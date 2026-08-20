@@ -1,0 +1,12 @@
+{
+  "files": [],
+  "references": [
+    { "path": "apps/extension" },
+    { "path": "packages/ir" },
+    { "path": "packages/replay" },
+    { "path": "packages/compose" },
+    { "path": "packages/narrate" },
+    { "path": "packages/cli" },
+    { "path": "plugins/remotion" }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "@waggle/studio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local SvelteKit 5 studio editor for describing walkthrough steps and driving narration/render. Full implementation lands in prd-005.",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --threshold error",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-node": "^5.5.7",
+    "@sveltejs/kit": "^2.70.3",
+    "@sveltejs/vite-plugin-svelte": "^7.3.0",
+    "svelte": "^5.56.9",
+    "svelte-check": "^4.7.6",
+    "typescript": "^6.0.3",
+    "vite": "^8.2.1"
+  }
+}

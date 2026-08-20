@@ -1,0 +1,9 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+  - "plugins/*"
+# esbuild's postinstall only downloads its prebuilt native binary; no
+# arbitrary script execution risk beyond what esbuild itself already ships.
+# Required for tsx (packages/cli's dev-run tool) to work.
+allowBuilds:
+  esbuild: true

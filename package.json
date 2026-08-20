@@ -1,0 +1,25 @@
+{
+  "name": "wagglereplay",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Waggle: local-first toolchain that records a web app walkthrough once and regenerates narrated demo videos from it forever.",
+  "license": "AGPL-3.0-or-later",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "packageManager": "pnpm@11.9.0",
+  "scripts": {
+    "lint": "biome ci .",
+    "lint:fix": "biome check --write .",
+    "typecheck": "pnpm -r --if-present run typecheck",
+    "test": "pnpm -r --if-present run test",
+    "build": "pnpm -r --if-present run build"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.9",
+    "@types/node": "^26.2.0",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
+  }
+}

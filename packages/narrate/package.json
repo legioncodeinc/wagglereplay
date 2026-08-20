@@ -1,0 +1,17 @@
+{
+  "name": "@waggle/narrate",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Narration engine: script drafting and TTS synthesis with word timestamps (ElevenLabs default adapter). Full implementation lands in prd-006.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@waggle/compose",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ffmpeg-based compositor: captions, cursor, ripples, watermark, audio mux. Full implementation lands in prd-007.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0"
+  }
+}
