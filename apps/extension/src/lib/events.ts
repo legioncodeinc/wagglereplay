@@ -146,7 +146,12 @@ export const SessionVideoInfoSchema = z.strictObject({
   filename: z.string().min(1),
   mimeType: z.string().min(1),
   /** True epoch sampled at `MediaRecorder.onstart`: the video's frame-0 timestamp. */
-  anchorEpochMs: z.number().int().nonnegative(),
+  // Not `.int()`: this is `performance.timeOrigin + performance.now()`
+  // (offscreen/recorder.ts's MediaRecorder.onstart handler), which is
+  // sub-millisecond precision and legitimately fractional - unlike
+  // `startEpochMs` above, which is `Date.now()` in the background service
+  // worker and is always a whole millisecond.
+  anchorEpochMs: z.number().nonnegative(),
   durationMs: z.number().nonnegative(),
   chunkCount: z.number().int().nonnegative(),
 });

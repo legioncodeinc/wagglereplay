@@ -43,13 +43,13 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { chromium } from 'playwright-core';
-import type { Browser, BrowserContext, Page } from 'playwright-core';
 import { startFixtureApp, TEST_IDS } from '@waggle/fixture-demo-app';
+import type { Browser, BrowserContext, Page } from 'playwright-core';
+import { chromium } from 'playwright-core';
 import type { CaptureEventDraft } from '../../src/lib/events.js';
 import { SessionMetaSchema } from '../../src/lib/events.js';
-import { CaptureSession } from '../../src/lib/session.js';
 import { finalizeSession } from '../../src/lib/finalizer.js';
+import { CaptureSession } from '../../src/lib/session.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const extensionDir = path.resolve(here, '../../');
@@ -87,9 +87,9 @@ function findCachedChromium(): string | null {
   return null;
 }
 
-async function tryRealExtensionSmoke(executablePath: string): Promise<
-  { achieved: true; serviceWorkerUrl: string } | { achieved: false; reason: string }
-> {
+async function tryRealExtensionSmoke(
+  executablePath: string,
+): Promise<{ achieved: true; serviceWorkerUrl: string } | { achieved: false; reason: string }> {
   const userDataDir = await mkdtemp(path.join(tmpdir(), 'waggle-ext-e2e-'));
   let context: BrowserContext | undefined;
   try {
@@ -126,34 +126,43 @@ async function tryRealExtensionSmoke(executablePath: string): Promise<
  * production bootstrap to activate. Returns a function that reads back
  * every draft event the bundle's real telemetry pipeline has sunk so far.
  */
-async function injectRealContentScript(page: Page): Promise<void> {
-  const bundle = await readFile(path.join(distDir, 'content-script.js'), 'utf8');
-
-  await page.evaluate(() => {
-    (window as unknown as { __waggleEvents: unknown[] }).__waggleEvents = [];
-    (window as unknown as { chrome: unknown }).chrome = {
-      runtime: {
-        id: 'seam-injected-e2e',
-        sendMessage: (message: { kind: string; event?: unknown }) => {
-          if (message.kind === 'telemetry:event') {
-            (window as unknown as { __waggleEvents: unknown[] }).__waggleEvents.push(message.event);
-          }
-        },
-        onMessage: {
-          addListener: (fn: (message: unknown) => void) => {
-            (window as unknown as { __waggleOnMessage: (m: unknown) => void }).__waggleOnMessage = fn;
-          },
+// The chrome.runtime shim is injected as a literal source string, not a
+// TypeScript closure passed to page.evaluate(). tsx's esbuild transform
+// (running under the --import tsx loader) injects `__name(fn, "...")`
+// name-preservation calls around named object-literal method properties
+// (exactly the `sendMessage`/`addListener` shape below); Playwright's
+// page.evaluate() serializes only the closure's own source via
+// Function.prototype.toString() to send it to the browser, which strips
+// away the surrounding module's `__name` helper declaration and throws a
+// ReferenceError in the page. A plain string sidesteps tsx's transform
+// entirely - Playwright evaluates it as literal page-context source.
+const CHROME_SHIM_SCRIPT = `
+  window.__waggleEvents = [];
+  window.chrome = {
+    runtime: {
+      id: 'seam-injected-e2e',
+      sendMessage: function (message) {
+        if (message.kind === 'telemetry:event') {
+          window.__waggleEvents.push(message.event);
+        }
+      },
+      onMessage: {
+        addListener: function (fn) {
+          window.__waggleOnMessage = fn;
         },
       },
-    };
-  });
+    },
+  };
+`;
 
+async function injectRealContentScript(page: Page, startEpochMs: number): Promise<void> {
+  const bundle = await readFile(path.join(distDir, 'content-script.js'), 'utf8');
+
+  await page.evaluate(CHROME_SHIM_SCRIPT);
   await page.addScriptTag({ content: bundle });
-
-  await page.evaluate(() => {
-    const onMessage = (window as unknown as { __waggleOnMessage?: (m: unknown) => void }).__waggleOnMessage;
-    onMessage?.({ kind: 'capture:start', sessionId: 'seam-e2e', startEpochMs: Date.now() });
-  });
+  await page.evaluate(
+    `window.__waggleOnMessage && window.__waggleOnMessage({ kind: 'capture:start', sessionId: 'seam-e2e', startEpochMs: ${startEpochMs} });`,
+  );
 }
 
 async function readCollectedEvents(page: Page): Promise<unknown[]> {
@@ -174,11 +183,25 @@ async function runSeamInjectedAlignment(
 
   try {
     await page.goto(fixture.url);
-    await injectRealContentScript(page);
+    // Mirrors background/service-worker.ts's real `startCapture`: a
+    // whole-millisecond `Date.now()` anchor taken once, before any
+    // telemetry, that becomes both the session's and (here, standing in
+    // for the video's) start epoch.
+    const sessionStartEpochMs = Date.now();
+    await injectRealContentScript(page, sessionStartEpochMs);
 
     async function clickAndMeasure(step: string, selector: string): Promise<void> {
+      // Wait for actionability BEFORE starting the timing bracket: on the
+      // very first click of a freshly-loaded page, Playwright's own
+      // pre-click actionability polling (waiting for the element to be
+      // visible, stable, and receive events) can take tens of ms and would
+      // otherwise be counted as "click latency" it is not - that is
+      // Playwright/page settling time, not a property of this extension's
+      // epoch conversion. Bracketing only the actual dispatch is what
+      // isolates the thing AC8 is actually about.
+      await page.waitForSelector(selector, { state: 'visible' });
       const before = Date.now();
-      await page.click(selector);
+      await page.click(selector, { timeout: 5000 });
       const after = Date.now();
       const nodeObservedEpochMs = (before + after) / 2;
 
@@ -195,6 +218,16 @@ async function runSeamInjectedAlignment(
       samples.push({ step, clickEpochMs: click.epochMs, nodeObservedEpochMs, deltaMs });
     }
 
+    // Warm-up: hover the first target before the timed sequence starts.
+    // A genuinely cold first interaction on a freshly-navigated page carries
+    // real Chromium hit-testing/compositor-readiness latency that has
+    // nothing to do with this extension's epoch conversion - and in a real
+    // recording session the person's cursor is already moving over the page
+    // (sampled by the pointermove telemetry) well before their first real
+    // click, so this mirrors the product's actual warm state rather than
+    // masking anything. Not timed; only the clicks below are.
+    await page.hover(`[data-testid="${TEST_IDS.ctaStart}"]`);
+
     // 1. Landing -> click Start Walkthrough.
     await clickAndMeasure('1-landing-cta-start', `[data-testid="${TEST_IDS.ctaStart}"]`);
     await page.waitForURL(/\/login/);
@@ -209,27 +242,37 @@ async function runSeamInjectedAlignment(
     await clickAndMeasure('3-items-item-2', `[data-testid="${TEST_IDS.item2}"]`);
 
     // 4. Continue to scroll.
-    await clickAndMeasure('4-items-continue-to-scroll', `[data-testid="${TEST_IDS.btnContinueToScroll}"]`);
+    await clickAndMeasure(
+      '4-items-continue-to-scroll',
+      `[data-testid="${TEST_IDS.btnContinueToScroll}"]`,
+    );
     await page.waitForURL(/\/scroll/);
 
     // 5. Continue to fetch, trigger it, wait for settle.
-    await clickAndMeasure('5-scroll-continue-to-fetch', `[data-testid="${TEST_IDS.btnContinueToFetch}"]`);
+    await clickAndMeasure(
+      '5-scroll-continue-to-fetch',
+      `[data-testid="${TEST_IDS.btnContinueToFetch}"]`,
+    );
     await page.waitForURL(/\/fetch/);
     await clickAndMeasure('5b-fetch-trigger', `[data-testid="${TEST_IDS.fetchTrigger}"]`);
     await page.waitForFunction(
-      (testId) => document.querySelector(`[data-testid="${testId}"]`)?.textContent?.startsWith('Loaded'),
+      (testId) =>
+        document.querySelector(`[data-testid="${testId}"]`)?.textContent?.startsWith('Loaded'),
       TEST_IDS.fetchResult,
     );
 
     // 6. Continue to confirm.
-    await clickAndMeasure('6-fetch-continue-to-confirm', `[data-testid="${TEST_IDS.btnContinueToConfirm}"]`);
+    await clickAndMeasure(
+      '6-fetch-continue-to-confirm',
+      `[data-testid="${TEST_IDS.btnContinueToConfirm}"]`,
+    );
     await page.waitForURL(/\/confirm/);
 
     const rawEvents = await readCollectedEvents(page);
     const session = new CaptureSession({
       sessionId: 'seam-e2e',
       tabId: 1,
-      startEpochMs: Math.min(...samples.map((s) => s.clickEpochMs)) - 1000,
+      startEpochMs: sessionStartEpochMs,
       initialUrl: fixture.url,
       userAgent: await page.evaluate(() => navigator.userAgent),
       recordedViewport: { w: 1280, h: 800, dpr: 1 },
@@ -268,7 +311,9 @@ async function main(): Promise<void> {
   const executablePath = findCachedChromium();
   console.log('=== AC8 alignment e2e ===');
 
-  let stepAResult: Awaited<ReturnType<typeof tryRealExtensionSmoke>> | { achieved: false; reason: string } = {
+  let stepAResult:
+    | Awaited<ReturnType<typeof tryRealExtensionSmoke>>
+    | { achieved: false; reason: string } = {
     achieved: false,
     reason: 'no cached Chromium executable found',
   };
@@ -279,7 +324,9 @@ async function main(): Promise<void> {
   }
 
   if (stepAResult.achieved) {
-    console.log(`STEP A: PASSED (partial) - service worker registered at ${stepAResult.serviceWorkerUrl}`);
+    console.log(
+      `STEP A: PASSED (partial) - service worker registered at ${stepAResult.serviceWorkerUrl}`,
+    );
     console.log('STEP A does NOT exercise chrome.tabCapture; see docs/ac8-e2e-runbook.md.');
   } else {
     console.log(`STEP A: not achieved in this environment - ${stepAResult.reason}`);

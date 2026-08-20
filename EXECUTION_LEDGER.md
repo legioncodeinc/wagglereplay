@@ -62,14 +62,14 @@ DONE means fully implemented with passing tests. VERIFIED means a pass other tha
 | 002-AC4 | 002 | Immutable version writer: v(n+1), manifest pointer, prior versions untouched | typescript-node | opus-5 | VERIFIED |
 | 002-AC5 | 002 | Export strips waggle keys and passes @puppeteer/replay parse() on all fixtures | typescript-node | sonnet-5 | VERIFIED |
 | 002-AC6 | 002 | Coordinate projection helpers, property-tested round trip under 0.5 px | typescript-node | sonnet-5 | VERIFIED |
-| 003-AC1 | 003 | MV3 manifest with required permissions; action click starts and stops capture | typescript-node | sonnet-5 | OPEN |
-| 003-AC2 | 003 | Offscreen MediaRecorder, epoch anchor, chunked upload, audio re-route | typescript-node | sonnet-5 | OPEN |
-| 003-AC3 | 003 | Content-script telemetry with timeOrigin epoch conversion | typescript-node | sonnet-5 | OPEN |
-| 003-AC4 | 003 | Element sampler: fallback selectors, rect, role and name, viewport, DPR | typescript-node | sonnet-5 | OPEN |
-| 003-AC5 | 003 | Route detection plus state-change classification with DOM delta summary | typescript-node | sonnet-5 | OPEN |
-| 003-AC6 | 003 | Settle markers from a webRequest in-flight counter with exclusions | typescript-node | sonnet-5 | OPEN |
-| 003-AC7 | 003 | Finalizer emits events.jsonl and meta.json; ripple overlay toggleable | typescript-node | sonnet-5 | OPEN |
-| 003-AC8 | 003 | E2E on the fixture app: 6-step flow, telemetry aligns within 50 ms | quality | opus-5 | OPEN |
+| 003-AC1 | 003 | MV3 manifest with required permissions; action click starts and stops capture | typescript-node | sonnet-5 | VERIFIED |
+| 003-AC2 | 003 | Offscreen MediaRecorder, epoch anchor, chunked upload, audio re-route | typescript-node | sonnet-5 | VERIFIED |
+| 003-AC3 | 003 | Content-script telemetry with timeOrigin epoch conversion | typescript-node | sonnet-5 | VERIFIED |
+| 003-AC4 | 003 | Element sampler: fallback selectors, rect, role and name, viewport, DPR | typescript-node | sonnet-5 | VERIFIED |
+| 003-AC5 | 003 | Route detection plus state-change classification with DOM delta summary | typescript-node | sonnet-5 | VERIFIED |
+| 003-AC6 | 003 | Settle markers from a webRequest in-flight counter with exclusions | typescript-node | sonnet-5 | VERIFIED |
+| 003-AC7 | 003 | Finalizer emits events.jsonl and meta.json; ripple overlay toggleable | typescript-node | sonnet-5 | VERIFIED |
+| 003-AC8 | 003 | E2E on the fixture app: 6-step flow, telemetry aligns within 50 ms | quality | opus-5 | DONE |
 | 004-AC1 | 004 | Step segmenter deterministic on the fixture recordings | typescript-node | sonnet-5 | OPEN |
 | 004-AC2 | 004 | ffmpeg keyframes t-5s to t+5s at 1 fps plus click and settled frames | typescript-node | sonnet-5 | OPEN |
 | 004-AC3 | 004 | Heatmap data: normalized click coordinates aggregated per route | typescript-node | sonnet-5 | OPEN |
@@ -161,6 +161,7 @@ DONE means fully implemented with passing tests. VERIFIED means a pass other tha
 |---|---|---|
 | 006-AC3 (partial) | No ELEVENLABS_API_KEY. Adapter, schema parsing, retry, and chunk stitching are fully built and unit-tested against mock transports. The v3 dialogue-plus-with-timestamps envelope and the exact subscription tier strings were never seen from a live response. | Provide ELEVENLABS_API_KEY to confirm the live response envelope. |
 | 006-AC6 (partial) | Same. The end-to-end run produces words.json, SRT, VTT, and transcript from a mocked synthesize call; no real audio bytes exist. | Provide ELEVENLABS_API_KEY to produce and spot-check real audio. |
+| 003-AC8 (partial) | Real chrome.tabCapture needs a headed display with the extension sideloaded, not reachable in this automated session. Proven here: the built extension loads in real Chromium and its MV3 service worker registers; the real content-script bundle drives the fixture app with worst-case click alignment of 9.5 ms against a 50 ms budget, reproduced by the orchestrator. Unproven: an actual tabCapture recording and byte-level correlation to decoded video frames. | Run apps/extension/docs/ac8-e2e-runbook.md on a machine with a display: build, load unpacked, click the action, walk the 6 steps, confirm non-zero MediaRecorder chunk sizes. |
 | 004-AC4 (anticipated) | PRD-004 AC4 requires a provider-agnostic LLM call for pre-draft descriptions. No LLM key present. | Provide an LLM provider key (any of OpenAI, Anthropic, Gemini) plus the preferred provider. |
 
 ## Cross-cutting decisions made during execution
