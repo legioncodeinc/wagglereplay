@@ -1,52 +1,19 @@
-import { z } from 'zod';
-
 /**
- * Schema for waggle.json, the project manifest described in ADR-015 and
- * library/knowledge/private/waggle/walkthrough-ir-and-project-format.md:
- * "waggle.json: project manifest: name, current IR version, presets,
- * defaults."
+ * Schema for waggle.json, the project manifest described in ADR-015.
  *
- * The Walkthrough IR itself (walkthrough.v{n}.json, steps/, narration
- * timing, etc.) is prd-002's schema; this file only validates the manifest
- * that points at it. `currentIrVersion` is `null` until the first IR
- * version exists (a freshly-`init`ed project has no recording yet).
+ * The definition moved to `@waggle/ir` in prd-002. The IR version writer
+ * writes `walkthrough.v(n+1).json` and repoints `currentIrVersion` in the
+ * same operation, so splitting the manifest shape away from the IR package
+ * would have created two definitions of one contract that could drift.
+ * This module stays as the CLI's import site.
+ *
+ * `currentIrVersion` is `null` until the first IR version exists (a
+ * freshly-`init`ed project has no recording yet).
  */
 
-export const WAGGLE_MANIFEST_SCHEMA_VERSION = 1;
-
-export const WaggleManifestSchema = z
-  .object({
-    schemaVersion: z.literal(WAGGLE_MANIFEST_SCHEMA_VERSION),
-    name: z.string().min(1, 'name must not be empty'),
-    createdAt: z.string().datetime({ message: 'createdAt must be an ISO 8601 timestamp' }),
-    currentIrVersion: z
-      .number()
-      .int()
-      .nonnegative()
-      .nullable()
-      .describe(
-        'The IR version number this manifest currently points at, or null if no walkthrough has been recorded yet.',
-      ),
-    presets: z
-      .record(z.string(), z.unknown())
-      .describe('Named render presets (aspect ratio, brand kit, etc.). Shape is owned by prd-007.'),
-    defaults: z
-      .object({
-        preset: z.string().optional(),
-      })
-      .describe('Default choices applied when a command is run without explicit flags.'),
-  })
-  .strict();
-
-export type WaggleManifest = z.infer<typeof WaggleManifestSchema>;
-
-export function createDefaultManifest(name: string): WaggleManifest {
-  return WaggleManifestSchema.parse({
-    schemaVersion: WAGGLE_MANIFEST_SCHEMA_VERSION,
-    name,
-    createdAt: new Date().toISOString(),
-    currentIrVersion: null,
-    presets: {},
-    defaults: {},
-  });
-}
+export type { WaggleManifest } from '@waggle/ir';
+export {
+  createDefaultManifest,
+  WAGGLE_MANIFEST_SCHEMA_VERSION,
+  WaggleManifestSchema,
+} from '@waggle/ir';

@@ -1,0 +1,65 @@
+{
+  "title": "Open the demo dashboard",
+  "timeout": 5000,
+  "steps": [
+    {
+      "type": "setViewport",
+      "width": 1440,
+      "height": 900,
+      "deviceScaleFactor": 2,
+      "isMobile": false,
+      "hasTouch": false,
+      "isLandscape": true,
+      "waggle": {
+        "classification": "state-change",
+        "masked": false
+      }
+    },
+    {
+      "type": "navigate",
+      "url": "https://demo.example.com/",
+      "assertedEvents": [
+        {
+          "type": "navigation",
+          "url": "https://demo.example.com/",
+          "title": "Demo home"
+        }
+      ],
+      "waggle": {
+        "classification": "navigate",
+        "routeBefore": "about:blank",
+        "routeAfter": "/",
+        "settle": { "source": "network-idle", "ms": 812 },
+        "assets": { "before": "steps/v1/000-before.png", "settled": "steps/v1/000-settled.png" },
+        "masked": false
+      }
+    },
+    {
+      "type": "navigate",
+      "url": "https://demo.example.com/dashboard",
+      "assertedEvents": [{ "type": "navigation", "url": "https://demo.example.com/dashboard" }],
+      "waggle": {
+        "classification": "navigate",
+        "routeBefore": "/",
+        "routeAfter": "/dashboard",
+        "settle": { "source": "network-idle", "ms": 1140 },
+        "narrationSegmentId": "seg-001",
+        "assets": { "before": "steps/v1/001-before.png", "settled": "steps/v1/001-settled.png" },
+        "masked": false
+      }
+    }
+  ],
+  "waggle": {
+    "schemaVersion": 1,
+    "recordedViewport": { "w": 1440, "h": 900, "dpr": 2 },
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/141.0.0.0 Safari/537.36",
+    "startEpochMs": 1755648000000,
+    "cursorTrail": [
+      { "t": 0, "x": 720, "y": 450 },
+      { "t": 240, "x": 712, "y": 402 },
+      { "t": 480, "x": 700, "y": 360 }
+    ],
+    "clicks": [],
+    "sourceRecording": { "videoRef": "renders/source/navigate.webm", "durationMs": 2400 }
+  }
+}

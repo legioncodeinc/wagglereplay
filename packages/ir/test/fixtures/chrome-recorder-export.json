@@ -1,0 +1,71 @@
+{
+  "title": "Recording 2026-08-20 at 10.14.52",
+  "steps": [
+    {
+      "type": "setViewport",
+      "width": 1512,
+      "height": 823,
+      "deviceScaleFactor": 2,
+      "isMobile": false,
+      "hasTouch": false,
+      "isLandscape": false
+    },
+    {
+      "type": "navigate",
+      "url": "https://demo.example.com/",
+      "assertedEvents": [
+        {
+          "type": "navigation",
+          "url": "https://demo.example.com/",
+          "title": "Demo home"
+        }
+      ]
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        ["#app > div.hero > button"],
+        ["aria/Get started"],
+        ["xpath///*[@id=\"app\"]/div[1]/button"],
+        ["pierce/#app > div.hero > button"],
+        ["text/Get started"]
+      ],
+      "offsetY": 18.5,
+      "offsetX": 47
+    },
+    {
+      "type": "change",
+      "target": "main",
+      "selectors": [
+        ["#workspace-name"],
+        ["aria/Workspace name"],
+        ["xpath///*[@id=\"workspace-name\"]"]
+      ],
+      "value": "Acme demo workspace"
+    },
+    {
+      "type": "keyDown",
+      "target": "main",
+      "key": "Enter"
+    },
+    {
+      "type": "keyUp",
+      "target": "main",
+      "key": "Enter"
+    },
+    {
+      "type": "scroll",
+      "target": "main",
+      "x": 0,
+      "y": 620
+    },
+    {
+      "type": "waitForElement",
+      "target": "main",
+      "selectors": [["#workspace-created"]],
+      "count": 1,
+      "visible": true
+    }
+  ]
+}

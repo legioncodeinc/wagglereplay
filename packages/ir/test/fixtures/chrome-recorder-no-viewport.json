@@ -1,0 +1,16 @@
+{
+  "title": "Recording without a setViewport step",
+  "steps": [
+    {
+      "type": "navigate",
+      "url": "https://demo.example.com/pricing"
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [["#plans > li:nth-child(2) > button"], ["aria/Choose Team plan"]],
+      "offsetX": 30,
+      "offsetY": 14
+    }
+  ]
+}

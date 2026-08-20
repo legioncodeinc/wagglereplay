@@ -7,6 +7,7 @@
     { "path": "packages/compose" },
     { "path": "packages/narrate" },
     { "path": "packages/cli" },
-    { "path": "plugins/remotion" }
+    { "path": "plugins/remotion" },
+    { "path": "fixtures/demo-app" }
   ]
 }

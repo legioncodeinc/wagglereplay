@@ -51,6 +51,12 @@ importers:
         specifier: ^8.2.1
         version: 8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(tsx@4.23.12)
 
+  fixtures/demo-app:
+    devDependencies:
+      '@types/node':
+        specifier: ^26.2.0
+        version: 26.2.0
+
   packages/cli:
     dependencies:
       '@waggle/ir':

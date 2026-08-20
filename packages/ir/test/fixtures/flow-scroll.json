@@ -1,0 +1,56 @@
+{
+  "title": "Scroll through the pricing page",
+  "steps": [
+    {
+      "type": "scroll",
+      "x": 0,
+      "y": 900,
+      "waggle": {
+        "classification": "scroll",
+        "routeBefore": "/pricing",
+        "routeAfter": "/pricing",
+        "settle": { "source": "animation-end", "ms": 320 },
+        "assets": { "settled": "steps/v1/000-settled.png" },
+        "masked": false
+      }
+    },
+    {
+      "type": "scroll",
+      "frame": [0, 1],
+      "selectors": [["#comparison", ".scroll-region"]],
+      "x": 0,
+      "y": 240,
+      "waggle": {
+        "classification": "scroll",
+        "element": {
+          "role": "region",
+          "name": "Plan comparison",
+          "rect": { "x": 120, "y": 200, "w": 1040, "h": 620 }
+        },
+        "settle": { "source": "mutation-quiet", "ms": 60 },
+        "narrationSegmentId": "seg-030",
+        "masked": false
+      }
+    },
+    {
+      "type": "scroll",
+      "y": 1800,
+      "waggle": {
+        "classification": "scroll",
+        "settle": { "source": "timeout", "ms": 500 },
+        "masked": false
+      }
+    }
+  ],
+  "waggle": {
+    "schemaVersion": 1,
+    "recordedViewport": { "w": 1280, "h": 720, "dpr": 1 },
+    "startEpochMs": 1755648000000,
+    "cursorTrail": [
+      { "t": 0, "x": 640, "y": 360 },
+      { "t": 500, "x": 640, "y": 360 },
+      { "t": 1000, "x": 642, "y": 358 }
+    ],
+    "clicks": []
+  }
+}

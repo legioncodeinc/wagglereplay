@@ -1,0 +1,17 @@
+{
+  "name": "@waggle/fixture-demo-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Deterministic, dependency-light static web app used as a shared test fixture by prd-003 (capture extension), prd-009 (replay engine drift), and prd-011 (vision QA seeded-defect run).",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0"
+  }
+}

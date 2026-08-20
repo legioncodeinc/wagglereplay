@@ -1,0 +1,157 @@
+{
+  "title": "Full demo: sign in, filter, export",
+  "timeout": 30000,
+  "selectorAttribute": "data-testid",
+  "steps": [
+    {
+      "type": "setViewport",
+      "width": 1512,
+      "height": 982,
+      "deviceScaleFactor": 2,
+      "isMobile": false,
+      "hasTouch": false,
+      "isLandscape": true,
+      "waggle": { "classification": "state-change", "masked": false }
+    },
+    {
+      "type": "navigate",
+      "url": "https://demo.example.com/sign-in",
+      "assertedEvents": [{ "type": "navigation", "url": "https://demo.example.com/sign-in" }],
+      "waggle": {
+        "classification": "navigate",
+        "routeAfter": "/sign-in",
+        "settle": { "source": "network-idle", "ms": 740 },
+        "masked": false
+      }
+    },
+    {
+      "type": "change",
+      "selectors": ["[data-testid=email]", "aria/Work email"],
+      "value": "demo-viewer@example.com",
+      "waggle": {
+        "classification": "input",
+        "element": {
+          "role": "textbox",
+          "name": "Work email",
+          "rect": { "x": 556, "y": 380, "w": 400, "h": 44 }
+        },
+        "masked": true
+      }
+    },
+    {
+      "type": "click",
+      "selectors": ["[data-testid=sign-in-submit]", "aria/Continue"],
+      "offsetX": 60,
+      "offsetY": 22,
+      "assertedEvents": [{ "type": "navigation", "url": "https://demo.example.com/dashboard" }],
+      "waggle": {
+        "classification": "state-change",
+        "routeBefore": "/sign-in",
+        "routeAfter": "/dashboard",
+        "domDelta": {
+          "summary": "The sign-in form was replaced by the dashboard shell.",
+          "ariaChanges": [
+            { "role": "form", "name": "Sign in", "change": "removed" },
+            { "role": "main", "name": "Dashboard", "change": "added" }
+          ]
+        },
+        "settle": { "source": "network-idle", "ms": 1320 },
+        "element": {
+          "role": "button",
+          "name": "Continue",
+          "text": "Continue",
+          "rect": { "x": 556, "y": 468, "w": 400, "h": 44 }
+        },
+        "narrationSegmentId": "seg-040",
+        "assets": {
+          "before": "steps/v1/003-before.png",
+          "click": "steps/v1/003-click.png",
+          "settled": "steps/v1/003-settled.png"
+        },
+        "masked": false
+      }
+    },
+    {
+      "type": "hover",
+      "selectors": ["[data-testid=chart-bar-q3]"],
+      "waggle": {
+        "classification": "state-change",
+        "domDelta": {
+          "summary": "A tooltip appeared over the Q3 bar.",
+          "ariaChanges": [{ "role": "tooltip", "name": "Q3: 41%", "change": "added" }]
+        },
+        "masked": false
+      }
+    },
+    {
+      "type": "scroll",
+      "x": 0,
+      "y": 640,
+      "waggle": {
+        "classification": "scroll",
+        "settle": { "source": "animation-end", "ms": 260 },
+        "masked": false
+      }
+    },
+    {
+      "type": "doubleClick",
+      "selectors": [["[data-testid=table]", "tr:nth-child(3)"]],
+      "offsetX": 12,
+      "offsetY": 9,
+      "deviceType": "mouse",
+      "button": "primary",
+      "waggle": { "classification": "state-change", "masked": false }
+    },
+    {
+      "type": "waitForExpression",
+      "expression": "document.querySelector('[data-testid=export-ready]') !== null",
+      "timeout": 10000,
+      "waggle": {
+        "classification": "state-change",
+        "settle": { "source": "timeout", "ms": 2000 },
+        "masked": false
+      }
+    },
+    {
+      "type": "emulateNetworkConditions",
+      "download": 1500000,
+      "upload": 750000,
+      "latency": 40,
+      "waggle": { "classification": "state-change", "masked": false }
+    },
+    {
+      "type": "customStep",
+      "name": "waggleAnnotate",
+      "parameters": { "note": "Highlight the export button for the voiceover." },
+      "waggle": {
+        "classification": "state-change",
+        "narrationSegmentId": "seg-050",
+        "masked": false
+      }
+    },
+    {
+      "type": "close",
+      "waggle": { "classification": "state-change", "masked": false }
+    }
+  ],
+  "waggle": {
+    "schemaVersion": 1,
+    "recordedViewport": { "w": 1512, "h": 982, "dpr": 2 },
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/141.0.0.0 Safari/537.36",
+    "startEpochMs": 1755648000000,
+    "cursorTrail": [
+      { "t": 0, "x": 756, "y": 491 },
+      { "t": 320, "x": 756, "y": 402 },
+      { "t": 640, "x": 756, "y": 490 },
+      { "t": 980, "x": 900, "y": 620 },
+      { "t": 1320, "x": 1100, "y": 700 }
+    ],
+    "clicks": [
+      { "t": 1000, "x": 756, "y": 490, "down": true },
+      { "t": 1052, "x": 756, "y": 490, "down": false },
+      { "t": 2400, "x": 900, "y": 620, "down": true },
+      { "t": 2448, "x": 900, "y": 620, "down": false }
+    ],
+    "sourceRecording": { "videoRef": "renders/source/full-demo.webm", "durationMs": 18400 }
+  }
+}

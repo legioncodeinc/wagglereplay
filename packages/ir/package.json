@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Walkthrough IR: types, zod schemas, and version-writer for the Waggle project format. Full implementation lands in prd-002.",
+  "description": "Walkthrough IR: TypeScript types and zod schemas (a strict superset of the Puppeteer Replay user-flow schema, ADR-001), validation with precise error paths, Chrome Recorder import, Puppeteer Replay export, the immutable version writer, and coordinate projection.",
   "exports": {
     ".": "./src/index.ts"
   },

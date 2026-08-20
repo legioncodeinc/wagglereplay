@@ -56,12 +56,12 @@ DONE means fully implemented with passing tests. VERIFIED means a pass other tha
 | 001-AC4 | 001 | Command surface registered; stubs exit "not implemented (prd-00X)" | typescript-node | sonnet-5 | VERIFIED |
 | 001-AC5 | 001 | renders/ and .env gitignored in scaffolded projects; creds template is env refs only | security | opus-5 | VERIFIED |
 | 001-AC6 | 001 | E2E: init in a tmp dir, manifest round-trips, documented stub exit codes | quality | opus-5 | VERIFIED |
-| 002-AC1 | 002 | Types and zod for flow, Replay-compatible step core, waggle extension keys | typescript-node | opus-5 | OPEN |
-| 002-AC2 | 002 | Validator accepts the fixture set, rejects the mutation battery with precise paths | typescript-node | opus-5 | OPEN |
-| 002-AC3 | 002 | Chrome Recorder JSON import with waggle keys defaulted | typescript-node | sonnet-5 | OPEN |
-| 002-AC4 | 002 | Immutable version writer: v(n+1), manifest pointer, prior versions untouched | typescript-node | opus-5 | OPEN |
-| 002-AC5 | 002 | Export strips waggle keys and passes @puppeteer/replay parse() on all fixtures | typescript-node | sonnet-5 | OPEN |
-| 002-AC6 | 002 | Coordinate projection helpers, property-tested round trip under 0.5 px | typescript-node | sonnet-5 | OPEN |
+| 002-AC1 | 002 | Types and zod for flow, Replay-compatible step core, waggle extension keys | typescript-node | opus-5 | VERIFIED |
+| 002-AC2 | 002 | Validator accepts the fixture set, rejects the mutation battery with precise paths | typescript-node | opus-5 | VERIFIED |
+| 002-AC3 | 002 | Chrome Recorder JSON import with waggle keys defaulted | typescript-node | sonnet-5 | VERIFIED |
+| 002-AC4 | 002 | Immutable version writer: v(n+1), manifest pointer, prior versions untouched | typescript-node | opus-5 | VERIFIED |
+| 002-AC5 | 002 | Export strips waggle keys and passes @puppeteer/replay parse() on all fixtures | typescript-node | sonnet-5 | VERIFIED |
+| 002-AC6 | 002 | Coordinate projection helpers, property-tested round trip under 0.5 px | typescript-node | sonnet-5 | VERIFIED |
 | 003-AC1 | 003 | MV3 manifest with required permissions; action click starts and stops capture | typescript-node | sonnet-5 | OPEN |
 | 003-AC2 | 003 | Offscreen MediaRecorder, epoch anchor, chunked upload, audio re-route | typescript-node | sonnet-5 | OPEN |
 | 003-AC3 | 003 | Content-script telemetry with timeOrigin epoch conversion | typescript-node | sonnet-5 | OPEN |
@@ -160,3 +160,12 @@ DONE means fully implemented with passing tests. VERIFIED means a pass other tha
 | ID | Blocker | Specific ask |
 |---|---|---|
 | (none yet) | | |
+
+## Cross-cutting decisions made during execution
+
+| Wave | Decision | Rationale | Raised for gate review |
+|---|---|---|---|
+| W2 | Project layout and manifest ownership moved from `packages/cli` to `packages/ir`; cli now re-exports. | The version writer writes `walkthrough.v(n+1).json` and repoints `currentIrVersion` as one operation. Splitting the manifest shape into a higher package would create two definitions of one contract. `packages/ir` is now the lowest layer. | No. Sound and verified: all 19 cli tests still pass unchanged. |
+| W2 | IR schema rejects unknown keys rather than stripping them, and rejects empty selector strings. Both are tightenings over upstream `@puppeteer/replay`. | A strip-by-default schema inside an immutable version writer would silently discard author data with no diff. Neither rule rejects anything Chrome Recorder emits, confirmed by the Recorder fixtures. | Yes. Flag to quality-worker-bee as a deliberate ADR-001 superset interpretation, not an accident. |
+| W2 | Chrome Recorder import fills only required waggle keys and defaults `startEpochMs` to 0, not `Date.now()`. | Determinism: re-importing the same Recorder export must not produce a spurious git diff. | Yes. Confirm PRD-002 AC3 "defaulted sensibly" is satisfied by minimal defaulting rather than derived data. |
+| W2 | Shared fixture app built once at `fixtures/demo-app` with `default`, `moved-button`, and `broken` variants. | PRD-003 AC8, PRD-009 AC6, and PRD-011 QA each need a fixture target. One parameterised app beats three inventions. | No. |
