@@ -82,13 +82,13 @@ DONE means fully implemented with passing tests. VERIFIED means a pass other tha
 | 005-AC5 | 005 | Heatmap overlay toggle per route | ux-ui-svelte | sonnet-5 | OPEN |
 | 005-AC6 | 005 | Settings panel: brand kit, voice, presets, credential binding, refs only | svelte | sonnet-5 | OPEN |
 | 005-AC7 | 005 | Keyboard-first review flow j, k, e, documented in app | svelte | sonnet-5 | OPEN |
-| 006-AC1 | 006 | Script generator at roughly 150 wpm with settle-time duration hints | mind | sonnet-5 | OPEN |
-| 006-AC2 | 006 | TTS adapter interface plus env-based provider selection per ADR-006 | typescript-node | sonnet-5 | OPEN |
-| 006-AC3 | 006 | ElevenLabs with-timestamps, normalized versus original text, chunk stitching | typescript-node | sonnet-5 | OPEN |
-| 006-AC4 | 006 | words.json plus SRT, VTT, transcript; cues capped at 42 chars by 2 lines | typescript-node | sonnet-5 | OPEN |
-| 006-AC5 | 006 | Deepgram adapter with timestamps none, plus xAI stub with declared capabilities | typescript-node | sonnet-5 | OPEN |
-| 006-AC6 | 006 | `waggle narrate` end to end; monotonic word timings covering full duration | quality | opus-5 | OPEN |
-| 006-AC7 | 006 | Guardrail: refuse shareable audio on free tier or beta model without override | security | opus-5 | OPEN |
+| 006-AC1 | 006 | Script generator at roughly 150 wpm with settle-time duration hints | mind | sonnet-5 | VERIFIED |
+| 006-AC2 | 006 | TTS adapter interface plus env-based provider selection per ADR-006 | typescript-node | sonnet-5 | VERIFIED |
+| 006-AC3 | 006 | ElevenLabs with-timestamps, normalized versus original text, chunk stitching | typescript-node | sonnet-5 | DONE |
+| 006-AC4 | 006 | words.json plus SRT, VTT, transcript; cues capped at 42 chars by 2 lines | typescript-node | sonnet-5 | VERIFIED |
+| 006-AC5 | 006 | Deepgram adapter with timestamps none, plus xAI stub with declared capabilities | typescript-node | sonnet-5 | VERIFIED |
+| 006-AC6 | 006 | `waggle narrate` end to end; monotonic word timings covering full duration | quality | opus-5 | DONE |
+| 006-AC7 | 006 | Guardrail: refuse shareable audio on free tier or beta model without override | security | opus-5 | VERIFIED |
 | 007-AC1 | 007 | Compositor interface plus brand kit zod schema | typescript-node | opus-5 | OPEN |
 | 007-AC2 | 007 | ASS karaoke generator from words.json, golden-file tested | typescript-node | sonnet-5 | OPEN |
 | 007-AC3 | 007 | Spring-damped cursor synthesizer plus click ripple overlays | typescript-node | sonnet-5 | OPEN |
@@ -159,7 +159,9 @@ DONE means fully implemented with passing tests. VERIFIED means a pass other tha
 
 | ID | Blocker | Specific ask |
 |---|---|---|
-| (none yet) | | |
+| 006-AC3 (partial) | No ELEVENLABS_API_KEY. Adapter, schema parsing, retry, and chunk stitching are fully built and unit-tested against mock transports. The v3 dialogue-plus-with-timestamps envelope and the exact subscription tier strings were never seen from a live response. | Provide ELEVENLABS_API_KEY to confirm the live response envelope. |
+| 006-AC6 (partial) | Same. The end-to-end run produces words.json, SRT, VTT, and transcript from a mocked synthesize call; no real audio bytes exist. | Provide ELEVENLABS_API_KEY to produce and spot-check real audio. |
+| 004-AC4 (anticipated) | PRD-004 AC4 requires a provider-agnostic LLM call for pre-draft descriptions. No LLM key present. | Provide an LLM provider key (any of OpenAI, Anthropic, Gemini) plus the preferred provider. |
 
 ## Cross-cutting decisions made during execution
 

@@ -1,24 +1,21 @@
 import { Command } from 'commander';
 import { registerInitCommand } from './commands/init.js';
+import { registerNarrateCommand } from './commands/narrate.js';
 import { registerStubCommand, type StubCommandSpec } from './commands/stub.js';
 
 const CLI_VERSION = '0.1.0';
 
 /**
- * Full command surface (AC4). `init` is real (this PRD); every other
- * command is a stub that still resolves the project and validates the
- * manifest, then names the PRD that owns its real implementation.
+ * Full command surface (AC4). `init` (prd-001) and `narrate` (prd-006) are
+ * real; every other command is a stub that still resolves the project and
+ * validates the manifest, then names the PRD that owns its real
+ * implementation.
  */
 const STUB_COMMANDS: StubCommandSpec[] = [
   {
     name: 'record',
     summary: 'Launch Studio and capture a new walkthrough recording',
     owningPrd: 'prd-004',
-  },
-  {
-    name: 'narrate',
-    summary: 'Draft a narration script and synthesize voice audio with word timestamps',
-    owningPrd: 'prd-006',
   },
   {
     name: 'render',
@@ -71,6 +68,7 @@ export function createCli(): Command {
     .configureHelp({ sortSubcommands: true });
 
   registerInitCommand(program);
+  registerNarrateCommand(program);
   for (const spec of STUB_COMMANDS) {
     registerStubCommand(program, spec);
   }

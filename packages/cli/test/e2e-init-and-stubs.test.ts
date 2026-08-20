@@ -92,7 +92,6 @@ describe('waggle init + command surface (e2e)', () => {
 
   const stubCases: Array<{ command: string; owningPrd: string }> = [
     { command: 'record', owningPrd: 'prd-004' },
-    { command: 'narrate', owningPrd: 'prd-006' },
     { command: 'render', owningPrd: 'prd-007' },
     { command: 'regen', owningPrd: 'prd-009' },
     { command: 'export', owningPrd: 'prd-008' },

@@ -17,7 +17,7 @@ pnpm --filter @waggle/cli start <command> [...args]
 |---|---|---|
 | `waggle init <name>` | Implemented | prd-001 |
 | `waggle record` | Stub | prd-004 |
-| `waggle narrate` | Stub | prd-006 |
+| `waggle narrate` | Implemented | prd-006 |
 | `waggle render` | Stub | prd-007 |
 | `waggle regen` | Stub | prd-009 |
 | `waggle export` | Stub | prd-008 |
@@ -45,6 +45,24 @@ rendered copy; keep both in sync.
 | 4 | `PROJECT_NOT_FOUND` | The resolved project directory has no `waggle.json`. Run `waggle init <name>` first. |
 | 5 | `MANIFEST_INVALID` | `waggle.json` exists but is not valid JSON, or fails the manifest schema. The error message names the file and either the offending JSON path or a line/column. |
 | 6 | `NOT_IMPLEMENTED` | The command's project/manifest resolution succeeded, but its own behavior is not implemented yet in this PRD wave. The message names the owning PRD. |
+| 7 | `NARRATION_NOT_APPROVED` | `waggle narrate` drafted (or re-drafted) `narration/script.json` and is waiting on author approval, or a saved script still has unapproved segments. Nothing was sent to a TTS provider. |
+| 8 | `TTS_CONFIG_INVALID` | `waggle narrate` could not construct a TTS adapter from the environment (unknown `WAGGLE_TTS_PROVIDER`, or a required provider variable such as `ELEVENLABS_API_KEY` is missing). The message names the exact variable. |
+| 9 | `SHAREABLE_AUDIO_REFUSED` | `waggle narrate` refused to render shareable audio: the ElevenLabs plan is free tier, or the selected model is flagged beta (ADR-006). Set `WAGGLE_ALLOW_UNLICENSED_AUDIO=1` to override. |
+
+## `waggle narrate` (prd-006)
+
+Drafts `narration/script.json` from the current Walkthrough IR (one segment
+per step, deterministically, from the step's own classification, element,
+and DOM-delta metadata; see `@waggle/narrate`'s README for why this is not
+an LLM call), then refuses to synthesize anything until every segment is
+author-approved (`approved: true`, non-null `approvedText`). Once approved,
+selects a TTS provider from the environment (`WAGGLE_TTS_PROVIDER`, default
+`elevenlabs` per ADR-006) and writes `narration/audio.mp3` and
+`narration/transcript.txt`, plus, for a provider that returns timestamps,
+`narration/words.json`, `narration/captions.srt`, and
+`narration/captions.vtt`. See `packages/narrate/README.md` for the full
+environment variable list, the `words.json` shared contract, and the AC7
+shareable-audio guardrail.
 
 ## Project manifest (waggle.json)
 

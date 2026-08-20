@@ -47,6 +47,31 @@ export const ExitCode = {
    * The error message names the PRD that owns the implementation.
    */
   NOT_IMPLEMENTED: 6,
+
+  /**
+   * `waggle narrate` drafted (or re-drafted after new steps appeared)
+   * `narration/script.json` and is waiting on author approval, or the
+   * script has segments still unapproved. Nothing was sent to a TTS
+   * provider. Review and approve the pending segments, then run
+   * `waggle narrate` again.
+   */
+  NARRATION_NOT_APPROVED: 7,
+
+  /**
+   * `waggle narrate` could not construct a TTS adapter from the
+   * environment: an unknown `WAGGLE_TTS_PROVIDER`, or a required
+   * provider-specific variable (e.g. `ELEVENLABS_API_KEY`,
+   * `WAGGLE_ELEVENLABS_VOICE_ID`) is not set. The error message names the
+   * exact missing variable.
+   */
+  TTS_CONFIG_INVALID: 8,
+
+  /**
+   * `waggle narrate` refused to render shareable audio because the
+   * ElevenLabs plan is free tier or the selected model is flagged beta
+   * (ADR-006). Set `WAGGLE_ALLOW_UNLICENSED_AUDIO=1` to override.
+   */
+  SHAREABLE_AUDIO_REFUSED: 9,
 } as const;
 
 export type ExitCode = (typeof ExitCode)[keyof typeof ExitCode];

@@ -3,15 +3,27 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Chrome MV3 capture extension: tabCapture screencast plus click/route/element telemetry. Full implementation lands in prd-003.",
+  "description": "Chrome MV3 capture extension: tabCapture screencast plus click/route/element telemetry, streamed to the local Studio server.",
   "exports": {
     ".": "./src/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "build": "node build/build.mjs",
+    "e2e": "tsx test/e2e/run-alignment-e2e.ts"
+  },
+  "dependencies": {
+    "@waggle/ir": "workspace:*",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@types/node": "^26.2.0"
+    "@types/chrome": "^0.2.6",
+    "@types/node": "^26.2.0",
+    "@waggle/fixture-demo-app": "workspace:*",
+    "esbuild": "^0.28.2",
+    "jsdom": "^30.0.1",
+    "playwright-core": "^1.62.1",
+    "tsx": "^4.23.12"
   }
 }

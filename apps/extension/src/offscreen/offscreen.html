@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Waggle offscreen recorder</title>
+  </head>
+  <body>
+    <!--
+      This document has no visible UI: it exists only so MediaRecorder can
+      run outside the service worker's ~30s idle lifetime cap (AC2, corpus:
+      capture-layer.md). script.type="module" matches offscreen.js, esbuild's
+      ESM bundle of src/offscreen/recorder.ts.
+    -->
+    <script type="module" src="offscreen.js"></script>
+  </body>
+</html>
