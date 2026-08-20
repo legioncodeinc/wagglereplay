@@ -1,0 +1,89 @@
+name: CI
+
+# Lint, typecheck, and test on every push and pull request against main.
+# Bootstrap-safe: guards make each job pass on the pre-code seeded repo and
+# activate automatically when prd-001 lands package.json + pnpm-lock.yaml.
+# Actions pinned to full commit SHAs (tag-hijack defense).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Enable corepack (pnpm)
+        run: corepack enable
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Install dependencies
+        run: if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile; else echo "no lockfile yet (pre prd-001)"; fi
+
+      - name: Lint
+        run: if [ -f package.json ]; then pnpm run --if-present lint; else echo "no package.json yet"; fi
+
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Enable corepack (pnpm)
+        run: corepack enable
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Install dependencies
+        run: if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile; else echo "no lockfile yet (pre prd-001)"; fi
+
+      - name: Typecheck
+        run: if [ -f package.json ]; then pnpm run --if-present typecheck; else echo "no package.json yet"; fi
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Enable corepack (pnpm)
+        run: corepack enable
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Install dependencies
+        run: if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile; else echo "no lockfile yet (pre prd-001)"; fi
+
+      - name: Test
+        run: if [ -f package.json ]; then pnpm run --if-present test; else echo "no package.json yet"; fi
