@@ -58,9 +58,27 @@ export interface CanonicalRequestInput {
   readonly hashedPayload: string;
 }
 
+/**
+ * SigV4 orders signed header names by BYTE value, not by locale.
+ *
+ * `localeCompare` is the wrong comparator here on two counts: ICU treats
+ * `-` as variable-weight punctuation, so hyphenated header names can order
+ * differently than their bytes do (`x-amz-meta-z` sorts before
+ * `x-amz-metaa` by byte, after it by locale), and the result depends on
+ * which ICU data the running Node was built with, so the same request
+ * could sign differently on two machines. Both matter because
+ * `signedHeaders` is built separately by the caller; if the two orders
+ * disagree, the canonical header block no longer describes
+ * `SignedHeaders` and the request is rejected as `SignatureDoesNotMatch`.
+ * Exported so callers derive `signedHeaders` from the same comparator.
+ */
+export function compareHeaderNames(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
 export function buildCanonicalRequest(input: CanonicalRequestInput): string {
   const canonicalHeaders = [...input.headers.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
+    .sort(([a], [b]) => compareHeaderNames(a, b))
     .map(([name, value]) => `${name}:${value}\n`)
     .join('');
 

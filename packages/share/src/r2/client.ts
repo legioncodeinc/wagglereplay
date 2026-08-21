@@ -2,6 +2,7 @@ import type { R2Config } from './env.js';
 import {
   buildStringToSign,
   canonicalUriForKey,
+  compareHeaderNames,
   credentialScope,
   deriveSigningKey,
   sha256Hex,
@@ -90,7 +91,10 @@ export class R2Client {
       ['x-amz-content-sha256', payloadHash],
       ['x-amz-date', amzDate],
     ]);
-    const signedHeaders = [...headers.keys()].sort().join(';');
+    // Same comparator `buildCanonicalRequest` sorts the header block with,
+    // so `SignedHeaders` can never describe a different order than the
+    // canonical request it is signed alongside.
+    const signedHeaders = [...headers.keys()].sort(compareHeaderNames).join(';');
 
     const authorization = signRequest({
       method: 'PUT',

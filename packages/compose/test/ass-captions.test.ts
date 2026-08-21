@@ -71,12 +71,31 @@ describe('AC2: ASS primitives', () => {
   });
 
   it('escapes braces so narration text cannot inject an override block', () => {
-    expect(escapeAssText('use {\\an8} carefully')).toBe('use \\{\\an8\\} carefully');
+    expect(escapeAssText('use {\\an8} carefully')).toBe('use \\{an8\\} carefully');
     // A literal newline would end the Dialogue line and truncate the cue.
     expect(escapeAssText('line one\nline two')).toBe('line one line two');
+    // A CRLF pair is one break, so it collapses to one space, not two.
+    expect(escapeAssText('line one\r\nline two')).toBe('line one line two');
     // ASS has no literal-backslash escape, so the three meaningful
     // sequences lose their backslash rather than breaking the line.
     expect(escapeAssText('a \\N b')).toBe('a N b');
+  });
+
+  it('leaves no caller-supplied backslash that could re-form a control sequence', () => {
+    // Regression: the previous chained-replace escaper deleted ONE
+    // backslash from `\N`, so a doubled backslash survived as a working
+    // `\N` and injected a real hard line break into the caption. Verified
+    // against libass by rendering: the frame came back as two lines.
+    expect(escapeAssText('a \\\\N b')).toBe('a N b');
+    expect(escapeAssText('a \\\\h b')).toBe('a h b');
+    expect(escapeAssText('a \\\\n b')).toBe('a n b');
+    // Every backslash in the result is one this function inserted, so no
+    // output backslash can pair with a neighbour ahead of a brace.
+    expect(escapeAssText('\\{\\an8\\}')).toBe('\\{an8\\}');
+    expect(escapeAssText('C:\\Users\\demo')).toBe('C:Usersdemo');
+    for (const output of ['a \\\\N b', '\\{\\an8\\}', 'x\\\\\\\\{y'].map(escapeAssText)) {
+      expect(output.replace(/\\[{}]/g, '')).not.toContain('\\');
+    }
   });
 
   it('strips commas from style fields, which ASS cannot quote', () => {

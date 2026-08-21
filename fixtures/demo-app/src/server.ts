@@ -102,13 +102,25 @@ function handleRequest(req: IncomingMessage, res: ServerResponse, variant: Fixtu
   res.end(method === 'HEAD' ? undefined : document);
 }
 
+/**
+ * Turns the caller's `?delay=` into a timer duration that is ALWAYS inside
+ * `[0, MAX_FETCH_DELAY_MS]`.
+ *
+ * The clamp is the unconditional last operation on every path rather than
+ * living inside one branch of a ternary. The settle-marker tests
+ * (PRD-003, PRD-009) need a caller-chosen delay, so the capability stays;
+ * what changes is that no future edit to the validity guard can drop the
+ * upper bound and let a caller-supplied value reach `setTimeout` and pin
+ * the fixture server open (CodeQL `js/resource-exhaustion`).
+ */
+function clampFetchDelayMs(rawDelay: string | null): number {
+  const parsed = rawDelay === null ? DEFAULT_FETCH_DELAY_MS : Number(rawDelay);
+  const requested = Number.isFinite(parsed) && parsed >= 0 ? parsed : DEFAULT_FETCH_DELAY_MS;
+  return Math.min(requested, MAX_FETCH_DELAY_MS);
+}
+
 function handleApiData(url: URL, res: ServerResponse, method: string): void {
-  const rawDelay = url.searchParams.get('delay');
-  const parsedDelay = rawDelay === null ? DEFAULT_FETCH_DELAY_MS : Number(rawDelay);
-  const delay =
-    Number.isFinite(parsedDelay) && parsedDelay >= 0
-      ? Math.min(parsedDelay, MAX_FETCH_DELAY_MS)
-      : DEFAULT_FETCH_DELAY_MS;
+  const delay = clampFetchDelayMs(url.searchParams.get('delay'));
 
   setTimeout(() => {
     const body = JSON.stringify({ value: 'settled', delay });

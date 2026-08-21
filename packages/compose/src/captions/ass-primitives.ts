@@ -84,28 +84,54 @@ function pad(value: number): string {
 }
 
 /**
- * Escapes text for an ASS `Dialogue` field.
+ * Escapes text for an ASS `Dialogue` field, so the caller's text is inert
+ * data rather than ASS syntax.
  *
- * Two hazards, both silent:
+ * Three hazards, all silent:
  *
  *  - `{` opens an override block. An unescaped brace in narration text
  *    swallows everything up to the next `}` and can inject arbitrary style
  *    overrides. `\{` and `\}` are the documented escapes.
  *  - `\N`, `\n`, and `\h` are ASS's hard line break, soft line break, and
- *    non-breaking space. ASS has NO escape for a literal backslash, so a
- *    backslash that happens to precede one of those three letters cannot
- *    be represented; the backslash is dropped and the letter kept, which
- *    is the only transformation here that changes what the reader sees.
- *    It is preferred over the alternative (a caption that silently breaks
- *    in the middle) and it is why callers pass ALREADY-SPLIT lines and
- *    let this function insert the real `\N` itself.
+ *    non-breaking space. Callers pass ALREADY-SPLIT lines and let
+ *    `joinAssLines` insert the real `\N`, so any of the three appearing in
+ *    caption text is an injected control sequence, not content.
+ *  - ASS has NO escape for a literal backslash. That is a real format
+ *    limitation (verified against libass: `\\` renders as a backslash
+ *    followed by whatever the next escape does, it is not itself an
+ *    escape), so a backslash in the caller's text cannot be represented
+ *    and is DROPPED. This is the only transformation here that changes
+ *    what the reader sees, and it is preferred over the alternative: a
+ *    caption that silently breaks in the middle.
+ *
+ * Dropping every backslash rather than only the ones preceding `N`/`n`/`h`
+ * is load-bearing, not tidiness. The previous implementation deleted one
+ * backslash from `\N`, which meant an input of `\\N` survived the pass as
+ * a functioning `\N` and injected a real hard line break into the caption
+ * (confirmed by rendering: the frame came back with two lines, pixel
+ * identical to a caption containing a genuine break). Caption text reaches
+ * this function from a brand kit and a narration script that live in a
+ * git-committable, shareable project directory, so it crosses a trust
+ * boundary and the reconstruction was reachable. Escaping in a single pass
+ * closes it: no stage re-reads another stage's output, so no output
+ * backslash can pair with a neighbour to re-form a control sequence, and
+ * the only backslashes in the result are the ones inserted here.
  */
 export function escapeAssText(text: string): string {
-  return text
-    .replace(/\\([Nnh])/g, '$1')
-    .replace(/\{/g, '\\{')
-    .replace(/\}/g, '\\}')
-    .replace(/\r\n?|\n/g, ' ');
+  let escaped = '';
+  let afterCarriageReturn = false;
+  for (const char of text) {
+    const wasAfterCarriageReturn = afterCarriageReturn;
+    afterCarriageReturn = char === '\r';
+    if (char === '\\') continue;
+    if (char === '{') escaped += '\\{';
+    else if (char === '}') escaped += '\\}';
+    // A CRLF pair collapses to ONE space, not two.
+    else if (char === '\n') escaped += wasAfterCarriageReturn ? '' : ' ';
+    else if (char === '\r') escaped += ' ';
+    else escaped += char;
+  }
+  return escaped;
 }
 
 /** Joins already-wrapped caption lines with ASS's hard line break. */

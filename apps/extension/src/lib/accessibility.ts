@@ -78,14 +78,35 @@ function labelledByText(el: Element): string | null {
   return parts.length > 0 ? parts.join(' ') : null;
 }
 
+/**
+ * Finds the `<label for="...">` associated with an element id.
+ *
+ * The id comes from the page being recorded, which is attacker-influenced
+ * whenever an author records a page they do not control, so it is never
+ * interpolated into a selector string. The previous implementation escaped
+ * `"` but not `\`, so an id containing a backslash either threw a
+ * `SyntaxError` out of `querySelector` (killing the content script's
+ * sampling for that element) or terminated the attribute selector early
+ * and matched an element of the page's choosing, letting a hostile page
+ * dictate the accessible name recorded into the IR.
+ *
+ * Comparing the `for` attribute directly removes the selector-injection
+ * class entirely rather than escaping around it: there is no selector to
+ * escape. `CSS.escape` would also be correct, but it is a global whose
+ * presence depends on the realm the element lives in, whereas this works
+ * anywhere an `Element` does. Document order is preserved, so the element
+ * chosen matches what `querySelector` returned for a benign id.
+ */
 function labelForInput(el: Element): string | null {
   const doc = el.ownerDocument;
   const id = el.getAttribute('id');
   if (id) {
-    const escaped = id.replace(/"/g, '\\"');
-    const explicit = doc.querySelector(`label[for="${escaped}"]`);
-    const explicitText = explicit?.textContent?.trim();
-    if (explicitText) return explicitText;
+    for (const label of doc.querySelectorAll('label[for]')) {
+      if (label.getAttribute('for') !== id) continue;
+      const explicitText = label.textContent?.trim();
+      if (explicitText) return explicitText;
+      break;
+    }
   }
   const wrapping = el.closest('label');
   const wrappingText = wrapping?.textContent?.trim();

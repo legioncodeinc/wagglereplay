@@ -5,5 +5,5 @@
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "types": ["node", "chrome"]
   },
-  "include": ["src", "test", "build"]
+  "include": ["src", "test", "scripts"]
 }

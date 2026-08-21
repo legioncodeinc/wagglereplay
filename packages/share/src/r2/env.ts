@@ -32,6 +32,25 @@ const R2_ENV_VAR_DESCRIPTIONS: Record<keyof typeof R2_ENV_VARS, string> = {
     "the base URL the bucket is served from (a connected custom domain, or the bucket's r2.dev URL) so a public download link can be printed",
 };
 
+/**
+ * Strips trailing `/` characters from a base URL.
+ *
+ * Deliberately a character scan and not `replace(/\/+$/, '')`: a greedy
+ * `+` anchored to `$` backtracks once per starting offset on a value that
+ * ends in a long run of slashes without matching, which is quadratic in
+ * the length of the run (CodeQL `js/polynomial-redos`). The input is an
+ * environment variable rather than a request parameter, so the practical
+ * exposure is small, but a linear scan costs nothing and removes the
+ * class outright.
+ */
+function stripTrailingSlashes(value: string): string {
+  let end = value.length;
+  while (end > 0 && value.charCodeAt(end - 1) === 0x2f) {
+    end -= 1;
+  }
+  return value.slice(0, end);
+}
+
 export interface R2Config {
   readonly accountId: string;
   readonly accessKeyId: string;
@@ -74,7 +93,7 @@ export function readR2ConfigFromEnv(env: NodeJS.ProcessEnv): R2ConfigResult {
       accessKeyId: values.accessKeyId as string,
       secretAccessKey: values.secretAccessKey as string,
       bucket: values.bucket as string,
-      publicBaseUrl: (values.publicBaseUrl as string).replace(/\/+$/, ''),
+      publicBaseUrl: stripTrailingSlashes(values.publicBaseUrl as string),
     },
   };
 }

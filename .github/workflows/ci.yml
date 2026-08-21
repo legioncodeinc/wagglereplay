@@ -11,6 +11,13 @@ name: CI
 # (ubuntu-24.04, ffmpeg 6.1.1) is below the project's required 7+, so a
 # static-build action is used instead. Same guard as the install step, so it
 # is a no-op before prd-001 lands a lockfile.
+#
+# The Test job also runs a workspace build before Test. packages/cli's
+# studio-command tests boot the real @waggle/studio SvelteKit server (built
+# to apps/studio/build/index.js, gitignored); nothing else in this workflow
+# ever ran that build, so the artifact only existed by accident of local
+# dev history. lint and typecheck do not need it: neither executes built
+# output, so it is not added to those jobs.
 
 on:
   push:
@@ -91,6 +98,9 @@ jobs:
 
       - name: Install dependencies
         run: if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile; else echo "no lockfile yet (pre prd-001)"; fi
+
+      - name: Build
+        run: if [ -f package.json ]; then pnpm run --if-present build; else echo "no package.json yet"; fi
 
       # packages/compose and packages/ingest shell out to real ffmpeg/ffprobe
       # (ADR-003). BtbN/FFmpeg-Builds n9.0 matches the ffmpeg 9.0 on the

@@ -10,7 +10,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
-    "build": "node build/build.mjs",
+    "build": "node scripts/build.mjs",
     "e2e": "tsx test/e2e/run-alignment-e2e.ts"
   },
   "dependencies": {

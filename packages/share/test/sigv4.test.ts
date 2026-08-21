@@ -4,6 +4,7 @@ import {
   buildCanonicalRequest,
   buildStringToSign,
   canonicalUriForKey,
+  compareHeaderNames,
   credentialScope,
   deriveSigningKey,
   encodeUriSegment,
@@ -79,6 +80,42 @@ describe('canonical request and signing key construction', () => {
       'host:example.r2.cloudflarestorage.com',
       'x-amz-date:20260101T000000Z',
     ]);
+  });
+
+  /**
+   * Regression: the header block used to be sorted with `localeCompare`
+   * while `client.ts` derived `SignedHeaders` with the default (byte
+   * order) sort. ICU treats `-` as variable-weight punctuation, so the two
+   * disagree on hyphenated names, and the canonical header block would
+   * then describe a different order than the `SignedHeaders` signed
+   * alongside it. SigV4 mandates byte order for both.
+   */
+  it('orders signed headers by byte value, not by locale collation', () => {
+    // `-` is 0x2D and `_` is 0x5F, so byte order puts the hyphen first;
+    // ICU orders the underscore first, because it weighs punctuation
+    // below the letters rather than by code point.
+    const names = ['x-amz_date', 'x-amz-date'];
+    expect([...names].sort(compareHeaderNames)).toEqual(['x-amz-date', 'x-amz_date']);
+    // The comparator agrees with the plain byte-order sort SigV4 requires.
+    expect([...names].sort(compareHeaderNames)).toEqual([...names].sort());
+    // ...and localeCompare, the previous comparator, does not.
+    expect([...names].sort((a, b) => a.localeCompare(b))).not.toEqual([...names].sort());
+
+    const headers = new Map([
+      ['x-amz_date', 'a'],
+      ['x-amz-date', 'z'],
+    ]);
+    const signedHeaders = [...headers.keys()].sort(compareHeaderNames).join(';');
+    const canonicalRequest = buildCanonicalRequest({
+      method: 'PUT',
+      canonicalUri: '/bucket/key.txt',
+      canonicalQueryString: '',
+      headers,
+      signedHeaders,
+      hashedPayload: sha256Hex(''),
+    });
+    const headerLines = canonicalRequest.split('\n').slice(3, 5);
+    expect(headerLines.map((line) => line.split(':')[0])).toEqual(signedHeaders.split(';'));
   });
 
   it('credentialScope joins date, region, service, and the fixed terminator', () => {

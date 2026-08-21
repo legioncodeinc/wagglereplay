@@ -24,10 +24,16 @@ corepack enable && pnpm install   # once prd-001 lands
 ## Before opening a pull request
 
 ```bash
+pnpm build
 pnpm run --if-present lint
 pnpm run --if-present typecheck
 pnpm run --if-present test
 ```
+
+Run `pnpm build` first. `packages/cli`'s studio-command tests boot the real
+`@waggle/studio` server from its built output (`apps/studio/build/index.js`,
+gitignored), so `pnpm test` fails on a fresh clone that has never been
+built. CI builds automatically before its own Test job.
 
 All must pass. House style: no em dashes or en dashes in any authored file.
 
