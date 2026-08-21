@@ -21,23 +21,45 @@ export const ANIMATION_KILL_CSS =
 /** The id the injected style element carries, so re-injection is a no-op. */
 export const ANIMATION_KILL_STYLE_ID = '__waggle-animation-kill';
 
-/** The init-script snippet that installs the animation-kill stylesheet. */
-export const ANIMATION_KILL_INIT_SCRIPT = `(function(){var existing=document.getElementById('${ANIMATION_KILL_STYLE_ID}');if(existing)return;var style=document.createElement('style');style.id='${ANIMATION_KILL_STYLE_ID}';style.textContent=${JSON.stringify(ANIMATION_KILL_CSS)};(document.head||document.documentElement).appendChild(style);})();`;
-
-/**
- * Builds the init script a deterministic context installs on every new
- * document, before the quiescence probe (owned by ../steps/settle.ts and
- * appended by the context factory). Pure string assembly: same inputs,
- * same bytes.
- */
-export function buildDeterminismInitScript(options: {
+export interface DeterminismInitPayload {
   readonly killAnimations: boolean;
   readonly networkExclusions: readonly string[];
-}): string {
-  const exclusions = JSON.stringify(options.networkExclusions);
-  const parts = [
-    `window.__waggleSettleExclusions = ${exclusions};`,
-    ...(options.killAnimations ? [ANIMATION_KILL_INIT_SCRIPT] : []),
-  ];
-  return parts.join('\n');
+  readonly animationCss: string;
+  readonly animationStyleId: string;
+}
+
+/**
+ * Builds the serializable data passed to Playwright's init function.
+ * Keeping dynamic values in the argument channel avoids constructing
+ * executable JavaScript from configuration data.
+ */
+export function buildDeterminismInitPayload(options: {
+  readonly killAnimations: boolean;
+  readonly networkExclusions: readonly string[];
+}): DeterminismInitPayload {
+  return {
+    killAnimations: options.killAnimations,
+    networkExclusions: [...options.networkExclusions],
+    animationCss: ANIMATION_KILL_CSS,
+    animationStyleId: ANIMATION_KILL_STYLE_ID,
+  };
+}
+
+/**
+ * Runs in the page before application code. Playwright serializes this
+ * function separately from `payload`, so configuration remains data rather
+ * than being interpolated into source code.
+ */
+export function installDeterminismAssets(payload: DeterminismInitPayload): void {
+  const runtime = window as unknown as { __waggleSettleExclusions?: readonly string[] };
+  runtime.__waggleSettleExclusions = [...payload.networkExclusions];
+
+  if (!payload.killAnimations || document.getElementById(payload.animationStyleId)) {
+    return;
+  }
+
+  const style = document.createElement('style');
+  style.id = payload.animationStyleId;
+  style.textContent = payload.animationCss;
+  (document.head ?? document.documentElement).appendChild(style);
 }

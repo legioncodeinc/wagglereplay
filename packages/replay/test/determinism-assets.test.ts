@@ -1,30 +1,38 @@
 import { describe, expect, it } from 'vitest';
 import {
   ANIMATION_KILL_CSS,
-  ANIMATION_KILL_INIT_SCRIPT,
-  buildDeterminismInitScript,
+  ANIMATION_KILL_STYLE_ID,
+  buildDeterminismInitPayload,
 } from '../src/determinism/assets.js';
 
-describe('buildDeterminismInitScript', () => {
-  it('injects the settle exclusions every time', () => {
-    const script = buildDeterminismInitScript({ killAnimations: false, networkExclusions: [] });
-    expect(script).toContain('window.__waggleSettleExclusions = []');
-    expect(script).not.toContain(ANIMATION_KILL_CSS);
+describe('buildDeterminismInitPayload', () => {
+  it('keeps dynamic configuration in serializable data', () => {
+    const payload = buildDeterminismInitPayload({
+      killAnimations: false,
+      networkExclusions: [],
+    });
+    expect(payload).toEqual({
+      killAnimations: false,
+      networkExclusions: [],
+      animationCss: ANIMATION_KILL_CSS,
+      animationStyleId: ANIMATION_KILL_STYLE_ID,
+    });
   });
 
-  it('injects the animation-kill stylesheet only when toggled on', () => {
-    const on = buildDeterminismInitScript({
+  it('copies exclusions so later caller mutation cannot alter the payload', () => {
+    const exclusions = ['analytics'];
+    const payload = buildDeterminismInitPayload({
       killAnimations: true,
-      networkExclusions: ['analytics'],
+      networkExclusions: exclusions,
     });
-    expect(on).toContain(ANIMATION_KILL_INIT_SCRIPT);
-    expect(on).toContain('window.__waggleSettleExclusions = ["analytics"]');
-    expect(on).toContain('animation:none!important');
+    exclusions.push('late-mutation');
+    expect(payload.networkExclusions).toEqual(['analytics']);
+    expect(payload.animationCss).toContain('animation:none!important');
   });
 
   it('is byte-identical for identical inputs', () => {
-    const a = buildDeterminismInitScript({ killAnimations: true, networkExclusions: ['x'] });
-    const b = buildDeterminismInitScript({ killAnimations: true, networkExclusions: ['x'] });
-    expect(a).toBe(b);
+    const a = buildDeterminismInitPayload({ killAnimations: true, networkExclusions: ['x'] });
+    const b = buildDeterminismInitPayload({ killAnimations: true, networkExclusions: ['x'] });
+    expect(JSON.stringify(a)).toBe(JSON.stringify(b));
   });
 });

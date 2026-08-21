@@ -29,9 +29,10 @@ export {
 export * from './credentials/index.js';
 export {
   ANIMATION_KILL_CSS,
-  ANIMATION_KILL_INIT_SCRIPT,
   ANIMATION_KILL_STYLE_ID,
-  buildDeterminismInitScript,
+  buildDeterminismInitPayload,
+  type DeterminismInitPayload,
+  installDeterminismAssets,
 } from './determinism/assets.js';
 export {
   createDeterministicContext,

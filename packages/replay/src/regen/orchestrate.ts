@@ -22,7 +22,7 @@ import {
   type RunReportPreset,
   writeRunReport,
 } from '../report/run-report.js';
-import { REPLAY_MANIFEST_FILENAME, runReplaySession } from '../session/replay-session.js';
+import { runReplaySession } from '../session/replay-session.js';
 import type { ActWithValue } from '../steps/act.js';
 import {
   CONCURRENCY_ENV_VAR,

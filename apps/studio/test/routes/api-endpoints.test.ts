@@ -162,7 +162,7 @@ describe('AC3/AC4/AC6 API routes', () => {
       '[data-testid="opaque-login"]',
     ]);
 
-    const getResponse = await getCredentialMarkings(fakeEvent({}));
+    const getResponse = await getCredentialMarkings();
     const safeBody = JSON.stringify(await getResponse.json());
     expect(safeBody).toContain('[data-testid=\\"opaque-login\\"]');
     expect(safeBody).not.toContain('DEMO_USER');

@@ -9,17 +9,17 @@
     "width": 1920,
     "height": 1080,
     "fps": 12,
-    "durationMs": 2209,
+    "durationMs": 1628,
     "framesReceived": 7,
-    "framesWritten": 25
+    "framesWritten": 18
   },
   "steps": [
     {
       "stepIndex": 0,
       "stepType": "setViewport",
       "ok": true,
-      "startOffsetMs": 28,
-      "durationMs": 125,
+      "startOffsetMs": 32,
+      "durationMs": 135,
       "settleSource": "mutation-quiet",
       "selectorUsed": null,
       "attemptedSelectors": [],
@@ -30,7 +30,7 @@
       "stepIndex": 1,
       "stepType": "navigate",
       "ok": true,
-      "startOffsetMs": 184,
+      "startOffsetMs": 203,
       "durationMs": 70,
       "settleSource": "element-assertion",
       "selectorUsed": null,
@@ -42,9 +42,9 @@
       "stepIndex": 2,
       "stepType": "click",
       "ok": true,
-      "startOffsetMs": 415,
-      "durationMs": 1608,
-      "settleSource": "timeout",
+      "startOffsetMs": 403,
+      "durationMs": 1078,
+      "settleSource": "mutation-quiet",
       "selectorUsed": {
         "recorded": "aria/Start Walkthrough[role=\"button\"]",
         "playwright": "role=button[name=\"Start Walkthrough\"]",
@@ -64,27 +64,27 @@
       "ny": 0.14537037037037037
     },
     {
-      "atMs": 919,
+      "atMs": 642,
       "nx": 0.34270833333333334,
       "ny": 0.14537037037037037
     },
     {
-      "atMs": 1019,
+      "atMs": 742,
       "nx": 0.34270833333333334,
       "ny": 0.14537037037037037
     },
     {
-      "atMs": 1119,
+      "atMs": 842,
       "nx": 0.34270833333333334,
       "ny": 0.14537037037037037
     },
     {
-      "atMs": 1219,
+      "atMs": 942,
       "nx": 0.34270833333333334,
       "ny": 0.14537037037037037
     },
     {
-      "atMs": 2209,
+      "atMs": 1628,
       "nx": 0.34270833333333334,
       "ny": 0.14537037037037037
     }

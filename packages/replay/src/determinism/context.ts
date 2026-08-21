@@ -1,6 +1,6 @@
 import type { Browser, BrowserContext } from 'playwright-core';
 import { QUIESCENCE_PROBE_SOURCE } from '../steps/settle.js';
-import { buildDeterminismInitScript } from './assets.js';
+import { buildDeterminismInitPayload, installDeterminismAssets } from './assets.js';
 
 /**
  * The determinism kit context factory (prd-009 AC2).
@@ -80,14 +80,12 @@ export async function createDeterministicContext(
   });
 
   try {
-    const initScript = [
-      buildDeterminismInitScript({
-        killAnimations,
-        networkExclusions: options.networkExclusions ?? [],
-      }),
-      QUIESCENCE_PROBE_SOURCE,
-    ].join('\n');
-    await context.addInitScript(initScript);
+    const initPayload = buildDeterminismInitPayload({
+      killAnimations,
+      networkExclusions: options.networkExclusions ?? [],
+    });
+    await context.addInitScript(installDeterminismAssets, initPayload);
+    await context.addInitScript(QUIESCENCE_PROBE_SOURCE);
     return context;
   } catch (error: unknown) {
     await context.close().catch(() => undefined);

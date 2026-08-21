@@ -40,7 +40,7 @@ function activeMarkings(projectDir: string): {
 }
 
 /** Safe capture bootstrap data: selector roles only, never env refs or values. */
-export const GET: RequestHandler = () => {
+export const GET = (() => {
   try {
     return json(activeMarkings(getProjectDir()), {
       headers: { 'cache-control': 'no-store' },
@@ -51,7 +51,7 @@ export const GET: RequestHandler = () => {
     }
     throw err;
   }
-};
+}) satisfies RequestHandler;
 
 /** Persists one marking into the bound set's canonical `applies_to` object. */
 export const PUT: RequestHandler = async ({ request }) => {

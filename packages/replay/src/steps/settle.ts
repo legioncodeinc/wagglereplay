@@ -60,8 +60,8 @@ export const QUIESCENCE_PROBE_SOURCE = String.raw`
 (() => {
   if (window.__waggleQuiescence) return;
   const state = { lastMutationAt: performance.now(), inFlight: 0 };
-  const exclusions = (window.__waggleSettleExclusions || []).map((s) => String(s).toLowerCase());
   const excluded = (url) => {
+    const exclusions = (window.__waggleSettleExclusions || []).map((s) => String(s).toLowerCase());
     const u = String(url || '').toLowerCase();
     return exclusions.some((needle) => needle !== '' && u.includes(needle));
   };
