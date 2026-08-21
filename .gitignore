@@ -67,3 +67,7 @@ Desktop.ini
 renders/
 *.webm.part
 .waggle-cache/
+
+# Local agent hook state. These files are machine-local and can contain
+# session metadata; they must never enter a commit.
+.mimosa/
