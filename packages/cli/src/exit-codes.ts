@@ -72,6 +72,53 @@ export const ExitCode = {
    * (ADR-006). Set `WAGGLE_ALLOW_UNLICENSED_AUDIO=1` to override.
    */
   SHAREABLE_AUDIO_REFUSED: 9,
+
+  /**
+   * `waggle record` was run with no `--session <dir>`: interactive capture
+   * (launching Studio, driving the extension) is prd-005's job and does
+   * not exist yet in this PRD wave. Pass `--session <dir>` pointing at a
+   * finished capture session (events.jsonl, meta.json, and the video file
+   * - the exact output of the extension's finalizer) to ingest it now.
+   */
+  INGEST_SESSION_REQUIRED: 10,
+
+  /**
+   * `waggle record --session <dir>` pointed at a directory that is missing
+   * `events.jsonl`/`meta.json`, fails to validate against those schemas,
+   * is not seq-ordered, or names a video file that does not exist. The
+   * error message names the exact file and problem.
+   */
+  INGEST_INVALID_SESSION: 11,
+
+  /**
+   * `waggle render` could not assemble the inputs a render needs: the
+   * project has no recorded IR, the IR points at a source recording that
+   * is missing, or narration audio and `words.json` disagree about whether
+   * the project has been narrated. The message names the exact file.
+   */
+  RENDER_INPUT_MISSING: 12,
+
+  /**
+   * `waggle render` could not run the compositor backend, or the backend
+   * failed. Either ffmpeg is not installed and not named by
+   * `WAGGLE_FFMPEG_PATH`, or it exited non-zero; in the second case the
+   * tail of its stderr is included in the message.
+   */
+  FFMPEG_FAILED: 13,
+
+  /**
+   * `waggle render --brand-kit <id>` named a kit that does not exist under
+   * `brand/`, or the kit file is not valid JSON or fails the brand kit
+   * schema. The message names every offending field.
+   */
+  BRAND_KIT_INVALID: 14,
+
+  /**
+   * `waggle render --preset <id>` named a preset that is neither built in
+   * nor declared in `waggle.json`, or the manifest's own entry for it is
+   * malformed. The message lists the known preset ids.
+   */
+  PRESET_UNKNOWN: 15,
 } as const;
 
 export type ExitCode = (typeof ExitCode)[keyof typeof ExitCode];

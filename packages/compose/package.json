@@ -3,13 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "ffmpeg-based compositor: captions, cursor, ripples, watermark, audio mux. Full implementation lands in prd-007.",
+  "description": "Compositor interface plus the default ffmpeg backend: karaoke captions, synthetic cursor, click ripples, auto-zoom, watermark/logo, intro/outro, reserved PiP slot, narration mux with ducking.",
   "exports": {
     ".": "./src/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run"
+  },
+  "dependencies": {
+    "@waggle/ir": "workspace:*",
+    "@waggle/narrate": "workspace:*",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^26.2.0"

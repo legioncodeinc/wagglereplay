@@ -84,6 +84,12 @@ importers:
 
   packages/cli:
     dependencies:
+      '@waggle/compose':
+        specifier: workspace:*
+        version: link:../compose
+      '@waggle/ingest':
+        specifier: workspace:*
+        version: link:../ingest
       '@waggle/ir':
         specifier: workspace:*
         version: link:../ir
@@ -97,6 +103,9 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
+      '@types/chrome':
+        specifier: ^0.2.6
+        version: 0.2.6
       '@types/node':
         specifier: ^26.2.0
         version: 26.2.0
@@ -105,10 +114,42 @@ importers:
         version: 4.23.12
 
   packages/compose:
+    dependencies:
+      '@waggle/ir':
+        specifier: workspace:*
+        version: link:../ir
+      '@waggle/narrate':
+        specifier: workspace:*
+        version: link:../narrate
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
     devDependencies:
       '@types/node':
         specifier: ^26.2.0
         version: 26.2.0
+
+  packages/ingest:
+    dependencies:
+      '@waggle/extension':
+        specifier: workspace:*
+        version: link:../../apps/extension
+      '@waggle/ir':
+        specifier: workspace:*
+        version: link:../ir
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
+    devDependencies:
+      '@types/chrome':
+        specifier: ^0.2.6
+        version: 0.2.6
+      '@types/node':
+        specifier: ^26.2.0
+        version: 26.2.0
+      '@waggle/fixture-demo-app':
+        specifier: workspace:*
+        version: link:../../fixtures/demo-app
 
   packages/ir:
     dependencies:

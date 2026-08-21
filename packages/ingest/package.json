@@ -1,0 +1,24 @@
+{
+  "name": "@waggle/ingest",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Ingest pipeline: turns a finished capture session (video, events.jsonl, meta.json) into a Walkthrough IR version plus storyboard assets (keyframes, heatmap, AI pre-draft descriptions) inside the project directory.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -b tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@waggle/extension": "workspace:*",
+    "@waggle/ir": "workspace:*",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.2.6",
+    "@types/node": "^26.2.0",
+    "@waggle/fixture-demo-app": "workspace:*"
+  }
+}

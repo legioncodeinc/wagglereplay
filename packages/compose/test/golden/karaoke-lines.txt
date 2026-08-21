@@ -1,0 +1,5 @@
+1 0-7990
+{\kf49}Open{\kf1} {\kf49}the{\kf1} {\kf49}dashboard{\kf1} {\kf49}and{\kf1} {\kf49}apply{\kf1} {\kf49}a{\kf1} {\kf49}filter{\kf1} {\kf49}to\N{\kf1}{\kf49}narrow{\kf1} {\kf49}the{\kf1} {\kf49}results{\kf1} {\kf49}down{\kf1} {\kf49}to{\kf1} {\kf49}just{\kf1} {\kf49}this{\kf1} {\kf49}week
+
+2 8000-8990
+{\kf49}of{\kf1} {\kf49}activity

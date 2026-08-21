@@ -18,7 +18,7 @@ pnpm --filter @waggle/cli start <command> [...args]
 | `waggle init <name>` | Implemented | prd-001 |
 | `waggle record` | Stub | prd-004 |
 | `waggle narrate` | Implemented | prd-006 |
-| `waggle render` | Stub | prd-007 |
+| `waggle render` | Implemented | prd-007 |
 | `waggle regen` | Stub | prd-009 |
 | `waggle export` | Stub | prd-008 |
 | `waggle studio` | Stub | prd-005 |
@@ -48,6 +48,12 @@ rendered copy; keep both in sync.
 | 7 | `NARRATION_NOT_APPROVED` | `waggle narrate` drafted (or re-drafted) `narration/script.json` and is waiting on author approval, or a saved script still has unapproved segments. Nothing was sent to a TTS provider. |
 | 8 | `TTS_CONFIG_INVALID` | `waggle narrate` could not construct a TTS adapter from the environment (unknown `WAGGLE_TTS_PROVIDER`, or a required provider variable such as `ELEVENLABS_API_KEY` is missing). The message names the exact variable. |
 | 9 | `SHAREABLE_AUDIO_REFUSED` | `waggle narrate` refused to render shareable audio: the ElevenLabs plan is free tier, or the selected model is flagged beta (ADR-006). Set `WAGGLE_ALLOW_UNLICENSED_AUDIO=1` to override. |
+| 10 | `INGEST_SESSION_REQUIRED` | `waggle record` needs `--session <dir>`. Interactive capture (launching Studio, driving the extension) is prd-005 work and does not exist yet in this PRD wave. Point `--session` at a finished capture session, meaning the exact output of the extension finalizer: `events.jsonl`, `meta.json`, and the video file. |
+| 11 | `INGEST_INVALID_SESSION` | `waggle record --session <dir>` pointed at a directory missing `events.jsonl` or `meta.json`, failing those schemas, not seq-ordered, or naming a video file that does not exist. The message names the exact file and problem. |
+| 12 | `RENDER_INPUT_MISSING` | `waggle render` could not assemble its inputs: no recorded IR, a missing source recording, or narration audio and `words.json` disagreeing about whether the project has been narrated. The message names the file. |
+| 13 | `FFMPEG_FAILED` | `waggle render` could not launch the compositor backend (ffmpeg is not installed and `WAGGLE_FFMPEG_PATH` is unset), or it exited non-zero. The tail of its stderr is included. |
+| 14 | `BRAND_KIT_INVALID` | `waggle render --brand-kit <id>` named a kit that does not exist under `brand/`, or the kit file is not valid JSON or fails the brand kit schema. |
+| 15 | `PRESET_UNKNOWN` | `waggle render --preset <id>` named a preset that is neither built in nor declared in `waggle.json`, or the manifest entry for it is malformed. The message lists the known ids. |
 
 ## `waggle narrate` (prd-006)
 

@@ -1,27 +1,19 @@
 import { Command } from 'commander';
 import { registerInitCommand } from './commands/init.js';
 import { registerNarrateCommand } from './commands/narrate.js';
+import { registerRecordCommand } from './commands/record.js';
+import { registerRenderCommand } from './commands/render.js';
 import { registerStubCommand, type StubCommandSpec } from './commands/stub.js';
 
 const CLI_VERSION = '0.1.0';
 
 /**
- * Full command surface (AC4). `init` (prd-001) and `narrate` (prd-006) are
- * real; every other command is a stub that still resolves the project and
- * validates the manifest, then names the PRD that owns its real
- * implementation.
+ * Full command surface (AC4). `init` (prd-001), `narrate` (prd-006), and
+ * `record` (prd-004) are real; every other command is a stub that still
+ * resolves the project and validates the manifest, then names the PRD
+ * that owns its real implementation.
  */
 const STUB_COMMANDS: StubCommandSpec[] = [
-  {
-    name: 'record',
-    summary: 'Launch Studio and capture a new walkthrough recording',
-    owningPrd: 'prd-004',
-  },
-  {
-    name: 'render',
-    summary: 'Composite a branded, narrated MP4 from the current Walkthrough IR',
-    owningPrd: 'prd-007',
-  },
   {
     name: 'regen',
     summary: 'Replay the IR against the live app and regenerate the video',
@@ -69,6 +61,8 @@ export function createCli(): Command {
 
   registerInitCommand(program);
   registerNarrateCommand(program);
+  registerRenderCommand(program);
+  registerRecordCommand(program);
   for (const spec of STUB_COMMANDS) {
     registerStubCommand(program, spec);
   }

@@ -70,11 +70,11 @@ DONE means fully implemented with passing tests. VERIFIED means a pass other tha
 | 003-AC6 | 003 | Settle markers from a webRequest in-flight counter with exclusions | typescript-node | sonnet-5 | VERIFIED |
 | 003-AC7 | 003 | Finalizer emits events.jsonl and meta.json; ripple overlay toggleable | typescript-node | sonnet-5 | VERIFIED |
 | 003-AC8 | 003 | E2E on the fixture app: 6-step flow, telemetry aligns within 50 ms | quality | opus-5 | DONE |
-| 004-AC1 | 004 | Step segmenter deterministic on the fixture recordings | typescript-node | sonnet-5 | OPEN |
-| 004-AC2 | 004 | ffmpeg keyframes t-5s to t+5s at 1 fps plus click and settled frames | typescript-node | sonnet-5 | OPEN |
-| 004-AC3 | 004 | Heatmap data: normalized click coordinates aggregated per route | typescript-node | sonnet-5 | OPEN |
-| 004-AC4 | 004 | AI pre-draft descriptions with a machine-drafted flag | mind | sonnet-5 | OPEN |
-| 004-AC5 | 004 | `waggle record` end to end; ingest idempotent, byte-identical IR | typescript-node | sonnet-5 | OPEN |
+| 004-AC1 | 004 | Step segmenter deterministic on the fixture recordings | typescript-node | sonnet-5 | VERIFIED |
+| 004-AC2 | 004 | ffmpeg keyframes t-5s to t+5s at 1 fps plus click and settled frames | typescript-node | sonnet-5 | VERIFIED |
+| 004-AC3 | 004 | Heatmap data: normalized click coordinates aggregated per route | typescript-node | sonnet-5 | VERIFIED |
+| 004-AC4 | 004 | AI pre-draft descriptions with a machine-drafted flag | mind | sonnet-5 | DONE |
+| 004-AC5 | 004 | `waggle record` end to end; ingest idempotent, byte-identical IR | typescript-node | sonnet-5 | VERIFIED |
 | 005-AC1 | 005 | Studio boots on localhost with a project dir; upload endpoints write ingest inputs | svelte | sonnet-5 | OPEN |
 | 005-AC2 | 005 | Film strip: settled frame, ripple marker, classification badge, route delta | ux-ui-svelte | sonnet-5 | OPEN |
 | 005-AC3 | 005 | Step detail: frame scrubber, element card, DOM delta summary | ux-ui-svelte | sonnet-5 | OPEN |
@@ -89,14 +89,14 @@ DONE means fully implemented with passing tests. VERIFIED means a pass other tha
 | 006-AC5 | 006 | Deepgram adapter with timestamps none, plus xAI stub with declared capabilities | typescript-node | sonnet-5 | VERIFIED |
 | 006-AC6 | 006 | `waggle narrate` end to end; monotonic word timings covering full duration | quality | opus-5 | DONE |
 | 006-AC7 | 006 | Guardrail: refuse shareable audio on free tier or beta model without override | security | opus-5 | VERIFIED |
-| 007-AC1 | 007 | Compositor interface plus brand kit zod schema | typescript-node | opus-5 | OPEN |
-| 007-AC2 | 007 | ASS karaoke generator from words.json, golden-file tested | typescript-node | sonnet-5 | OPEN |
-| 007-AC3 | 007 | Spring-damped cursor synthesizer plus click ripple overlays | typescript-node | sonnet-5 | OPEN |
-| 007-AC4 | 007 | Deterministic filter-graph builder, all layers, H.264 at preset dims and fps | typescript-node | opus-5 | OPEN |
-| 007-AC5 | 007 | Auto-zoom via crop and scale expressions, eased, no zoompan | typescript-node | sonnet-5 | OPEN |
-| 007-AC6 | 007 | Narration audio mux with configurable source ducking | typescript-node | sonnet-5 | OPEN |
-| 007-AC7 | 007 | `waggle render --preset 16x9` produces an MP4; idempotent stream md5 | quality | opus-5 | OPEN |
-| 007-AC8 | 007 | Kit swap changes only branded elements; no IR or narration writes | quality | opus-5 | OPEN |
+| 007-AC1 | 007 | Compositor interface plus brand kit zod schema | typescript-node | opus-5 | VERIFIED |
+| 007-AC2 | 007 | ASS karaoke generator from words.json, golden-file tested | typescript-node | sonnet-5 | VERIFIED |
+| 007-AC3 | 007 | Spring-damped cursor synthesizer plus click ripple overlays | typescript-node | sonnet-5 | VERIFIED |
+| 007-AC4 | 007 | Deterministic filter-graph builder, all layers, H.264 at preset dims and fps | typescript-node | opus-5 | VERIFIED |
+| 007-AC5 | 007 | Auto-zoom via crop and scale expressions, eased, no zoompan | typescript-node | sonnet-5 | VERIFIED |
+| 007-AC6 | 007 | Narration audio mux with configurable source ducking | typescript-node | sonnet-5 | VERIFIED |
+| 007-AC7 | 007 | `waggle render --preset 16x9` produces an MP4; idempotent stream md5 | quality | opus-5 | VERIFIED |
+| 007-AC8 | 007 | Kit swap changes only branded elements; no IR or narration writes | quality | opus-5 | VERIFIED |
 | 008-AC1 | 008 | Stable render naming plus JSON sidecar with version, kit, preset, label, checksum | typescript-node | sonnet-5 | OPEN |
 | 008-AC2 | 008 | `waggle export` self-contained share bundle; link-integrity check passes | typescript-node | sonnet-5 | OPEN |
 | 008-AC3 | 008 | Optional R2 upload; absent config explains exactly what to set | typescript-node | sonnet-5 | OPEN |
@@ -153,7 +153,15 @@ DONE means fully implemented with passing tests. VERIFIED means a pass other tha
 
 | Time | Bee | Event | Action |
 |---|---|---|---|
-| (none yet) | | | |
+| 2026-08-20 W4 | typescript-node (prd-004 ingest) | Terminated mid-task by an external API session limit. Not a stall and not a work defect: packages/ingest already typechecked clean at the point of death. | Resumed with context intact after the limit reset rather than re-dispatching from scratch, since no decomposition was warranted for an external interruption. |
+| 2026-08-20 W4 | typescript-node (prd-007 compositor) | Terminated mid-task by the same external API session limit. Left one typecheck error in test/compositor-contract.test.ts and a failing repo-wide lint. | Resumed with context intact, with the two concrete defects named explicitly in the resume brief. |
+
+| W4 | ffmpeg encoder pins -threads to 4. | libx264 is deterministic only for a GIVEN thread count, and its default derives from host CPU count. An unpinned render is reproducible on one machine and not across two, so PRD-007 AC7 would have passed locally and failed in CI. | No. Correct and important; note it if CI runners ever change shape. |
+| W4 | CLI exit codes 10 and 11 claimed by ingest, 12 to 15 by compose. | Two parallel Bees extended the same shared exit-code table. Compose renumbered rather than reclaiming, leaving a documented gap for ingest to fill. | Yes. Verify packages/cli/README.md documents 10 and 11 before the repo-health gate. |
+
+| W4 | Ingest writes two new project-dir files, heatmap.json and predraft.json, not enumerated in ADR-015. | Both are additive, JSON, git-committable, and follow the IR writer serialization exactly. ADR-015's decision is filesystem-dirs-not-a-database, which these honour. | Yes. Confirm with quality-worker-bee whether ADR-015 needs an amendment enumerating them, or whether its file list was illustrative rather than exhaustive. |
+| W4 | Pre-draft descriptions live in predraft.json, not inside the IR. | packages/ir WaggleStepExtensionSchema has no description or machineDrafted field, and packages/ir is a locked, already-verified package. Adding fields to it would have reopened PRD-002. | Yes. PRD-005 AC4 studio editor must read and write this file; confirm the contract holds when studio lands. |
+| W4 | Exit-code documentation gap closed by the orchestrator, not a Bee. | Ingest claimed codes 10 and 11 in source but did not add them to the cli README table; compose flagged the gap rather than guessing another Bee's semantics. Orchestrator added both rows from the source doc comments. | No. Resolved. |
 
 ## Blocked register
 

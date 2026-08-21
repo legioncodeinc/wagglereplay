@@ -3,6 +3,7 @@
   "references": [
     { "path": "apps/extension" },
     { "path": "packages/ir" },
+    { "path": "packages/ingest" },
     { "path": "packages/replay" },
     { "path": "packages/compose" },
     { "path": "packages/narrate" },
