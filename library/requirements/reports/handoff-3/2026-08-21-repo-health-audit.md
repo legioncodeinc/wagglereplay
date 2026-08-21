@@ -71,7 +71,7 @@ Evidence endpoint: `https://api.github.com/repos/legioncodeinc/wagglereplay/code
 | Workflow | Pull request | Lint | Typecheck | Test | Build | Security | Timeout | Required |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `.github/workflows/ci.yml` | Yes | Yes | Yes | Yes | Yes | No | No | No |
-| `.github/workflows/codeql.yml` | Yes | No | No | Autobuild | Autobuild | CodeQL | No | CodeQL threshold only |
+| `.github/workflows/codeql.yml` | Yes | No | No | No | Autobuild | CodeQL | No | CodeQL threshold only |
 
 All third-party workflow actions are pinned to full commit SHAs and permissions are least-privilege. Add job timeouts and require Lint, Typecheck, and Test. Hand the required-check and future E2E topology to `ci-release-worker-bee`, especially when PRD-012 introduces regeneration workflows.
 

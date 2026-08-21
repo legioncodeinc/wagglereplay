@@ -16,7 +16,8 @@ For current acceptance-criterion status, `EXECUTION_LEDGER.md` is the source of 
 | Merged feature PR | [PR #2: replay regeneration and credential masking](https://github.com/legioncodeinc/wagglereplay/pull/2) |
 | PRD-009 | 8 of 8 acceptance criteria verified |
 | PRD-010 | 5 of 5 acceptance criteria verified |
-| Final security result | 0 Critical, 0 High, 0 Medium, 1 Low |
+| Final application security result | 0 Critical, 0 High, 0 Medium, 1 Low for the Studio loopback authentication boundary |
+| Dependency advisory result | 0 Critical, 0 High, 0 Moderate, 1 pre-existing Low |
 | Final automated suite | 764 of 764 tests passed |
 | Main CI after merge | [CI passed](https://github.com/legioncodeinc/wagglereplay/actions/runs/32478163532) |
 | Main CodeQL after merge | [CodeQL passed](https://github.com/legioncodeinc/wagglereplay/actions/runs/32478163488) |
@@ -115,18 +116,18 @@ The final unresolved result is 0 Critical, 0 High, 0 Medium, and 1 Low. The Low 
 
 The final tree passed all of the following:
 
-| Verification | Result |
-| --- | --- |
-| `pnpm lint` | Passed across 380 files |
-| `pnpm typecheck` | Passed for every workspace package; Svelte reported 0 errors and 0 warnings |
-| `pnpm build` | Passed |
-| `pnpm test` | 764 passed, 0 failed |
-| `pnpm --filter @waggle/replay e2e` | Passed with real Chromium, ffmpeg, moved-button drift, native output, and reframed output |
-| `pnpm --filter @waggle/studio e2e` | Passed against the built loopback server |
-| `pnpm --filter @waggle/extension e2e` | Passed extension registration and the seam-injected capture-timeline alignment proof |
-| Credential media canary | Passed real ffmpeg pixel checks and provider-byte identity checks |
-| Dependency audit | No Critical, High, or Moderate advisory; one Low metadata item remained |
-| Post-merge `main` checks | CI, CodeQL, and code quality passed |
+| Verification | Result | Evidence source |
+| --- | --- | --- |
+| `pnpm lint` | Passed across 380 files | PRD-009/010 post-fix gate and fresh Linux CI on PR #2 and merged `main` |
+| `pnpm typecheck` | Passed for every workspace package; Svelte reported 0 errors and 0 warnings | PRD-009/010 post-fix gate and fresh Linux CI on PR #2 and merged `main` |
+| `pnpm build` | Passed | PRD-009/010 post-fix gate and the Test job on PR #2 and merged `main` |
+| `pnpm test` | 764 passed, 0 failed | PRD-009/010 post-fix gate and fresh Linux CI on PR #2 and merged `main` |
+| `pnpm --filter @waggle/replay e2e` | Passed with real Chromium, ffmpeg, moved-button drift, native output, and reframed output | PRD-009/010 post-fix local E2E gate and checked-in QA artifacts |
+| `pnpm --filter @waggle/studio e2e` | Passed against the built loopback server | PRD-009/010 post-fix local E2E gate |
+| `pnpm --filter @waggle/extension e2e` | Passed extension registration and the seam-injected capture-timeline alignment proof | PRD-009/010 post-fix local E2E gate |
+| Credential media canary | Passed real ffmpeg pixel checks and provider-byte identity checks | PRD-010 post-redaction integration test and canary report |
+| Dependency audit | No Critical, High, or Moderate advisory; one pre-existing Low item remained | PRD-009/010 post-fix gate, reconfirmed by the handoff security audit |
+| Post-merge `main` checks | CI, CodeQL, and code quality passed | GitHub runs linked in `Current state` |
 
 Canonical evidence lives here:
 
