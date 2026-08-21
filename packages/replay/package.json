@@ -1,0 +1,17 @@
+{
+  "name": "@waggle/replay",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Playwright replay engine that re-executes the Walkthrough IR at any viewport. Full implementation lands in prd-009.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0"
+  }
+}

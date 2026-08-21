@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    // Same reason as packages/ingest/tsconfig.json: @waggle/ingest ->
+    // @waggle/extension's barrel transitively pulls DOM/chrome-typed
+    // source files into this package's single-program compilation.
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": ["node", "chrome"]
+  },
+  "references": [{ "path": "../ingest" }],
+  "include": ["src", "test"]
+}

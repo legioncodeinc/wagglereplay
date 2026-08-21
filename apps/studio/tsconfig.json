@@ -1,0 +1,16 @@
+{
+  "extends": "./.svelte-kit/tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "verbatimModuleSyntax": true,
+    "noUncheckedIndexedAccess": true,
+    // @waggle/ingest's server-only `runIngest` transitively imports
+    // @waggle/extension's Node-safe barrel, which itself pulls in a few
+    // DOM/chrome-typed source files (see packages/ingest/tsconfig.json's
+    // own comment on the identical issue). Mirrored here for the same
+    // reason: this program resolves those files directly as source
+    // (Vite's "bundler" moduleResolution, no project-reference boundary),
+    // so it needs the same ambient types to typecheck them.
+    "types": ["node", "chrome"]
+  }
+}

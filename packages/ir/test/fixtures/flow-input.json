@@ -1,0 +1,80 @@
+{
+  "title": "Search the report list",
+  "steps": [
+    {
+      "type": "click",
+      "selectors": ["#search", "aria/Search reports"],
+      "offsetX": 8,
+      "offsetY": 12,
+      "waggle": {
+        "classification": "state-change",
+        "element": {
+          "role": "searchbox",
+          "name": "Search reports",
+          "rect": { "x": 320, "y": 140, "w": 480, "h": 40 }
+        },
+        "masked": false
+      }
+    },
+    {
+      "type": "change",
+      "selectors": ["#search", "aria/Search reports"],
+      "value": "quarterly revenue",
+      "waggle": {
+        "classification": "input",
+        "element": {
+          "role": "searchbox",
+          "name": "Search reports",
+          "text": "quarterly revenue",
+          "rect": { "x": 320, "y": 140, "w": 480, "h": 40 }
+        },
+        "settle": { "source": "mutation-quiet", "ms": 140 },
+        "narrationSegmentId": "seg-020",
+        "masked": false
+      }
+    },
+    {
+      "type": "keyDown",
+      "key": "Enter",
+      "waggle": { "classification": "input", "masked": false }
+    },
+    {
+      "type": "keyUp",
+      "key": "Enter",
+      "assertedEvents": [
+        { "type": "navigation", "url": "https://demo.example.com/reports?q=quarterly+revenue" }
+      ],
+      "waggle": {
+        "classification": "input",
+        "routeBefore": "/reports",
+        "routeAfter": "/reports?q=quarterly+revenue",
+        "settle": { "source": "network-idle", "ms": 640 },
+        "masked": false
+      }
+    },
+    {
+      "type": "change",
+      "selectors": ["#contact-email"],
+      "value": "demo-viewer@example.com",
+      "waggle": {
+        "classification": "input",
+        "element": {
+          "role": "textbox",
+          "name": "Email for the exported report",
+          "rect": { "x": 320, "y": 420, "w": 480, "h": 40 }
+        },
+        "masked": true
+      }
+    }
+  ],
+  "waggle": {
+    "schemaVersion": 1,
+    "recordedViewport": { "w": 1280, "h": 800, "dpr": 1 },
+    "startEpochMs": 1755648000000,
+    "cursorTrail": [{ "t": 0, "x": 100, "y": 100 }, { "t": 200, "x": 400, "y": 155 }],
+    "clicks": [
+      { "t": 220, "x": 400, "y": 155, "down": true },
+      { "t": 268, "x": 400, "y": 155, "down": false }
+    ]
+  }
+}

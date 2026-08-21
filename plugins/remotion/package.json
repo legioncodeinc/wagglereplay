@@ -1,0 +1,17 @@
+{
+  "name": "@waggle/plugin-remotion",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Optional Remotion compositor backend, swappable in behind the same compositor interface as packages/compose. Full implementation lands in prd-014.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0"
+  }
+}

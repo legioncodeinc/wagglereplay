@@ -7,7 +7,7 @@ Records a walkthrough of your web app once, then regenerates polished, narrated 
 
 > Named for the waggle dance: how a bee shows the rest of the hive the exact route to something worth visiting.
 
-**Status: pre-alpha.** The repository is currently a seeded planning library (ADRs, PRDs, knowledge corpus) ahead of implementation. Nothing runs yet.
+**Status: pre-alpha.** The pnpm workspace boots and the `waggle` CLI is real (prd-001): `init` scaffolds a project, and `record`/`narrate`/`render`/`regen`/`export`/`studio`/`creds`/`clean` are registered stubs that resolve the project and validate its manifest, then name the PRD that implements them.
 
 ## What it is
 
@@ -21,31 +21,39 @@ Every existing tool in this space freezes pixels at capture time, so a UI change
 
 ## Quick start
 
-Not yet: pre-alpha. When prd-001 lands, this will be:
-
 ```bash
-pnpm dlx waggle init my-demo && pnpm dlx waggle record
+corepack enable
+pnpm install
+pnpm --filter @waggle/cli start init my-demo
 ```
+
+`init` is real today. The rest of the loop below is registered but stubbed
+until its owning PRD lands (see [packages/cli/README.md](./packages/cli/README.md)
+for the full command-to-PRD map and the exit-code table).
 
 ## Install
 
-Prerequisites (planned):
+Prerequisites:
 
 - Node.js 24 or newer (see `.nvmrc`)
-- pnpm 9+ (via `corepack enable`)
-- ffmpeg 7+ on PATH
-- Chrome (capture extension sideloaded during pre-alpha)
+- pnpm 11+ (via `corepack enable`)
+- ffmpeg 7+ on PATH (needed from prd-004 onward)
+- Chrome (capture extension sideloaded during pre-alpha, from prd-003 onward)
 
 ## Usage
 
-Planned core loop:
+`waggle` is not published or installed as a global bin yet (no npm publishing
+happens in prd-001). Run it through the workspace with `pnpm --filter
+@waggle/cli start <command>`; the examples below shorten that to just `waggle
+<command>` for readability. Core loop (commands past `init` are stubs; each
+names the PRD that implements it):
 
 ```bash
-waggle init my-demo        # scaffold a Waggle project directory
-waggle record              # opens the studio, capture from the extension
-waggle narrate             # script drafting + TTS with word timestamps
-waggle render --preset 16x9 --preset 9x16
-waggle regen               # re-replay + re-render after your app changed
+waggle init my-demo        # scaffold a Waggle project directory (implemented)
+waggle record               # opens the studio, capture from the extension (prd-004)
+waggle narrate               # script drafting + TTS with word timestamps (prd-006)
+waggle render --preset 16x9 --preset 9x16   # (prd-007)
+waggle regen                 # re-replay + re-render after your app changed (prd-009)
 ```
 
 ## Configuration
@@ -74,14 +82,25 @@ Decisions are recorded as ADRs in [library/knowledge/private/architecture/](./li
 ```bash
 git clone https://github.com/legioncodeinc/wagglereplay.git
 cd wagglereplay
-corepack enable && pnpm install   # once prd-001 lands
+corepack enable && pnpm install
+pnpm lint        # biome ci .
+pnpm typecheck   # tsc --noEmit per package, svelte-check for apps/studio
+pnpm test        # vitest per package
 ```
+
+The workspace uses [Biome](https://biomejs.dev) rather than ESLint+Prettier:
+one dependency, one config file (`biome.json`), and a Rust-native linter fast
+enough to run in `biome ci` (no auto-fix) on every push without slowing CI
+down; `biome check --write .` is the local/pre-commit auto-fix command.
 
 ## Testing
 
 ```bash
-pnpm test   # once prd-001 lands; CI guards keep the seeded repo green
+pnpm test
 ```
+
+`packages/cli` carries the e2e coverage for `waggle init` and the stub
+command surface; see [packages/cli/README.md](./packages/cli/README.md).
 
 ## Deployment
 

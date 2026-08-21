@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "sessionId": "ingest-fixture",
+  "startEpochMs": 1787219588122,
+  "generatedAt": "2026-08-20T00:00:00.000Z",
+  "tabId": 1,
+  "initialUrl": "http://127.0.0.1:55448/",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+  "recordedViewport": {
+    "w": 1280,
+    "h": 800,
+    "dpr": 1
+  },
+  "video": {
+    "filename": "video.mp4",
+    "mimeType": "video/mp4",
+    "anchorEpochMs": 1787219588122,
+    "durationMs": 1256,
+    "chunkCount": 1
+  },
+  "eventCount": 22,
+  "fixtureVariant": "default"
+}

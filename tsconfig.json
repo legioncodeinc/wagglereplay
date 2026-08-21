@@ -1,0 +1,15 @@
+{
+  "files": [],
+  "references": [
+    { "path": "apps/extension" },
+    { "path": "packages/ir" },
+    { "path": "packages/ingest" },
+    { "path": "packages/replay" },
+    { "path": "packages/compose" },
+    { "path": "packages/narrate" },
+    { "path": "packages/share" },
+    { "path": "packages/cli" },
+    { "path": "plugins/remotion" },
+    { "path": "fixtures/demo-app" }
+  ]
+}

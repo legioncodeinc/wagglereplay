@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Waggle Capture",
+  "version": "0.1.0",
+  "description": "Records a web app walkthrough: tab video plus click/route/element telemetry, streamed to the local Waggle Studio server.",
+  "action": {
+    "default_title": "Waggle: click to start or stop recording this tab"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content-script.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "permissions": ["tabCapture", "offscreen", "webNavigation", "storage", "scripting", "webRequest"],
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "minimum_chrome_version": "116"
+}

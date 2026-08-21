@@ -1,0 +1,30 @@
+{
+  "name": "@waggle/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "The waggle CLI: init, record, narrate, render, regen, export, studio, creds, clean.",
+  "exports": {
+    ".": "./src/cli.ts"
+  },
+  "scripts": {
+    "start": "tsx src/cli.ts",
+    "typecheck": "tsc -b tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@waggle/compose": "workspace:*",
+    "@waggle/ingest": "workspace:*",
+    "@waggle/ir": "workspace:*",
+    "@waggle/narrate": "workspace:*",
+    "@waggle/share": "workspace:*",
+    "@waggle/studio": "workspace:*",
+    "commander": "^15.0.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.2.6",
+    "@types/node": "^26.2.0",
+    "tsx": "^4.23.12"
+  }
+}

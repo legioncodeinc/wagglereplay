@@ -1,0 +1,76 @@
+{
+  "title": "Open the filters panel",
+  "selectorAttribute": "data-testid",
+  "steps": [
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        ["[data-testid=toolbar]", "[data-testid=filters-button]"],
+        "aria/Filters",
+        "xpath///*[@data-testid='filters-button']",
+        "text/Filters"
+      ],
+      "offsetX": 24,
+      "offsetY": 11,
+      "duration": 50,
+      "deviceType": "mouse",
+      "button": "primary",
+      "waggle": {
+        "classification": "state-change",
+        "routeBefore": "/dashboard",
+        "routeAfter": "/dashboard",
+        "domDelta": {
+          "summary": "The filters panel slid in from the right and took focus.",
+          "ariaChanges": [
+            { "role": "dialog", "name": "Filters", "change": "added" },
+            { "role": "button", "name": "Filters", "change": "updated" }
+          ],
+          "rectDelta": { "x": 1080, "y": 64, "w": 360, "h": 836 }
+        },
+        "settle": { "source": "animation-end", "ms": 220 },
+        "element": {
+          "role": "button",
+          "name": "Filters",
+          "text": "Filters",
+          "rect": { "x": 1188, "y": 72, "w": 96, "h": 32 }
+        },
+        "narrationSegmentId": "seg-010",
+        "assets": {
+          "before": "steps/v1/000-before.png",
+          "click": "steps/v1/000-click.png",
+          "settled": "steps/v1/000-settled.png"
+        },
+        "masked": false
+      }
+    },
+    {
+      "type": "waitForElement",
+      "selectors": ["[data-testid=filters-panel]"],
+      "operator": ">=",
+      "count": 1,
+      "visible": true,
+      "attributes": { "role": "dialog" },
+      "waggle": {
+        "classification": "state-change",
+        "settle": { "source": "mutation-quiet", "ms": 90 },
+        "masked": false
+      }
+    }
+  ],
+  "waggle": {
+    "schemaVersion": 1,
+    "recordedViewport": { "w": 1440, "h": 900, "dpr": 2 },
+    "startEpochMs": 1755648000000,
+    "cursorTrail": [
+      { "t": 0, "x": 640, "y": 500 },
+      { "t": 120, "x": 900, "y": 300 },
+      { "t": 260, "x": 1210, "y": 88 },
+      { "t": 380, "x": 1212, "y": 88 }
+    ],
+    "clicks": [
+      { "t": 400, "x": 1212, "y": 88, "down": true },
+      { "t": 450, "x": 1212, "y": 88, "down": false }
+    ]
+  }
+}

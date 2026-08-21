@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    // @waggle/extension's package export is one barrel
+    // (apps/extension/src/index.ts) that statically imports every
+    // Node-safe module it re-exports; TypeScript's single-program model
+    // (no project references are wired between these two packages) means
+    // this package's compiler options apply to those transitively-pulled
+    // files too, even though this package only ever consumes the
+    // Node-safe event/session/finalizer exports at runtime. Mirrors
+    // apps/extension/tsconfig.json's own lib/types exactly so those files
+    // typecheck the same way here as they do in their own package.
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": ["node", "chrome"]
+  },
+  "references": [{ "path": "../../apps/extension" }],
+  "include": ["src", "test"]
+}

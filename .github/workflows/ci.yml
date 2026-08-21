@@ -4,6 +4,20 @@ name: CI
 # Bootstrap-safe: guards make each job pass on the pre-code seeded repo and
 # activate automatically when prd-001 lands package.json + pnpm-lock.yaml.
 # Actions pinned to full commit SHAs (tag-hijack defense).
+#
+# The Test job additionally installs ffmpeg/ffprobe 9.0 (ADR-003: ffmpeg is
+# the default compositor backend; packages/compose and packages/ingest shell
+# out to the real binaries). Ubuntu's apt package on the ubuntu-latest runner
+# (ubuntu-24.04, ffmpeg 6.1.1) is below the project's required 7+, so a
+# static-build action is used instead. Same guard as the install step, so it
+# is a no-op before prd-001 lands a lockfile.
+#
+# The Test job also runs a workspace build before Test. packages/cli's
+# studio-command tests boot the real @waggle/studio SvelteKit server (built
+# to apps/studio/build/index.js, gitignored); nothing else in this workflow
+# ever ran that build, so the artifact only existed by accident of local
+# dev history. lint and typecheck do not need it: neither executes built
+# output, so it is not added to those jobs.
 
 on:
   push:
@@ -84,6 +98,23 @@ jobs:
 
       - name: Install dependencies
         run: if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile; else echo "no lockfile yet (pre prd-001)"; fi
+
+      - name: Build
+        run: if [ -f package.json ]; then pnpm run --if-present build; else echo "no package.json yet"; fi
+
+      # packages/compose and packages/ingest shell out to real ffmpeg/ffprobe
+      # (ADR-003). BtbN/FFmpeg-Builds n9.0 matches the ffmpeg 9.0 on the
+      # developer machine; verified directly (BtbN release API response plus
+      # an extracted archive) that the n9.0 linux64-gpl static build ships
+      # both bin/ffmpeg and bin/ffprobe. The action caches the extracted
+      # build itself (keyed on version, release id, os, and arch), so no
+      # separate cache step is added here for this single-job, single-
+      # platform use.
+      - name: Install ffmpeg
+        if: hashFiles('pnpm-lock.yaml') != ''
+        uses: AnimMouse/setup-ffmpeg@178e0b4a408f06ce40d896c3cd79f50fa6f8b0c3 # v1.2.5
+        with:
+          version: "9.0"
 
       - name: Test
         run: if [ -f package.json ]; then pnpm run --if-present test; else echo "no package.json yet"; fi
