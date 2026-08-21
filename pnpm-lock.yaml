@@ -124,6 +124,9 @@ importers:
       '@waggle/narrate':
         specifier: workspace:*
         version: link:../narrate
+      '@waggle/replay':
+        specifier: workspace:*
+        version: link:../replay
       '@waggle/share':
         specifier: workspace:*
         version: link:../share
@@ -215,10 +218,29 @@ importers:
         version: 26.2.0
 
   packages/replay:
+    dependencies:
+      '@waggle/compose':
+        specifier: workspace:*
+        version: link:../compose
+      '@waggle/ir':
+        specifier: workspace:*
+        version: link:../ir
+      playwright-core:
+        specifier: ^1.62.1
+        version: 1.62.1
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
     devDependencies:
       '@types/node':
         specifier: ^26.2.0
         version: 26.2.0
+      '@waggle/fixture-demo-app':
+        specifier: workspace:*
+        version: link:../../fixtures/demo-app
+      tsx:
+        specifier: ^4.23.12
+        version: 4.23.12
 
   packages/share:
     dependencies:

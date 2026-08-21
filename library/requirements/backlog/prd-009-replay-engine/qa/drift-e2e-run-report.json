@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-21T11:18:37.236Z",
+  "irVersion": 1,
+  "concurrency": {
+    "limit": 2,
+    "source": "WAGGLE_RENDER_CONCURRENCY"
+  },
+  "presets": [
+    {
+      "presetId": "16x9",
+      "composePresetId": "16x9",
+      "reflow": "native",
+      "reflowReason": "layout reflowed within 8px tolerance",
+      "capture": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 12,
+        "durationMs": 2242
+      },
+      "videoRef": "recordings/replay/v1/16x9/16x9.mp4",
+      "manifestRef": "recordings/replay/v1/16x9/replay.manifest.json",
+      "steps": [
+        {
+          "stepIndex": 0,
+          "stepType": "setViewport",
+          "ok": true,
+          "startOffsetMs": 29,
+          "durationMs": 150,
+          "settleSource": "mutation-quiet",
+          "drift": false,
+          "failure": null
+        },
+        {
+          "stepIndex": 1,
+          "stepType": "navigate",
+          "ok": true,
+          "startOffsetMs": 216,
+          "durationMs": 73,
+          "settleSource": "element-assertion",
+          "drift": false,
+          "failure": null
+        },
+        {
+          "stepIndex": 2,
+          "stepType": "click",
+          "ok": true,
+          "startOffsetMs": 400,
+          "durationMs": 1627,
+          "settleSource": "timeout",
+          "drift": true,
+          "failure": null
+        }
+      ],
+      "driftNotes": [
+        {
+          "stepIndex": 2,
+          "stepType": "click",
+          "usedAlternativeIndex": 1,
+          "usedSelector": "role=button[name=\"Start Walkthrough\"]",
+          "firstChoice": "css=[data-testid=\"cta-start\"]"
+        }
+      ],
+      "render": {
+        "outputPath": "renders/walkthrough.v1.replay-16x9.16x9.mp4",
+        "reframe": "native",
+        "durationMs": 2083,
+        "sourceKind": "replay",
+        "sourceReplayPresetId": "16x9",
+        "sourceVideoRef": "recordings/replay/v1/16x9/16x9.mp4",
+        "sourceManifestRef": "recordings/replay/v1/16x9/replay.manifest.json"
+      }
+    },
+    {
+      "presetId": "desktop",
+      "composePresetId": "16x9",
+      "reflow": "native",
+      "reflowReason": "layout reflowed within 8px tolerance",
+      "capture": {
+        "width": 1440,
+        "height": 900,
+        "fps": 12,
+        "durationMs": 2215
+      },
+      "videoRef": "recordings/replay/v1/desktop/desktop.mp4",
+      "manifestRef": "recordings/replay/v1/desktop/replay.manifest.json",
+      "steps": [
+        {
+          "stepIndex": 0,
+          "stepType": "setViewport",
+          "ok": true,
+          "startOffsetMs": 29,
+          "durationMs": 117,
+          "settleSource": "mutation-quiet",
+          "drift": false,
+          "failure": null
+        },
+        {
+          "stepIndex": 1,
+          "stepType": "navigate",
+          "ok": true,
+          "startOffsetMs": 184,
+          "durationMs": 117,
+          "settleSource": "element-assertion",
+          "drift": false,
+          "failure": null
+        },
+        {
+          "stepIndex": 2,
+          "stepType": "click",
+          "ok": true,
+          "startOffsetMs": 414,
+          "durationMs": 1676,
+          "settleSource": "timeout",
+          "drift": true,
+          "failure": null
+        }
+      ],
+      "driftNotes": [
+        {
+          "stepIndex": 2,
+          "stepType": "click",
+          "usedAlternativeIndex": 1,
+          "usedSelector": "role=button[name=\"Start Walkthrough\"]",
+          "firstChoice": "css=[data-testid=\"cta-start\"]"
+        }
+      ],
+      "render": {
+        "outputPath": "renders/walkthrough.v1.replay-desktop.16x9.mp4",
+        "reframe": "reframed",
+        "durationMs": 2167,
+        "sourceKind": "replay",
+        "sourceReplayPresetId": "desktop",
+        "sourceVideoRef": "recordings/replay/v1/desktop/desktop.mp4",
+        "sourceManifestRef": "recordings/replay/v1/desktop/replay.manifest.json"
+      }
+    }
+  ],
+  "success": true
+}

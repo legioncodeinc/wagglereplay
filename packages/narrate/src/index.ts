@@ -32,6 +32,10 @@ export {
   type RunNarrationResult,
   runNarration,
 } from './narrate/run-narration.js';
+export {
+  createNarrationTextScrubber,
+  NarrationPrivacyConfigError,
+} from './privacy/project-text.js';
 // --- Script drafting (AC1) --------------------------------------------------
 export {
   computeDurationHintMs,

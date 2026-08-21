@@ -9,6 +9,12 @@ import {
   type StepFramePlan,
 } from './extraction-plan.js';
 import type { FfmpegRunner } from './ffmpeg-runner.js';
+import {
+  activeFrameRedactions,
+  buildRedactionFilter,
+  type FrameRedaction,
+  validateFrameRedactions,
+} from './redaction.js';
 
 /** Renders a millisecond offset as the `-ss` argument ffmpeg expects: seconds with millisecond precision. */
 function toSeekArg(relMs: number): string {
@@ -57,7 +63,9 @@ export async function extractKeyframes(
   stepTimings: readonly StepTiming[],
   durationMs: number,
   options: ExtractionPlanOptions = {},
+  frameRedactions: readonly FrameRedaction[] = [],
 ): Promise<KeyframeExtractionResult> {
+  const validatedRedactions = validateFrameRedactions(frameRedactions);
   const plans = buildExtractionPlan(stepTimings, durationMs, options);
   const stepsRoot = subdirPath(projectDir, 'steps');
   const versionRoot = path.join(stepsRoot, `v${String(irVersion)}`);
@@ -74,12 +82,16 @@ export async function extractKeyframes(
     for (const request of plan.requests) {
       const absolutePath = path.join(stepDir, request.fileName);
       const projectRelativePath = path.relative(projectDir, absolutePath).split(path.sep).join('/');
+      const filter = buildRedactionFilter(
+        activeFrameRedactions(validatedRedactions, request.relMs),
+      );
       const argv = [
         '-y',
         '-i',
         videoPath,
         '-ss',
         toSeekArg(request.relMs),
+        ...(filter === null ? [] : ['-vf', filter]),
         '-frames:v',
         '1',
         absolutePath,

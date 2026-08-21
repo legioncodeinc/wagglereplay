@@ -1,9 +1,15 @@
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import type { RequestEvent } from '@sveltejs/kit';
-import { subdirPath, writeNextIrVersion } from '@waggle/ir';
+import { credentialsPath, subdirPath, writeNextIrVersion } from '@waggle/ir';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { defaultStudioSettings } from '../../src/lib/schemas/studio-settings.js';
 import { resetProjectDirCacheForTests } from '../../src/lib/server/project-context.js';
+import { writeStudioSettings } from '../../src/lib/server/settings-store.js';
+import {
+  GET as getCredentialMarkings,
+  PUT as putCredentialMarking,
+} from '../../src/routes/api/credential-markings/+server.js';
 import { GET as getFrame } from '../../src/routes/api/frames/[version]/[stepDir]/[fileName]/+server.js';
 import { PUT as putSettings } from '../../src/routes/api/settings/+server.js';
 import { PUT as putDescription } from '../../src/routes/api/steps/[stepIndex]/description/+server.js';
@@ -23,6 +29,7 @@ describe('AC3/AC4/AC6 API routes', () => {
 
   afterEach(() => {
     delete process.env.WAGGLE_PROJECT_DIR;
+    delete process.env.DEMO_USER;
     resetProjectDirCacheForTests();
     for (const dir of cleanup.splice(0)) rmSync(dir, { recursive: true, force: true });
   });
@@ -111,5 +118,55 @@ describe('AC3/AC4/AC6 API routes', () => {
       body: JSON.stringify({ brandKitId: 123 }),
     });
     await expect(putSettings(fakeEvent({}, request))).rejects.toMatchObject({ status: 400 });
+  });
+
+  it('PRD-010 AC4: persists a marking into canonical applies_to and exposes selector roles only', async () => {
+    const projectDir = seedProjectDir();
+    cleanup.push(projectDir);
+    process.env.WAGGLE_PROJECT_DIR = projectDir;
+    writeFileSync(
+      credentialsPath(projectDir),
+      `${JSON.stringify(
+        {
+          schemaVersion: 1,
+          credentials: [
+            {
+              id: 'demo',
+              label: 'Demo account',
+              username_env: 'DEMO_USER',
+              secret_env: 'DEMO_PASSWORD',
+              applies_to: { username: [], secret: [], totp: [] },
+            },
+          ],
+        },
+        null,
+        2,
+      )}\n`,
+      'utf8',
+    );
+    writeStudioSettings(projectDir, {
+      ...defaultStudioSettings(),
+      credentialSetId: 'demo',
+    });
+    process.env.DEMO_USER = 'value-that-must-never-leave-the-server';
+
+    const request = new Request('http://127.0.0.1:4310/api/credential-markings', {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ selector: '[data-testid="opaque-login"]', kind: 'username' }),
+    });
+    const putResponse = await putCredentialMarking(fakeEvent({}, request));
+    expect(putResponse.status).toBe(200);
+    const persisted = readFileSync(credentialsPath(projectDir), 'utf8');
+    expect(JSON.parse(persisted).credentials[0].applies_to.username).toEqual([
+      '[data-testid="opaque-login"]',
+    ]);
+
+    const getResponse = await getCredentialMarkings(fakeEvent({}));
+    const safeBody = JSON.stringify(await getResponse.json());
+    expect(safeBody).toContain('[data-testid=\\"opaque-login\\"]');
+    expect(safeBody).not.toContain('DEMO_USER');
+    expect(safeBody).not.toContain('DEMO_PASSWORD');
+    expect(safeBody).not.toContain(process.env.DEMO_USER);
   });
 });

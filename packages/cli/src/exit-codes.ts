@@ -91,10 +91,11 @@ export const ExitCode = {
   INGEST_INVALID_SESSION: 11,
 
   /**
-   * `waggle render` could not assemble the inputs a render needs: the
-   * project has no recorded IR, the IR points at a source recording that
-   * is missing, or narration audio and `words.json` disagree about whether
-   * the project has been narrated. The message names the exact file.
+   * `waggle render` or `waggle regen` could not assemble the inputs a
+   * render needs: the project has no recorded IR, the IR points at a source
+   * recording that is missing, or narration audio and `words.json` disagree
+   * about whether the project has been narrated. The message names the
+   * exact file.
    */
   RENDER_INPUT_MISSING: 12,
 
@@ -114,9 +115,10 @@ export const ExitCode = {
   BRAND_KIT_INVALID: 14,
 
   /**
-   * `waggle render --preset <id>` named a preset that is neither built in
-   * nor declared in `waggle.json`, or the manifest's own entry for it is
-   * malformed. The message lists the known preset ids.
+   * `waggle render --preset <id>` or `waggle regen --preset <id>` named a
+   * preset that is neither built in nor declared in `waggle.json`, or the
+   * manifest's own entry for it is malformed. The message lists the known
+   * preset ids.
    */
   PRESET_UNKNOWN: 15,
 
@@ -164,6 +166,24 @@ export const ExitCode = {
    * and a snippet of R2's own error body.
    */
   R2_UPLOAD_FAILED: 23,
+
+  /**
+   * `waggle creds` found a `credentials.json` that is not valid JSON or
+   * does not satisfy the canonical credentials schema (ADR-008, prd-010
+   * AC1). The message names the file and every offending JSON path. A
+   * MISSING credentials.json is not this code: a project without
+   * credentials is valid and checks clean.
+   */
+  CREDS_INVALID: 24,
+
+  /**
+   * `waggle creds check` found one or more environment-variable refs in
+   * `credentials.json` that are not set in this machine's environment.
+   * The message lists every unresolved ref by NAME (never a value);
+   * authenticated replay (`waggle regen`) would fail on this machine
+   * until they are set.
+   */
+  CREDS_UNRESOLVED: 25,
 } as const;
 
 export type ExitCode = (typeof ExitCode)[keyof typeof ExitCode];

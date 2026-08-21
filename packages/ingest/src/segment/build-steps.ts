@@ -1,3 +1,4 @@
+import { FIXED_INPUT_PLACEHOLDER } from '@waggle/extension';
 import type { WalkthroughStep } from '@waggle/ir';
 import type { EventGroup, GroupOrOrphan, StepTiming } from './types.js';
 
@@ -5,22 +6,6 @@ type ClickStep = Extract<WalkthroughStep, { type: 'click' }>;
 type ScrollStep = Extract<WalkthroughStep, { type: 'scroll' }>;
 type ChangeStep = Extract<WalkthroughStep, { type: 'change' }>;
 type NavigateStep = Extract<WalkthroughStep, { type: 'navigate' }>;
-
-/**
- * Masks an input's length as a same-length placeholder of a single
- * non-informative character. ADR-008: the actual characters typed into a
- * form field must never reach a git-committed project file (they never
- * even reach this function - `apps/extension/src/lib/masking.ts` is the
- * only place a keystroke's real value is ever read, and by the time an
- * `input` capture event exists it already carries only `{length, masked:
- * true}`). `ChangeStepCoreSchema.value` is a required string, so a step
- * built from a masked input still needs *some* string; a fixed-length run
- * of a placeholder character is honest about "something was typed here"
- * without echoing anything about what.
- */
-function maskedPlaceholder(length: number): string {
-  return '•'.repeat(length);
-}
 
 export interface BuildStepsResult {
   readonly steps: WalkthroughStep[];
@@ -181,7 +166,7 @@ function buildStepFromGroup(
   const step: ChangeStep = {
     type: 'change',
     selectors: last.selectors.map((s) => s.value),
-    value: maskedPlaceholder(last.value.length),
+    value: FIXED_INPUT_PLACEHOLDER,
     waggle: {
       classification: 'input',
       ...(group.outcome.settle ? { settle: group.outcome.settle.settle } : {}),

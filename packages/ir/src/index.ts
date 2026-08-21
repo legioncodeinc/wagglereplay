@@ -34,6 +34,32 @@ export {
   DEFAULT_RECORDED_VIEWPORT,
   importChromeRecorderFlow,
 } from './import/chrome-recorder.js';
+export type {
+  SensitiveTextLiterals,
+  SensitiveTextScrubber,
+  SensitiveTextScrubberOptions,
+} from './privacy/scrub.js';
+export {
+  createSensitiveTextScrubber,
+  DEFAULT_SCRUB_REPLACEMENT,
+  scrubSensitiveText,
+} from './privacy/scrub.js';
+export type {
+  CredentialAppliesTo,
+  CredentialSet,
+  CredentialsFile,
+} from './project/credentials.js';
+// --- Credentials file schema (ADR-008, prd-010) ---------------------------
+// Reference-only by construction: every field is an id, a label, or an
+// env-var NAME. The value-resolution side lives in @waggle/replay and
+// nowhere else.
+export {
+  CREDENTIALS_SCHEMA_VERSION,
+  CredentialAppliesToSchema,
+  CredentialSetSchema,
+  CredentialsFileSchema,
+  exampleCredentialSet,
+} from './project/credentials.js';
 export type { ProjectSubdir } from './project/layout.js';
 // --- Project layout and manifest (ADR-015) --------------------------------
 // These live here rather than in @waggle/cli because the version writer

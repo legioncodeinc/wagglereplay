@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -44,12 +44,49 @@ describe('AC5: loadSession', () => {
     expect(() => loadSession(dir)).toThrow(/seq-ordered/);
   });
 
+  it('fails closed when a credential event has no bounded redaction rectangle', () => {
+    const dir = tempDir();
+    const { meta } = loadSixStepFixture();
+    writeFileSync(path.join(dir, 'meta.json'), JSON.stringify(meta), 'utf8');
+    writeFileSync(
+      path.join(dir, 'events.jsonl'),
+      JSON.stringify({
+        seq: 0,
+        epochMs: meta.startEpochMs + 10,
+        tabId: 1,
+        type: 'input',
+        inputType: 'insertText',
+        selectors: [{ type: 'css', value: '#credential' }],
+        value: { placeholder: '[REDACTED]', masked: true },
+        credential: true,
+      }),
+      'utf8',
+    );
+    expect(() => loadSession(dir)).toThrow(/failed event validation/);
+  });
+
   it('throws IngestSessionError when the video file named in meta.json does not exist', () => {
     const dir = tempDir();
     const { meta } = loadSixStepFixture();
     writeFileSync(path.join(dir, 'meta.json'), JSON.stringify(meta), 'utf8');
     writeFileSync(path.join(dir, 'events.jsonl'), '', 'utf8');
     expect(() => loadSession(dir)).toThrow(new RegExp(meta.video.filename));
+  });
+
+  it('rejects a video filename that escapes the session directory', () => {
+    const root = tempDir();
+    const dir = path.join(root, 'session');
+    mkdirSync(dir);
+    const { meta } = loadSixStepFixture();
+    writeFileSync(path.join(root, 'outside.mp4'), 'private-video', 'utf8');
+    writeFileSync(
+      path.join(dir, 'meta.json'),
+      JSON.stringify({ ...meta, video: { ...meta.video, filename: '../outside.mp4' } }),
+      'utf8',
+    );
+    writeFileSync(path.join(dir, 'events.jsonl'), '', 'utf8');
+
+    expect(() => loadSession(dir)).toThrow(/inside the session directory/);
   });
 
   it('loads the real fixture session cleanly once a video file is present', () => {

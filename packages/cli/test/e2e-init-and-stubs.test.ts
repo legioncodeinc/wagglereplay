@@ -9,7 +9,7 @@ import { WaggleManifestSchema } from '../src/manifest/schema.js';
 
 /**
  * E2E coverage for AC6: init a project in a real temp directory, round-trip
- * the manifest through the loader, and assert the stub commands exit with
+ * the manifest through the loader, and assert command-surface errors use
  * the documented codes from exit-codes.ts. Runs `runCli()` in-process
  * (real filesystem I/O, real commander parsing, no mocks) rather than
  * spawning a subprocess, so it behaves identically on Windows and POSIX
@@ -93,34 +93,13 @@ describe('waggle init + command surface (e2e)', () => {
     );
   });
 
-  const stubCases: Array<{ command: string; owningPrd: string }> = [
-    // `render` left this list in prd-007, `export`/`clean` left it in
-    // prd-008, and `studio` left it in prd-005: all four are real commands
-    // now, with their own coverage in ./render-command.test.ts,
-    // ./export-command.test.ts / ./clean-command.test.ts, and
-    // ./studio-command.test.ts.
-    { command: 'regen', owningPrd: 'prd-009' },
-    { command: 'creds', owningPrd: 'prd-010' },
-  ];
-
-  for (const { command, owningPrd } of stubCases) {
-    it(`\`waggle ${command}\` resolves the project + manifest, then exits NOT_IMPLEMENTED naming ${owningPrd}`, async () => {
-      const parent = tempParentDir();
-      await runCli(['node', 'waggle', 'init', 'demo', '--dir', parent]);
-      const projectDir = path.join(parent, 'demo');
-
-      const code = await runCli(['node', 'waggle', command, '--project', projectDir]);
-      expect(code).toBe(ExitCode.NOT_IMPLEMENTED);
-    });
-  }
-
-  it('a stub command against a directory with no manifest exits PROJECT_NOT_FOUND', async () => {
+  it('a project command against a directory with no manifest exits PROJECT_NOT_FOUND', async () => {
     const parent = tempParentDir();
     const code = await runCli(['node', 'waggle', 'record', '--project', parent]);
     expect(code).toBe(ExitCode.PROJECT_NOT_FOUND);
   });
 
-  it('a stub command against a corrupt manifest exits MANIFEST_INVALID', async () => {
+  it('a project command against a corrupt manifest exits MANIFEST_INVALID', async () => {
     const parent = tempParentDir();
     await runCli(['node', 'waggle', 'init', 'demo', '--dir', parent]);
     const projectDir = path.join(parent, 'demo');

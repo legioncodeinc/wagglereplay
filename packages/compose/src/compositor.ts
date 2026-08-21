@@ -88,6 +88,20 @@ export interface PictureInPictureInput {
   readonly endMs: number | null;
 }
 
+/**
+ * One point of a replay-emitted focus track (prd-009 AC5, ADR-011).
+ * Declared here rather than imported from @waggle/replay so the
+ * compositor contract keeps its one-direction dependency shape; the
+ * shapes are identical by construction and prd-009's tests pin them.
+ */
+export interface FocusPointInput {
+  /** Body time, ms relative to the capture's start. */
+  readonly atMs: number;
+  /** Normalized 0..1 focus position. */
+  readonly nx: number;
+  readonly ny: number;
+}
+
 /** Where the finished file goes. */
 export interface OutputTarget {
   readonly path: string;
@@ -116,6 +130,13 @@ export interface CompositorInputs {
   readonly output: OutputTarget;
   /** ADR-007's reserved slot. `null` until prd-017. */
   readonly pictureInPicture: PictureInPictureInput | null;
+  /**
+   * prd-009 AC5: a replay-emitted focus track that REPLACES the
+   * recorded-IR focus events for the zoom/reframe crop window. Undefined
+   * for original-recording renders, which keep deriving focus from the
+   * IR's own clicks and cursor trail.
+   */
+  readonly focusTrack?: readonly FocusPointInput[];
   /**
    * When true the backend prepares every intermediate and reports the
    * command it would run, without encoding. Used by the graph-determinism

@@ -17,6 +17,7 @@ describe('attachTelemetry', () => {
       <button data-testid="cta-start">Start Walkthrough</button>
       <div id="scroller" style="overflow:auto; height:10px;"><div style="height:1000px"></div></div>
       <input id="password" type="password" />
+      <input data-testid="opaque-login-field" type="text" />
     `;
     events = [];
     detach = attachTelemetry({
@@ -68,15 +69,48 @@ describe('attachTelemetry', () => {
 
   it('masks input values and flags credential fields', () => {
     const password = document.getElementById('password') as HTMLInputElement;
+    password.getBoundingClientRect = () => new DOMRect(100, 200, 300, 40);
     password.value = 'hunter2';
     password.dispatchEvent(withTimeStamp(new Event('input', { bubbles: true }), 0));
 
     const input = events.find((e) => e.type === 'input');
     expect(input).toBeDefined();
     if (input?.type !== 'input') throw new Error('expected an input event');
-    expect(input.value).toEqual({ length: 7, masked: true });
+    expect(input.value).toEqual({ placeholder: '[REDACTED]', masked: true });
     expect(input.credential).toBe(true);
+    if (!input.credential) throw new Error('expected credential input geometry');
+    expect(input.redaction).toEqual({
+      rect: { x: 100, y: 200, w: 300, h: 40 },
+      viewport: { w: window.innerWidth, h: window.innerHeight, dpr: window.devicePixelRatio },
+    });
     expect(JSON.stringify(input)).not.toContain('hunter2');
+  });
+
+  it('uses an explicit selector marking for a non-heuristic username field', () => {
+    detach();
+    events = [];
+    detach = attachTelemetry({
+      window,
+      document,
+      epochSource: createPerformanceEpochSource(window.performance),
+      sink: (event) => events.push(event),
+      credentialMarkings: [{ selector: '[data-testid="opaque-login-field"]', kind: 'username' }],
+    });
+
+    const username = document.querySelector(
+      '[data-testid="opaque-login-field"]',
+    ) as HTMLInputElement;
+    username.getBoundingClientRect = () => new DOMRect(-10, 20, 210, 40);
+    username.value = 'alice@example.test';
+    username.dispatchEvent(withTimeStamp(new Event('input', { bubbles: true }), 0));
+
+    const input = events.find((event) => event.type === 'input');
+    if (input?.type !== 'input') throw new Error('expected an input event');
+    expect(input.credential).toBe(true);
+    if (!input.credential) throw new Error('expected credential input geometry');
+    expect(input.redaction?.rect).toEqual({ x: 0, y: 20, w: 200, h: 40 });
+    expect(input.value).toEqual({ placeholder: '[REDACTED]', masked: true });
+    expect(JSON.stringify(input)).not.toContain('alice@example.test');
   });
 
   it('records scroll position from the scrolling element', () => {

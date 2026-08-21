@@ -17,6 +17,7 @@
     "@waggle/ingest": "workspace:*",
     "@waggle/ir": "workspace:*",
     "@waggle/narrate": "workspace:*",
+    "@waggle/replay": "workspace:*",
     "@waggle/share": "workspace:*",
     "@waggle/studio": "workspace:*",
     "commander": "^15.0.0",

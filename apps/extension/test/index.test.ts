@@ -9,7 +9,7 @@ import {
 describe('@waggle/extension barrel', () => {
   it('exports a usable, working surface', () => {
     expect(CAPTURE_SCHEMA_VERSION).toBe(1);
-    expect(maskInputValue('hunter2')).toEqual({ length: 7, masked: true });
+    expect(maskInputValue('hunter2')).toEqual({ placeholder: '[REDACTED]', masked: true });
     expect(typeof finalizeSession).toBe('function');
     expect(() =>
       CaptureEventSchema.parse({

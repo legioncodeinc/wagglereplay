@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, realpathSync } from 'node:fs';
 import path from 'node:path';
 import {
   type CaptureEvent,
@@ -16,6 +16,41 @@ export interface LoadedSession {
   readonly meta: SessionMeta;
   /** Absolute path to the session's video file (`meta.video.filename` resolved inside `sessionDir`). */
   readonly videoPath: string;
+}
+
+function isWithinDirectory(rootDir: string, candidatePath: string): boolean {
+  const relative = path.relative(rootDir, candidatePath);
+  return (
+    relative === '' ||
+    (relative !== '..' && !relative.startsWith(`..${path.sep}`) && !path.isAbsolute(relative))
+  );
+}
+
+function resolveSessionVideo(sessionDir: string, filename: string): string {
+  if (path.isAbsolute(filename)) {
+    throw new IngestSessionError(
+      'Session video filename must resolve inside the session directory.',
+    );
+  }
+  const sessionRoot = realpathSync(path.resolve(sessionDir));
+  const candidate = path.resolve(sessionRoot, filename);
+  if (!isWithinDirectory(sessionRoot, candidate)) {
+    throw new IngestSessionError(
+      'Session video filename must resolve inside the session directory.',
+    );
+  }
+  if (!existsSync(candidate)) {
+    throw new IngestSessionError(
+      `Session meta.json names video "${filename}" but it does not exist.`,
+    );
+  }
+  const realCandidate = realpathSync(candidate);
+  if (!isWithinDirectory(sessionRoot, realCandidate)) {
+    throw new IngestSessionError(
+      'Session video filename must resolve inside the session directory.',
+    );
+  }
+  return realCandidate;
 }
 
 function readJsonFile(filePath: string, subject: string): unknown {
@@ -107,12 +142,7 @@ export function loadSession(sessionDir: string): LoadedSession {
   const meta = parseMeta(path.join(sessionDir, META_FILENAME));
   const events = parseEvents(path.join(sessionDir, EVENTS_FILENAME));
 
-  const videoPath = path.join(sessionDir, meta.video.filename);
-  if (!existsSync(videoPath)) {
-    throw new IngestSessionError(
-      `Session meta.json names video "${meta.video.filename}" but "${videoPath}" does not exist.`,
-    );
-  }
+  const videoPath = resolveSessionVideo(sessionDir, meta.video.filename);
 
   return { events, meta, videoPath };
 }

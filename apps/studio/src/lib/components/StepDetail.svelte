@@ -1,5 +1,6 @@
 <script lang="ts">
   import { getProjectState } from '$lib/state/project-state.svelte.js';
+  import CredentialMarking from './CredentialMarking.svelte';
   import FrameScrubber from './FrameScrubber.svelte';
   import DescriptionEditor from './DescriptionEditor.svelte';
 
@@ -38,6 +39,10 @@
     <FrameScrubber {irVersion} {stepIndex} {samples} assets={step.waggle.assets} />
 
     <DescriptionEditor {stepIndex} />
+
+    {#if step.type === 'change'}
+      <CredentialMarking selectors={step.selectors} />
+    {/if}
 
     {#if step.waggle.element !== undefined}
       <div class="card">

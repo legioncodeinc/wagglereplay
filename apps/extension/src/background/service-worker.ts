@@ -1,3 +1,4 @@
+import { fetchCredentialMarkings } from '../lib/credential-markings.js';
 import { finalizeSession } from '../lib/finalizer.js';
 import type { RuntimeMessage } from '../lib/messaging.js';
 import { NetworkQuiescenceTracker, type WebRequestLikeDetails } from '../lib/network-quiescence.js';
@@ -125,6 +126,7 @@ async function startCapture(tab: chrome.tabs.Tab): Promise<void> {
   const sessionId = crypto.randomUUID();
   const startEpochMs = Date.now();
   const recordedViewport = await readRecordedViewport(tabId);
+  const credentialMarkings = await fetchCredentialMarkings(uploadOriginFor()).catch(() => []);
 
   const session = new CaptureSession({
     sessionId,
@@ -166,6 +168,7 @@ async function startCapture(tab: chrome.tabs.Tab): Promise<void> {
     kind: 'capture:start',
     sessionId,
     startEpochMs,
+    credentialMarkings,
   } satisfies RuntimeMessage);
 
   chrome.action.setBadgeText({ tabId, text: 'REC' });

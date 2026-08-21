@@ -1,5 +1,5 @@
 import type { RouteHeatmap } from '@waggle/ingest';
-import type { WalkthroughStep } from '@waggle/ir';
+import type { CredentialAppliesTo, WalkthroughStep } from '@waggle/ir';
 import type { NarrationSegmentDraft } from '@waggle/narrate';
 import { getContext, setContext } from 'svelte';
 import type { StudioProjectState } from '$lib/types.js';
@@ -100,6 +100,14 @@ export class ProjectState {
   /** AC6: reflects a saved `studio.json` settings update into shared state immediately. */
   applySettings(settings: StudioProjectState['settings']): void {
     this.data = { ...this.data, settings };
+  }
+
+  /** Reflects a persisted selector marking immediately while the watcher reload is in flight. */
+  applyCredentialMarkings(credentialSetId: string, appliesTo: CredentialAppliesTo): void {
+    const credentialRefs = this.data.credentialRefs.map((entry) =>
+      entry.id === credentialSetId ? { ...entry, applies_to: appliesTo } : entry,
+    );
+    this.data = { ...this.data, credentialRefs };
   }
 
   toggleHeatmap(): void {

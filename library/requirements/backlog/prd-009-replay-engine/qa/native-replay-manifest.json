@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "irVersion": 1,
+  "replayPresetId": "16x9",
+  "composePresetId": "16x9",
+  "reflow": "native",
+  "reflowReason": "layout reflowed within 8px tolerance",
+  "capture": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 12,
+    "durationMs": 2242,
+    "framesReceived": 7,
+    "framesWritten": 25
+  },
+  "steps": [
+    {
+      "stepIndex": 0,
+      "stepType": "setViewport",
+      "ok": true,
+      "startOffsetMs": 29,
+      "durationMs": 150,
+      "settleSource": "mutation-quiet",
+      "selectorUsed": null,
+      "attemptedSelectors": [],
+      "screenshotRef": "screenshots/step-000.png",
+      "failure": null
+    },
+    {
+      "stepIndex": 1,
+      "stepType": "navigate",
+      "ok": true,
+      "startOffsetMs": 216,
+      "durationMs": 73,
+      "settleSource": "element-assertion",
+      "selectorUsed": null,
+      "attemptedSelectors": [],
+      "screenshotRef": "screenshots/step-001.png",
+      "failure": null
+    },
+    {
+      "stepIndex": 2,
+      "stepType": "click",
+      "ok": true,
+      "startOffsetMs": 400,
+      "durationMs": 1627,
+      "settleSource": "timeout",
+      "selectorUsed": {
+        "recorded": "aria/Start Walkthrough[role=\"button\"]",
+        "playwright": "role=button[name=\"Start Walkthrough\"]",
+        "engine": "role",
+        "alternativeIndex": 1,
+        "drift": true
+      },
+      "attemptedSelectors": ["css=[data-testid=\"cta-start\"]"],
+      "screenshotRef": "screenshots/step-002.png",
+      "failure": null
+    }
+  ],
+  "focusTrack": []
+}

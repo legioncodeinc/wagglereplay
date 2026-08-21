@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "irVersion": 1,
+  "replayPresetId": "9x16",
+  "composePresetId": "9x16",
+  "reflow": "reframed",
+  "reflowReason": "author override forced reframed",
+  "capture": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 12,
+    "durationMs": 2209,
+    "framesReceived": 7,
+    "framesWritten": 25
+  },
+  "steps": [
+    {
+      "stepIndex": 0,
+      "stepType": "setViewport",
+      "ok": true,
+      "startOffsetMs": 28,
+      "durationMs": 125,
+      "settleSource": "mutation-quiet",
+      "selectorUsed": null,
+      "attemptedSelectors": [],
+      "screenshotRef": "screenshots/step-000.png",
+      "failure": null
+    },
+    {
+      "stepIndex": 1,
+      "stepType": "navigate",
+      "ok": true,
+      "startOffsetMs": 184,
+      "durationMs": 70,
+      "settleSource": "element-assertion",
+      "selectorUsed": null,
+      "attemptedSelectors": [],
+      "screenshotRef": "screenshots/step-001.png",
+      "failure": null
+    },
+    {
+      "stepIndex": 2,
+      "stepType": "click",
+      "ok": true,
+      "startOffsetMs": 415,
+      "durationMs": 1608,
+      "settleSource": "timeout",
+      "selectorUsed": {
+        "recorded": "aria/Start Walkthrough[role=\"button\"]",
+        "playwright": "role=button[name=\"Start Walkthrough\"]",
+        "engine": "role",
+        "alternativeIndex": 1,
+        "drift": true
+      },
+      "attemptedSelectors": ["css=[data-testid=\"cta-start\"]"],
+      "screenshotRef": "screenshots/step-002.png",
+      "failure": null
+    }
+  ],
+  "focusTrack": [
+    {
+      "atMs": 0,
+      "nx": 0.34270833333333334,
+      "ny": 0.14537037037037037
+    },
+    {
+      "atMs": 919,
+      "nx": 0.34270833333333334,
+      "ny": 0.14537037037037037
+    },
+    {
+      "atMs": 1019,
+      "nx": 0.34270833333333334,
+      "ny": 0.14537037037037037
+    },
+    {
+      "atMs": 1119,
+      "nx": 0.34270833333333334,
+      "ny": 0.14537037037037037
+    },
+    {
+      "atMs": 1219,
+      "nx": 0.34270833333333334,
+      "ny": 0.14537037037037037
+    },
+    {
+      "atMs": 2209,
+      "nx": 0.34270833333333334,
+      "ny": 0.14537037037037037
+    }
+  ]
+}

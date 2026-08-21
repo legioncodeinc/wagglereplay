@@ -1,3 +1,4 @@
+import type { CredentialMarking } from '../lib/credential-markings.js';
 import { createPerformanceEpochSource, type EpochSource } from '../lib/epoch.js';
 import type { CaptureEventDraft } from '../lib/events.js';
 import type { RuntimeMessage } from '../lib/messaging.js';
@@ -26,6 +27,7 @@ export interface ContentScriptDeps {
   pointerSampleIntervalMs?: number;
   scrollSampleIntervalMs?: number;
   stateChangeWindowMs?: number;
+  credentialMarkings?: readonly CredentialMarking[];
 }
 
 export interface ContentScriptHandle {
@@ -52,6 +54,9 @@ export function initContentScript(deps: ContentScriptDeps): ContentScriptHandle 
       : {}),
     ...(deps.stateChangeWindowMs !== undefined
       ? { stateChangeWindowMs: deps.stateChangeWindowMs }
+      : {}),
+    ...(deps.credentialMarkings !== undefined
+      ? { credentialMarkings: deps.credentialMarkings }
       : {}),
   });
 
@@ -81,7 +86,12 @@ if (typeof chrome !== 'undefined' && chrome.runtime?.id) {
   chrome.runtime.onMessage.addListener((message: unknown) => {
     const runtimeMessage = message as RuntimeMessage;
     if (runtimeMessage.kind === 'capture:start' && !handle) {
-      handle = initContentScript({ window, document, sink: createRuntimeSink() });
+      handle = initContentScript({
+        window,
+        document,
+        sink: createRuntimeSink(),
+        credentialMarkings: runtimeMessage.credentialMarkings,
+      });
     } else if (runtimeMessage.kind === 'capture:stop' && handle) {
       handle.dispose();
       handle = null;

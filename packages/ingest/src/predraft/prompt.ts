@@ -3,7 +3,7 @@ import type { StepClassification } from '@waggle/ir';
 /**
  * AC4 prompt construction. ADR-008 applies: this module reads ONLY the
  * fields listed below, and deliberately never accepts a step's masked
- * `value` (a `change` step's value is already a same-length placeholder
+ * `value` (a `change` step's value is already a fixed placeholder
  * of a single repeated character with no information content - see
  * ../segment/build-steps.ts's `maskedPlaceholder` - but this module does
  * not even take that field as an input, so there is no code path by which

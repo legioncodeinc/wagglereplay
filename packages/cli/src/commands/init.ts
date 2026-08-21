@@ -52,14 +52,17 @@ function credentialsTemplate(): string {
   // ADR-008: environment variable REFERENCES only, never values. This is a
   // template shape example, not a real credential: "example" is an id, and
   // DEMO_USER / DEMO_PASSWORD are the *names* of env vars to read at replay
-  // time (prd-010), not secrets themselves.
+  // time (prd-010), not secrets themselves. The shape is the canonical
+  // @waggle/ir CredentialsFileSchema (prd-010 AC1).
   const template = {
     schemaVersion: 1,
     credentials: [
       {
         id: 'example',
+        label: 'Example demo login',
         username_env: 'DEMO_USER',
         secret_env: 'DEMO_PASSWORD',
+        applies_to: { username: [], secret: [], totp: [] },
       },
     ],
   };

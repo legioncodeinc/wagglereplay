@@ -137,6 +137,13 @@ export interface ZoomTrackInput {
   readonly zoom: ZoomStyle;
   readonly timeline: RenderTimeline;
   readonly reframe: ReframeMode;
+  /**
+   * prd-009 AC5: when a replay-emitted focus track is supplied it
+   * replaces the recorded-IR focus events entirely. The replay measured
+   * attention live (act-time element centers at the capture viewport);
+   * the recorded IR can only approximate it after a UI change.
+   */
+  readonly focusTrack?: readonly { atMs: number; nx: number; ny: number }[];
 }
 
 /**
@@ -149,7 +156,14 @@ export interface ZoomTrackInput {
  */
 export function buildZoomTrack(input: ZoomTrackInput): ZoomTrack {
   const { flow, zoom, timeline, reframe } = input;
-  const focusEvents = collectFocusEvents(flow);
+  const focusEvents =
+    input.focusTrack !== undefined
+      ? input.focusTrack.map((point) => ({
+          atMs: point.atMs,
+          nx: clamp01(point.nx),
+          ny: clamp01(point.ny),
+        }))
+      : collectFocusEvents(flow);
   const windows = buildZoomWindows(focusEvents, zoom);
 
   const zoomKeyframes: Keyframe[] = [{ atMs: 0, value: 1 }];

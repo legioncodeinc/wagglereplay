@@ -143,7 +143,13 @@ export function buildFilterGraph(options: BuildGraphOptions): BuiltGraph {
   const timeline = buildTimeline(kit, source.durationMs);
   const reframe = reframeModeFor(preset, source.width, source.height);
   const geometry = computeCoverGeometry(preset, source.width, source.height);
-  const zoomTrack = buildZoomTrack({ flow, zoom: kit.zoom, timeline, reframe });
+  const zoomTrack = buildZoomTrack({
+    flow,
+    zoom: kit.zoom,
+    timeline,
+    reframe,
+    ...(inputs.focusTrack !== undefined ? { focusTrack: inputs.focusTrack } : {}),
+  });
   const zoom = buildZoomExpressions(zoomTrack, preset, geometry);
   const cursorTrack = buildCursorTrack({ flow, cursor: kit.cursor, timeline });
 
