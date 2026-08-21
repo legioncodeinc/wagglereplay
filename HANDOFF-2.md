@@ -73,9 +73,9 @@ No PRD has been rewritten yet. **This is your first substantial decision.** At m
 
 - **PRD-005 (studio)** is built as a SvelteKit server launched by the CLI. It now needs to become the desktop app's renderer, plus gain a recordings list and an API key settings surface.
 - **PRD-003 (extension)** has no record button UX, no countdown, no in-page overlay, and no Studio detection or connection handshake. All four are new work.
-- **ADR-010 does not list the  permission**, which ADR-018 now requires for the popup or Picture-in-Picture control surface. The manifest must gain it. Recorded as an extension in ADR-018 rather than by editing ADR-010, since ADRs are locked.
-- **PRD-001 describes  as "launches studio"**, which is stale UX framing under ADR-016 through ADR-018. The command still exists per ADR-019, but it is no longer how a human launches Studio.
-- **Biome does not actually lint Markdown in this repo.** A clean [0m[36mChecked 329 files in 42[0m[0m[2m[36mms[0m[0m[36m.[0m[0m[36m No fixes applied.[0m says nothing about prose or ADR content. Do not read it as validation of documentation.
+- **ADR-010 does not list the `windows` permission**, which ADR-018 now requires for the popup or Picture-in-Picture control surface. The manifest must gain it. Recorded as an extension in ADR-018 rather than by editing ADR-010, since ADRs are locked.
+- **PRD-001 describes `record` as "launches studio"**, which is stale UX framing under ADR-016 through ADR-018. The command still exists per ADR-019, but it is no longer how a human launches Studio.
+- **Biome does not actually lint Markdown in this repo.** A clean `pnpm lint` says nothing about prose or ADR content. Do not read it as validation of documentation.
 - A **new PRD is probably needed** for the desktop app shell, installer, and extension registration. The backlog currently stops at prd-017, so the next free number is **prd-018**. Follow `library/requirements/backlog/README.md` for the folder convention, and confirm the max across `backlog/`, `in-work/`, and `completed/` before claiming a number.
 - **PRD-012 (CI regeneration)** is the reason the CLI survives. Do not let a GUI-only refactor break its headless entry point.
 
