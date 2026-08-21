@@ -1,0 +1,23 @@
+# ADR-018: Recording is driven from the extension, with a capture-excluded control overlay
+
+Status: Accepted (2026-08-21)
+
+## Context
+
+The zero-terminal recording flow needs the extension to carry the record button, a pre-roll countdown, an on-screen recording control the user can move out of the way, and a way to stop that always works. PRD-003 already ships one piece of injected in-page UI, a live click ripple overlay (AC7, toggleable), which is precedent that content-script overlays are workable but also that they are visible in whatever pixels get captured. That precedent surfaces the real risk for this decision: MV3 tab capture (chrome.tabCapture or getDisplayMedia, feeding the MediaRecorder pipeline per PRD-003 AC2) captures the tab's full composited render. A control overlay injected as page-DOM content is part of that render and would appear in the recorded video exactly like the ripple overlay does; a drag on that overlay would also fire mousedown, mousemove, and mouseup at the same DOM the telemetry listeners (AC3, AC6) are watching, polluting the click and route event stream the IR ingests. Unlike the ripple overlay, which is allowed to be seen, the control overlay must never be seen and its drag must never be recorded.
+
+## Decision
+
+The recording control (drag handle, pause, and stop) renders in a browser surface separate from the recorded tab's DOM: either a Picture-in-Picture window (documentPictureInPicture, where the installed Chrome version supports it) or a small always-on-top popup window opened via chrome.windows.create, positioned over the recorded content but not part of it. Because chrome.tabCapture captures only the target tab, this surface is excluded from the recorded pixels by construction, and because its drag events happen in a different window and document, the page's own telemetry listeners never see them at all, so no event-filtering logic is needed to keep drags out of events.jsonl. The pre-roll countdown renders the same way, and capture start (MediaRecorder) is deferred until the countdown completes, so the countdown itself is never at risk of appearing in the recording regardless of surface. Clicking the extension action icon a second time always stops the recording and triggers processing, independent of whether the overlay is visible, dragged, or closed; it is the one control that cannot fail to work.
+
+## Consequences
+
+The visual-pollution and telemetry-pollution risks are solved by the same architectural choice rather than by two separate mitigations, and the fix generalizes: any future recording-control UI added later inherits the same exclusion for free. It adds window-management code MV3 extensions do not otherwise need, documentPictureInPicture feature-detection, a popup-window fallback, and a custom drag region since dragging an OS-level window differs from dragging an in-page element, and it needs a new manifest permission (windows) that ADR-010's permission list did not include; that manifest addition ships alongside this decision and does not change ADR-010's decision. The countdown-then-record sequencing adds a small amount of timing coordination against PRD-003's MediaRecorder start.
+
+## Alternatives Considered
+
+In-page content-script overlay with per-listener event filtering, the same pattern the ripple overlay uses. Rejected as the primary mechanism: it requires every current and future telemetry listener to carry a filter check, and it does nothing to solve the visual-capture problem the ripple overlay is fine with but the control overlay is not. Toggling the overlay's visibility synchronized to each captured frame. Rejected as technically infeasible: MediaRecorder encodes continuously with no per-frame hook to hide and restore a DOM element around. Requiring the user to manually reposition a normal browser window as their control surface. Rejected: it is exactly the kind of manual fiddling the zero-terminal mandate exists to remove.
+
+## Supersession and interaction
+
+Extends ADR-010: the manifest gains a windows permission this decision requires; ADR-010's existing permission list and its settle-marker decision are otherwise untouched. Consistent with ADR-002, which already keeps synthetic visual elements (cursor, ripples, zooms) out of raw capture by compositing them later from the IR rather than capturing them live; this decision applies the same never-in-the-raw-pixels principle to the control overlay by construction instead of by later removal. References PRD-003 AC7's ripple overlay as prior art for injected recording-session UI, while treating it as a contrast case, not a template, since a ripple is allowed in raw capture and the control overlay is not.
