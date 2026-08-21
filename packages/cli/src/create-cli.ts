@@ -1,17 +1,21 @@
 import { Command } from 'commander';
+import { registerCleanCommand } from './commands/clean.js';
+import { registerExportCommand } from './commands/export.js';
 import { registerInitCommand } from './commands/init.js';
 import { registerNarrateCommand } from './commands/narrate.js';
 import { registerRecordCommand } from './commands/record.js';
 import { registerRenderCommand } from './commands/render.js';
 import { registerStubCommand, type StubCommandSpec } from './commands/stub.js';
+import { registerStudioCommand } from './commands/studio.js';
 
 const CLI_VERSION = '0.1.0';
 
 /**
- * Full command surface (AC4). `init` (prd-001), `narrate` (prd-006), and
- * `record` (prd-004) are real; every other command is a stub that still
- * resolves the project and validates the manifest, then names the PRD
- * that owns its real implementation.
+ * Full command surface (AC4). `init` (prd-001), `narrate` (prd-006),
+ * `render` (prd-007), `export`/`clean` (prd-008), and `studio` (prd-005)
+ * are real; every other command is a stub that still resolves the project
+ * and validates the manifest, then names the PRD that owns its real
+ * implementation.
  */
 const STUB_COMMANDS: StubCommandSpec[] = [
   {
@@ -20,24 +24,9 @@ const STUB_COMMANDS: StubCommandSpec[] = [
     owningPrd: 'prd-009',
   },
   {
-    name: 'export',
-    summary: 'Export a share bundle (rendered video plus a static share page)',
-    owningPrd: 'prd-008',
-  },
-  {
-    name: 'studio',
-    summary: 'Start the local Studio editor server for this project',
-    owningPrd: 'prd-005',
-  },
-  {
     name: 'creds',
     summary: 'Manage credential environment-variable references for this project',
     owningPrd: 'prd-010',
-  },
-  {
-    name: 'clean',
-    summary: 'Remove generated renders and caches for this project',
-    owningPrd: 'prd-008',
   },
 ];
 
@@ -63,6 +52,9 @@ export function createCli(): Command {
   registerNarrateCommand(program);
   registerRenderCommand(program);
   registerRecordCommand(program);
+  registerExportCommand(program);
+  registerCleanCommand(program);
+  registerStudioCommand(program);
   for (const spec of STUB_COMMANDS) {
     registerStubCommand(program, spec);
   }

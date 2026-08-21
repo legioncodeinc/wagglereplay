@@ -1,0 +1,23 @@
+{
+  "name": "@waggle/share",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Render output management, the static share-page bundle, and the optional R2 uploader (prd-008).",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@waggle/compose": "workspace:*",
+    "@waggle/ir": "workspace:*",
+    "@waggle/narrate": "workspace:*",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0"
+  }
+}

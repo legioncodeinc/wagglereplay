@@ -91,13 +91,13 @@ describe('waggle init + command surface (e2e)', () => {
   });
 
   const stubCases: Array<{ command: string; owningPrd: string }> = [
-    // `render` left this list in prd-007: it is a real command now, and
-    // its own coverage lives in ./render-command.test.ts.
+    // `render` left this list in prd-007, `export`/`clean` left it in
+    // prd-008, and `studio` left it in prd-005: all four are real commands
+    // now, with their own coverage in ./render-command.test.ts,
+    // ./export-command.test.ts / ./clean-command.test.ts, and
+    // ./studio-command.test.ts.
     { command: 'regen', owningPrd: 'prd-009' },
-    { command: 'export', owningPrd: 'prd-008' },
-    { command: 'studio', owningPrd: 'prd-005' },
     { command: 'creds', owningPrd: 'prd-010' },
-    { command: 'clean', owningPrd: 'prd-008' },
   ];
 
   for (const { command, owningPrd } of stubCases) {

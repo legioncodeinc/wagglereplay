@@ -20,10 +20,10 @@ pnpm --filter @waggle/cli start <command> [...args]
 | `waggle narrate` | Implemented | prd-006 |
 | `waggle render` | Implemented | prd-007 |
 | `waggle regen` | Stub | prd-009 |
-| `waggle export` | Stub | prd-008 |
-| `waggle studio` | Stub | prd-005 |
+| `waggle export` | Implemented | prd-008 |
+| `waggle studio` | Implemented | prd-005 |
 | `waggle creds` | Stub | prd-010 |
-| `waggle clean` | Stub | prd-008 |
+| `waggle clean` | Implemented | prd-008 |
 
 Every stub resolves the project directory (`--project <dir>`, default cwd),
 loads and validates `waggle.json`, and then exits with `ExitCode.NOT_IMPLEMENTED`
@@ -54,6 +54,12 @@ rendered copy; keep both in sync.
 | 13 | `FFMPEG_FAILED` | `waggle render` could not launch the compositor backend (ffmpeg is not installed and `WAGGLE_FFMPEG_PATH` is unset), or it exited non-zero. The tail of its stderr is included. |
 | 14 | `BRAND_KIT_INVALID` | `waggle render --brand-kit <id>` named a kit that does not exist under `brand/`, or the kit file is not valid JSON or fails the brand kit schema. |
 | 15 | `PRESET_UNKNOWN` | `waggle render --preset <id>` named a preset that is neither built in nor declared in `waggle.json`, or the manifest entry for it is malformed. The message lists the known ids. |
+| 16 | `STUDIO_BUILD_MISSING` | `waggle studio` could not find `@waggle/studio`'s built adapter-node server (`build/index.js`). Run `pnpm --filter @waggle/studio build` (or the workspace `pnpm build`) first. |
+| 17 | `STUDIO_PORT_UNAVAILABLE` | `waggle studio` could not bind its host:port (default `127.0.0.1:4310`): something else is already listening there. Pass `--port <port>` to use a different one. |
+| 20 | `EXPORT_NO_RENDERS` | `waggle export` found no rendered outputs for the project's current IR version. Run `waggle render` first. |
+| 21 | `BUNDLE_LINK_INTEGRITY_FAILED` | `waggle export` built a share bundle whose HTML page references a file that does not exist inside the bundle directory (prd-008 AC2's link-integrity check). The message names every missing reference. |
+| 22 | `R2_CONFIG_INVALID` | `waggle export --upload` was passed but one or more `WAGGLE_R2_*` environment variables are not set. The message names every missing variable and what it is for. |
+| 23 | `R2_UPLOAD_FAILED` | `waggle export --upload` was fully configured but the R2 API rejected an upload (a non-2xx response). The message includes the HTTP status and a snippet of R2's own error body. |
 
 ## `waggle narrate` (prd-006)
 
@@ -69,6 +75,68 @@ selects a TTS provider from the environment (`WAGGLE_TTS_PROVIDER`, default
 `narration/captions.vtt`. See `packages/narrate/README.md` for the full
 environment variable list, the `words.json` shared contract, and the AC7
 shareable-audio guardrail.
+
+## `waggle export` (prd-008, ADR-009)
+
+Builds the static share bundle for the project's current Walkthrough IR
+version: a self-contained `index.html` (no CDN, no external font, no
+external script) plus, alongside it in `renders/share/v<n>/`, the rendered
+MP4 (and every other preset rendered for that version, offered as
+additional downloads), a poster JPEG, a WebVTT captions track and plain-
+text transcript (when the project has been narrated), and each render's
+`.manifest.json` sidecar (see prd-008 AC1 below). Every href/src the page
+emits is checked against the files actually on disk before the command
+reports success (`ExitCode.BUNDLE_LINK_INTEGRITY_FAILED` otherwise). See
+`@waggle/share`'s README for the bundle layout and the sidecar shape in
+full.
+
+`--upload` additionally pushes the bundle to the user's own Cloudflare R2
+bucket over R2's S3-compatible API (ADR-009: "zero egress... when
+configured") and prints the public URL layout. It requires five
+environment variables (`WAGGLE_R2_ACCOUNT_ID`, `WAGGLE_R2_ACCESS_KEY_ID`,
+`WAGGLE_R2_SECRET_ACCESS_KEY`, `WAGGLE_R2_BUCKET`,
+`WAGGLE_R2_PUBLIC_BASE_URL`); without `--upload`, none of this runs and no
+R2 variable is ever read. There are no live R2 credentials in this
+environment: `@waggle/share`'s README states precisely which one assertion
+about the uploader still needs a real bucket to fully verify.
+
+## `waggle clean` (prd-008)
+
+Prunes stale render outputs: per (brand kit, preset) pair, everything
+older than the `--keep-versions` most recent IR versions (default 1), plus
+(only when `--older-than-days <n>` is passed) anything older than that
+many days regardless of version. `renders/.work/` (the compositor's own
+scratch space) is always offered for removal as pure cache.
+`renders/share/` (bundles `waggle export` built, which may already be
+distributed) is never touched by this command.
+
+**Dry run is the default.** `waggle clean` always prints what it would
+remove and never deletes anything unless `--force` is passed.
+
+## `waggle studio` (prd-005)
+
+Boots `@waggle/studio`'s built adapter-node server (`apps/studio/build/index.js`
+- run `pnpm --filter @waggle/studio build`, or the workspace `pnpm build`,
+before the first launch) as a child process bound to `--host`/`--port`
+(default `127.0.0.1:4310`, matching `apps/extension`'s own
+`DEFAULT_STUDIO_ORIGIN`), with the resolved project directory passed as the
+`WAGGLE_PROJECT_DIR` environment variable and `BODY_SIZE_LIMIT=Infinity`
+(adapter-node's default 512kB request cap would otherwise reject the
+extension's binary video-chunk uploads). Blocks in the foreground like any
+other dev server; Ctrl+C (SIGINT) is forwarded to the child.
+
+Studio serves:
+
+- The extension's exact upload contract
+  (`apps/extension/src/lib/upload-client.ts`): `POST /waggle/sessions/:id/video/chunks/:index`,
+  `POST /waggle/sessions/:id/events`, `POST /waggle/sessions/:id/meta`. The
+  `meta` upload is the session's finalize signal - Studio assembles the
+  uploaded chunks and runs `@waggle/ingest`'s full pipeline against them
+  automatically, the same as `waggle record --session <dir>` does by hand.
+- The film strip, step detail, description editor, heatmap overlay, and
+  project settings UI at `/`.
+- `j`/`k` step navigation, `e` to jump into the selected step's description
+  editor, `h` to toggle the heatmap, and `?` for the in-app shortcut sheet.
 
 ## Project manifest (waggle.json)
 

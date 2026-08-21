@@ -17,6 +17,8 @@
     "@waggle/ingest": "workspace:*",
     "@waggle/ir": "workspace:*",
     "@waggle/narrate": "workspace:*",
+    "@waggle/share": "workspace:*",
+    "@waggle/studio": "workspace:*",
     "commander": "^15.0.0",
     "zod": "^4.4.3"
   },

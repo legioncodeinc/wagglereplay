@@ -119,6 +119,51 @@ export const ExitCode = {
    * malformed. The message lists the known preset ids.
    */
   PRESET_UNKNOWN: 15,
+
+  /**
+   * `waggle studio` could not find `@waggle/studio`'s built adapter-node
+   * server (`build/index.js`). Studio ships as a SvelteKit app that must
+   * be built once (`pnpm --filter @waggle/studio build`, or the workspace
+   * `pnpm build`) before it can be launched as a child process; this code
+   * fires instead of a bare "module not found" stack trace.
+   */
+  STUDIO_BUILD_MISSING: 16,
+
+  /**
+   * `waggle studio` could not bind its host:port (default
+   * `127.0.0.1:4310`, matching `apps/extension`'s
+   * `DEFAULT_STUDIO_ORIGIN`): something else is already listening there.
+   * Pass `--port <port>` to use a different one.
+   */
+  STUDIO_PORT_UNAVAILABLE: 17,
+
+  /**
+   * `waggle export` found no rendered outputs for the project's current
+   * IR version. Run `waggle render` first.
+   */
+  EXPORT_NO_RENDERS: 20,
+
+  /**
+   * `waggle export` built a share bundle whose HTML page references a
+   * file that does not exist inside the bundle directory (prd-008 AC2's
+   * link-integrity check). This should not happen from a correct
+   * template; the message names every missing reference.
+   */
+  BUNDLE_LINK_INTEGRITY_FAILED: 21,
+
+  /**
+   * `waggle export --upload` was passed but one or more `WAGGLE_R2_*`
+   * environment variables are not set. The message names every missing
+   * variable and what it is for.
+   */
+  R2_CONFIG_INVALID: 22,
+
+  /**
+   * `waggle export --upload` was fully configured but the R2 API rejected
+   * an upload (a non-2xx response). The message includes the HTTP status
+   * and a snippet of R2's own error body.
+   */
+  R2_UPLOAD_FAILED: 23,
 } as const;
 
 export type ExitCode = (typeof ExitCode)[keyof typeof ExitCode];

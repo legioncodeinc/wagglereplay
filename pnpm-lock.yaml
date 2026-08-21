@@ -53,6 +53,22 @@ importers:
         version: 4.23.12
 
   apps/studio:
+    dependencies:
+      '@waggle/compose':
+        specifier: workspace:*
+        version: link:../../packages/compose
+      '@waggle/ingest':
+        specifier: workspace:*
+        version: link:../../packages/ingest
+      '@waggle/ir':
+        specifier: workspace:*
+        version: link:../../packages/ir
+      '@waggle/narrate':
+        specifier: workspace:*
+        version: link:../../packages/narrate
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
     devDependencies:
       '@sveltejs/adapter-node':
         specifier: ^5.5.7
@@ -63,12 +79,24 @@ importers:
       '@sveltejs/vite-plugin-svelte':
         specifier: ^7.3.0
         version: 7.3.0(svelte@5.56.9)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(tsx@4.23.12))
+      '@types/chrome':
+        specifier: ^0.2.6
+        version: 0.2.6
+      '@types/node':
+        specifier: ^26.2.0
+        version: 26.2.0
+      playwright-core:
+        specifier: ^1.62.1
+        version: 1.62.1
       svelte:
         specifier: ^5.56.9
         version: 5.56.9
       svelte-check:
         specifier: ^4.7.6
         version: 4.7.6(picomatch@4.0.5)(svelte@5.56.9)(typescript@6.0.3)
+      tsx:
+        specifier: ^4.23.12
+        version: 4.23.12
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -96,6 +124,12 @@ importers:
       '@waggle/narrate':
         specifier: workspace:*
         version: link:../narrate
+      '@waggle/share':
+        specifier: workspace:*
+        version: link:../share
+      '@waggle/studio':
+        specifier: workspace:*
+        version: link:../../apps/studio
       commander:
         specifier: ^15.0.0
         version: 15.0.0
@@ -181,6 +215,25 @@ importers:
         version: 26.2.0
 
   packages/replay:
+    devDependencies:
+      '@types/node':
+        specifier: ^26.2.0
+        version: 26.2.0
+
+  packages/share:
+    dependencies:
+      '@waggle/compose':
+        specifier: workspace:*
+        version: link:../compose
+      '@waggle/ir':
+        specifier: workspace:*
+        version: link:../ir
+      '@waggle/narrate':
+        specifier: workspace:*
+        version: link:../narrate
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
     devDependencies:
       '@types/node':
         specifier: ^26.2.0

@@ -75,13 +75,13 @@ DONE means fully implemented with passing tests. VERIFIED means a pass other tha
 | 004-AC3 | 004 | Heatmap data: normalized click coordinates aggregated per route | typescript-node | sonnet-5 | VERIFIED |
 | 004-AC4 | 004 | AI pre-draft descriptions with a machine-drafted flag | mind | sonnet-5 | DONE |
 | 004-AC5 | 004 | `waggle record` end to end; ingest idempotent, byte-identical IR | typescript-node | sonnet-5 | VERIFIED |
-| 005-AC1 | 005 | Studio boots on localhost with a project dir; upload endpoints write ingest inputs | svelte | sonnet-5 | OPEN |
-| 005-AC2 | 005 | Film strip: settled frame, ripple marker, classification badge, route delta | ux-ui-svelte | sonnet-5 | OPEN |
-| 005-AC3 | 005 | Step detail: frame scrubber, element card, DOM delta summary | ux-ui-svelte | sonnet-5 | OPEN |
-| 005-AC4 | 005 | Description editor writes narration drafts, clears the flag, autosaves | svelte | sonnet-5 | OPEN |
-| 005-AC5 | 005 | Heatmap overlay toggle per route | ux-ui-svelte | sonnet-5 | OPEN |
-| 005-AC6 | 005 | Settings panel: brand kit, voice, presets, credential binding, refs only | svelte | sonnet-5 | OPEN |
-| 005-AC7 | 005 | Keyboard-first review flow j, k, e, documented in app | svelte | sonnet-5 | OPEN |
+| 005-AC1 | 005 | Studio boots on localhost with a project dir; upload endpoints write ingest inputs | svelte | sonnet-5 | VERIFIED |
+| 005-AC2 | 005 | Film strip: settled frame, ripple marker, classification badge, route delta | ux-ui-svelte | sonnet-5 | VERIFIED |
+| 005-AC3 | 005 | Step detail: frame scrubber, element card, DOM delta summary | ux-ui-svelte | sonnet-5 | VERIFIED |
+| 005-AC4 | 005 | Description editor writes narration drafts, clears the flag, autosaves | svelte | sonnet-5 | VERIFIED |
+| 005-AC5 | 005 | Heatmap overlay toggle per route | ux-ui-svelte | sonnet-5 | VERIFIED |
+| 005-AC6 | 005 | Settings panel: brand kit, voice, presets, credential binding, refs only | svelte | sonnet-5 | VERIFIED |
+| 005-AC7 | 005 | Keyboard-first review flow j, k, e, documented in app | svelte | sonnet-5 | VERIFIED |
 | 006-AC1 | 006 | Script generator at roughly 150 wpm with settle-time duration hints | mind | sonnet-5 | VERIFIED |
 | 006-AC2 | 006 | TTS adapter interface plus env-based provider selection per ADR-006 | typescript-node | sonnet-5 | VERIFIED |
 | 006-AC3 | 006 | ElevenLabs with-timestamps, normalized versus original text, chunk stitching | typescript-node | sonnet-5 | DONE |
@@ -97,10 +97,10 @@ DONE means fully implemented with passing tests. VERIFIED means a pass other tha
 | 007-AC6 | 007 | Narration audio mux with configurable source ducking | typescript-node | sonnet-5 | VERIFIED |
 | 007-AC7 | 007 | `waggle render --preset 16x9` produces an MP4; idempotent stream md5 | quality | opus-5 | VERIFIED |
 | 007-AC8 | 007 | Kit swap changes only branded elements; no IR or narration writes | quality | opus-5 | VERIFIED |
-| 008-AC1 | 008 | Stable render naming plus JSON sidecar with version, kit, preset, label, checksum | typescript-node | sonnet-5 | OPEN |
-| 008-AC2 | 008 | `waggle export` self-contained share bundle; link-integrity check passes | typescript-node | sonnet-5 | OPEN |
-| 008-AC3 | 008 | Optional R2 upload; absent config explains exactly what to set | typescript-node | sonnet-5 | OPEN |
-| 008-AC4 | 008 | `waggle clean` prunes by age and version, dry-run default | typescript-node | sonnet-5 | OPEN |
+| 008-AC1 | 008 | Stable render naming plus JSON sidecar with version, kit, preset, label, checksum | typescript-node | sonnet-5 | VERIFIED |
+| 008-AC2 | 008 | `waggle export` self-contained share bundle; link-integrity check passes | typescript-node | sonnet-5 | VERIFIED |
+| 008-AC3 | 008 | Optional R2 upload; absent config explains exactly what to set | typescript-node | sonnet-5 | DONE |
+| 008-AC4 | 008 | `waggle clean` prunes by age and version, dry-run default | typescript-node | sonnet-5 | VERIFIED |
 | 009-AC1 | 009 | Step-to-Playwright mapper, settle cascade, structured StepFailure | typescript-node | opus-5 | OPEN |
 | 009-AC2 | 009 | Determinism kit: reducedMotion, animation kill, fixed timezone and locale, storage state | typescript-node | sonnet-5 | OPEN |
 | 009-AC3 | 009 | CDP screencast piped to ffmpeg H.264 plus per-step timing manifest | typescript-node | opus-5 | OPEN |
@@ -159,9 +159,15 @@ DONE means fully implemented with passing tests. VERIFIED means a pass other tha
 | W4 | ffmpeg encoder pins -threads to 4. | libx264 is deterministic only for a GIVEN thread count, and its default derives from host CPU count. An unpinned render is reproducible on one machine and not across two, so PRD-007 AC7 would have passed locally and failed in CI. | No. Correct and important; note it if CI runners ever change shape. |
 | W4 | CLI exit codes 10 and 11 claimed by ingest, 12 to 15 by compose. | Two parallel Bees extended the same shared exit-code table. Compose renumbered rather than reclaiming, leaving a documented gap for ingest to fill. | Yes. Verify packages/cli/README.md documents 10 and 11 before the repo-health gate. |
 
-| W4 | Ingest writes two new project-dir files, heatmap.json and predraft.json, not enumerated in ADR-015. | Both are additive, JSON, git-committable, and follow the IR writer serialization exactly. ADR-015's decision is filesystem-dirs-not-a-database, which these honour. | Yes. Confirm with quality-worker-bee whether ADR-015 needs an amendment enumerating them, or whether its file list was illustrative rather than exhaustive. |
+| W4 | Ingest writes two new project-dir files, heatmap.json, predraft.json, and (from PRD-005) studio.json, none enumerated in ADR-015. | Both are additive, JSON, git-committable, and follow the IR writer serialization exactly. ADR-015's decision is filesystem-dirs-not-a-database, which these honour. | Yes. Confirm with quality-worker-bee whether ADR-015 needs an amendment enumerating them, or whether its file list was illustrative rather than exhaustive. |
 | W4 | Pre-draft descriptions live in predraft.json, not inside the IR. | packages/ir WaggleStepExtensionSchema has no description or machineDrafted field, and packages/ir is a locked, already-verified package. Adding fields to it would have reopened PRD-002. | Yes. PRD-005 AC4 studio editor must read and write this file; confirm the contract holds when studio lands. |
 | W4 | Exit-code documentation gap closed by the orchestrator, not a Bee. | Ingest claimed codes 10 and 11 in source but did not add them to the cli README table; compose flagged the gap rather than guessing another Bee's semantics. Orchestrator added both rows from the source doc comments. | No. Resolved. |
+
+| W5 | PRD-008 R2 uploader hand-rolls AWS SigV4 signing (152 lines) instead of depending on @aws-sdk/client-s3. | Keeps the dependency tree tiny for an optional, non-default feature, consistent with the local-first posture of ADR-009 and ADR-014. Primitives are tested against RFC 4231 published vectors rather than only against itself. | Yes, and specifically. Hand-rolled request signing is security-sensitive code: security-worker-bee must review sigv4.ts directly for canonical-request construction, header handling, and any credential leakage into logs or errors. Do not wave it through on the strength of passing tests. |
+
+| W5 | Studio caught two real bugs that only an end-to-end test could find: adapter-node BODY_SIZE_LIMIT=0 means reject every body, not unlimited, which would have rejected the extension binary video-chunk uploads in production; and a Svelte sync-effect reset the save indicator the instant its own write echoed back through shared state. | Recorded because both are the class of defect unit tests structurally cannot catch, which is the argument for keeping the Playwright smoke test in the suite. | No. Both fixed. |
+| W5 | Studio voice picker is a free-text voiceId field, not a live-fetched provider voice list. | No TTS key exists, and the standing convention is that adapters degrade gracefully rather than attempt a live call. | Yes. Confirm PRD-005 AC6 "voice picker" is satisfied by a bound field; revisit if a key arrives. |
+| W5 | Three new project-dir files now exist across PRD-004 and PRD-005. | Reinforces rather than changes the ADR-015 question already logged above. | Yes, folded into the ADR-015 item. |
 
 ## Blocked register
 
@@ -170,6 +176,7 @@ DONE means fully implemented with passing tests. VERIFIED means a pass other tha
 | 006-AC3 (partial) | No ELEVENLABS_API_KEY. Adapter, schema parsing, retry, and chunk stitching are fully built and unit-tested against mock transports. The v3 dialogue-plus-with-timestamps envelope and the exact subscription tier strings were never seen from a live response. | Provide ELEVENLABS_API_KEY to confirm the live response envelope. |
 | 006-AC6 (partial) | Same. The end-to-end run produces words.json, SRT, VTT, and transcript from a mocked synthesize call; no real audio bytes exist. | Provide ELEVENLABS_API_KEY to produce and spot-check real audio. |
 | 003-AC8 (partial) | Real chrome.tabCapture needs a headed display with the extension sideloaded, not reachable in this automated session. Proven here: the built extension loads in real Chromium and its MV3 service worker registers; the real content-script bundle drives the fixture app with worst-case click alignment of 9.5 ms against a 50 ms budget, reproduced by the orchestrator. Unproven: an actual tabCapture recording and byte-level correlation to decoded video frames. | Run apps/extension/docs/ac8-e2e-runbook.md on a machine with a display: build, load unpacked, click the action, walk the 6 steps, confirm non-zero MediaRecorder chunk sizes. |
+| 008-AC3 (partial) | No R2 or S3 credentials. The uploader hand-rolls SigV4 signing, fully implemented and unit-tested against a mocked transport plus RFC 4231 primitives vectors. Unproven: that a real R2 bucket accepts a request signed this way and returns 200. | Provide R2 account id, access key id, secret access key, and bucket name to confirm a live upload. |
 | 004-AC4 (anticipated) | PRD-004 AC4 requires a provider-agnostic LLM call for pre-draft descriptions. No LLM key present. | Provide an LLM provider key (any of OpenAI, Anthropic, Gemini) plus the preferred provider. |
 
 ## Cross-cutting decisions made during execution
