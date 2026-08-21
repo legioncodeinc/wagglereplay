@@ -6,12 +6,12 @@
 # file to gate merges (repo Settings; see the seed report).
 
 # Default owner for everything.
-*       @legioncodeinc
+*       @thenotoriousllama
 
 # Lock down repository governance and CI/CD itself.
-/.github/                @legioncodeinc
-/.github/CODEOWNERS      @legioncodeinc
-/.github/workflows/      @legioncodeinc
+/.github/                @thenotoriousllama
+/.github/CODEOWNERS      @thenotoriousllama
+/.github/workflows/      @thenotoriousllama
 
 # Library docs (PRDs, ADRs, knowledge) route through the same owner.
-/library/                @legioncodeinc
+/library/                @thenotoriousllama
