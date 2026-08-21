@@ -4,8 +4,8 @@
  * A walkthrough project is git-committable by design, so a raw input value
  * captured here would eventually be committed. This module is the single
  * place a keystroke's characters ever pass through, and the only shape
- * that leaves it is `{ length, masked: true }`: never the value itself,
- * never a hash of it, never a partial prefix. `credential` marks fields
+ * that leaves it is `{ placeholder: '[REDACTED]', masked: true }`: never
+ * the value itself, its length, a hash, or a partial prefix. `credential` marks fields
  * the recorder believes carry a secret (password inputs, or any input
  * whose name/autocomplete attributes suggest one) so the finalizer and,
  * later, the Studio UI (prd-005) can render a redaction box instead of the
@@ -13,14 +13,16 @@
  * placeholder events" clause.
  */
 
+export const FIXED_INPUT_PLACEHOLDER = '[REDACTED]' as const;
+
 export interface MaskedInput {
-  readonly length: number;
+  readonly placeholder: typeof FIXED_INPUT_PLACEHOLDER;
   readonly masked: true;
 }
 
 /** Masks a raw input value. This is the only function allowed to read `value`. */
-export function maskInputValue(value: string): MaskedInput {
-  return { length: value.length, masked: true };
+export function maskInputValue(_value: string): MaskedInput {
+  return { placeholder: FIXED_INPUT_PLACEHOLDER, masked: true };
 }
 
 const CREDENTIAL_INPUT_TYPES = new Set(['password']);

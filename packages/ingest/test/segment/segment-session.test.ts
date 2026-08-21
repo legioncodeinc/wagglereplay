@@ -73,7 +73,7 @@ describe('AC1: segmentSession - determinism on the fixture recording', () => {
     const changeSteps = flow.steps.filter((step) => step.type === 'change');
     expect(changeSteps.length).toBeGreaterThan(0);
     for (const step of changeSteps) {
-      expect(step.value).toMatch(/^•+$/);
+      expect(step.value).toBe('[REDACTED]');
     }
     // The real fixture typed "demo-user" and "demo-pass-0000"; neither
     // substring, nor any letter/digit from them, may appear anywhere in
@@ -88,6 +88,34 @@ describe('AC1: segmentSession - determinism on the fixture recording', () => {
     const { flow } = segmentSession(events, meta);
     const changeSteps = flow.steps.filter((step) => step.type === 'change');
     expect(changeSteps.map((step) => step.waggle.masked)).toEqual([false, true]);
+  });
+
+  it('associates bounded credential boxes with their video-relative activation timestamp', () => {
+    const { events, meta } = loadSixStepFixture();
+    const shiftedMeta = {
+      ...meta,
+      video: { ...meta.video, anchorEpochMs: meta.video.anchorEpochMs + 100 },
+    };
+    const { frameRedactions } = segmentSession(events, shiftedMeta);
+    expect(frameRedactions).toEqual([
+      {
+        startRelMs: 95.39990234375,
+        geometry: {
+          rect: { x: 384, y: 298, w: 512, h: 42 },
+          viewport: { w: 1280, h: 800, dpr: 1 },
+        },
+      },
+    ]);
+  });
+
+  it('redacts from video frame zero when a credential event predates the recording anchor', () => {
+    const { events, meta } = loadSixStepFixture();
+    const shiftedMeta = {
+      ...meta,
+      video: { ...meta.video, anchorEpochMs: meta.video.anchorEpochMs + 300 },
+    };
+    const { frameRedactions } = segmentSession(events, shiftedMeta);
+    expect(frameRedactions[0]?.startRelMs).toBe(0);
   });
 
   it('carries the recorded viewport, startEpochMs, and cursor trail onto flow.waggle', () => {

@@ -1,8 +1,10 @@
+import { type CredentialMarking, explicitCredentialKind } from '../lib/credential-markings.js';
 import { sampleElement } from '../lib/element-sampler.js';
 import type { EpochSource } from '../lib/epoch.js';
 import { epochFromTimeOrigin } from '../lib/epoch.js';
 import type { CaptureEventDraft } from '../lib/events.js';
 import { isCredentialField, maskInputValue } from '../lib/masking.js';
+import { boundedRedactionGeometry } from '../lib/redaction-geometry.js';
 import { generateSelectors } from '../lib/selectors.js';
 import { observeStateChangeWindow } from '../lib/state-change.js';
 import type { RippleController } from './ripple-overlay.js';
@@ -32,6 +34,8 @@ export interface TelemetryOptions {
   scrollSampleIntervalMs?: number;
   /** How long to watch a route-less click for an in-place DOM change, ms. Default 300ms. */
   stateChangeWindowMs?: number;
+  /** Project-authored selector roles for the bound credential set. */
+  credentialMarkings?: readonly CredentialMarking[];
 }
 
 const POINTER_BUTTON_BY_INDEX = ['primary', 'auxiliary', 'secondary', 'back', 'forward'] as const;
@@ -132,14 +136,26 @@ export function attachTelemetry(options: TelemetryOptions): () => void {
     const target = event.target;
     if (!(target instanceof Element) || !isFormField(target)) return;
     const epochMs = eventEpoch(event);
-    sink({
+    const sample = sampleElement(target, win);
+    const selectors = sample.selectors;
+    const explicitKind = explicitCredentialKind(selectors, options.credentialMarkings ?? []);
+    const credential = explicitKind !== null || isCredentialField(target);
+    const base = {
       type: 'input',
       epochMs,
       inputType: (event as InputEvent).inputType ?? 'unknown',
-      selectors: generateSelectors(target),
+      selectors,
       value: maskInputValue(target.value),
-      credential: isCredentialField(target),
-    });
+    } as const;
+    if (credential) {
+      sink({
+        ...base,
+        credential: true,
+        redaction: boundedRedactionGeometry(target.getBoundingClientRect(), sample.viewport),
+      });
+      return;
+    }
+    sink({ ...base, credential: false });
   };
 
   const onRouteChange = (event: Event): void => {

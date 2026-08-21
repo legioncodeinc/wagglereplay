@@ -65,7 +65,12 @@ export interface RunIngestResult {
  */
 export async function runIngest(options: RunIngestOptions): Promise<RunIngestResult> {
   const { events, meta, videoPath } = loadSession(options.sessionDir);
-  const { flow, stepTimings, warnings: segmentWarnings } = segmentSession(events, meta);
+  const {
+    flow,
+    stepTimings,
+    frameRedactions,
+    warnings: segmentWarnings,
+  } = segmentSession(events, meta);
 
   const targetIrVersion = (latestIrVersion(options.projectDir) ?? 0) + 1;
 
@@ -78,6 +83,7 @@ export async function runIngest(options: RunIngestOptions): Promise<RunIngestRes
     stepTimings,
     meta.video.durationMs,
     options.extractionOptions,
+    frameRedactions,
   );
 
   const { videoRef, destPath: recordingFilePath } = copySourceRecording(
@@ -122,6 +128,7 @@ export async function runIngest(options: RunIngestOptions): Promise<RunIngestRes
     irVersion: writeResult.version,
     env: options.predraftEnv,
     fetchImpl: options.predraftFetch,
+    verifiedImageRefs: new Set(frames.map((frame) => frame.projectRelativePath)),
   });
   const predraftFilePath = writePreDraft(options.projectDir, predraftDocument);
 

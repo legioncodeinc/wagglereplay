@@ -2,8 +2,44 @@
 
 Orchestrator: the-smoker. Branch: `legion/handoff-application-automation-3f40ae`.
 Scope: all 17 PRDs in `library/requirements/backlog/`, 98 acceptance criteria.
-Status vocabulary: OPEN | IN PROGRESS | DONE | VERIFIED | BLOCKED.
+Status vocabulary: OPEN | IN PROGRESS | DONE | VERIFIED.
 DONE means fully implemented with passing tests. VERIFIED means a pass other than the implementer confirmed it.
+
+## Run 2 header (2026-08-21): prd-009 plus prd-010
+
+Second smoker run. Branch `legion/smoker-prd009-prd010` in worktree
+`.claude/worktrees/smoker-prd009-010`. Scope: exactly prd-009 (8 AC) and
+prd-010 (5 AC), both status backlog, zero prior work; Mario directed this run
+and confirmed both PRDs are independent of the rest of the backlog. All 001
+through 008 rows below are from run 1 and stay untouched.
+
+Harness note: this session has no sub-agent spawn tool, so the orchestrator
+executed each Bee's scoped work itself, in wave order, reading the paired
+Stinger in full before each Bee's work as the arming contract requires. Model
+routing below stays advisory context; this harness does not select models per
+dispatch.
+
+Wave plan for this run (dependency-ordered; 010 AC2 to AC5 need 009 wave 1):
+
+- R1: 009 AC1, AC2 (mapper, settle, StepFailure, determinism kit) then 010 AC1
+  (credentials schema plus `waggle creds check`). Exit: replay package core
+  typechecks and unit-tests green; creds check command real.
+- R2: 009 AC3, AC4, AC5 (screencast to ffmpeg, preset matrix plus reflow
+  probe, focus track). Exit: a real browser capture produces an MP4 the
+  compositor can probe; focus track emitted.
+- R3: 010 AC2, AC3 (fill-time env resolution with canary battery, TOTP).
+  Exit: canary absent from every artifact; RFC 6238 vectors pass.
+- R4: 010 AC4, AC5 (studio marking, capture placeholder events, screenshot
+  redaction, shared scrubber). Exit: marking round trip writes applies_to;
+  flagged frames redacted; scrubber battery green.
+- R5: 009 AC6, AC7, AC8 (`waggle regen`, run report, concurrency) plus the
+  mandatory real replay-to-compose seam test (no fake ffmpeg runner, no
+  pre-placed fixture video). Exit: moved-button fixture regen green with
+  drift recorded.
+- R6: verification pass over all 13 criteria (implementer does not grade its
+  own homework), then Ship Gate: security then quality (010 mandates the
+  security pass). github-repo-health runs separately at orchestrator level.
+- R7: ship: commit, push, draft PR, CI to green.
 
 ## Environment facts established at Phase 0
 
@@ -101,19 +137,19 @@ DONE means fully implemented with passing tests. VERIFIED means a pass other tha
 | 008-AC2 | 008 | `waggle export` self-contained share bundle; link-integrity check passes | typescript-node | sonnet-5 | VERIFIED |
 | 008-AC3 | 008 | Optional R2 upload; absent config explains exactly what to set | typescript-node | sonnet-5 | DONE |
 | 008-AC4 | 008 | `waggle clean` prunes by age and version, dry-run default | typescript-node | sonnet-5 | VERIFIED |
-| 009-AC1 | 009 | Step-to-Playwright mapper, settle cascade, structured StepFailure | typescript-node | opus-5 | OPEN |
-| 009-AC2 | 009 | Determinism kit: reducedMotion, animation kill, fixed timezone and locale, storage state | typescript-node | sonnet-5 | OPEN |
-| 009-AC3 | 009 | CDP screencast piped to ffmpeg H.264 plus per-step timing manifest | typescript-node | opus-5 | OPEN |
-| 009-AC4 | 009 | Preset matrix plus native-reflow probe deciding native versus reframed | typescript-node | sonnet-5 | OPEN |
-| 009-AC5 | 009 | Smart reframe focus-point track consumed by the compositor | typescript-node | sonnet-5 | OPEN |
-| 009-AC6 | 009 | `waggle regen`; moved-button fixture regens green via fallback selectors | quality | opus-5 | OPEN |
-| 009-AC7 | 009 | Run report per regen written into the project | typescript-node | sonnet-5 | OPEN |
-| 009-AC8 | 009 | WAGGLE_RENDER_CONCURRENCY respected across preset jobs | typescript-node | sonnet-5 | OPEN |
-| 010-AC1 | 010 | credentials.json schema plus `waggle creds check` without printing values | security | opus-5 | OPEN |
-| 010-AC2 | 010 | Fill-time env resolution; canary absent from all artifacts | security | opus-5 | OPEN |
-| 010-AC3 | 010 | RFC 6238 TOTP from the seed env ref at fill time | typescript-node | sonnet-5 | OPEN |
-| 010-AC4 | 010 | Capture credential marking, placeholder events, screenshot redaction | typescript-node | sonnet-5 | OPEN |
-| 010-AC5 | 010 | Shared prompt scrubber, unit-tested against the canary battery | security | opus-5 | OPEN |
+| 009-AC1 | 009 | Step-to-Playwright mapper, settle cascade, structured StepFailure | typescript-node | opus-5 | VERIFIED |
+| 009-AC2 | 009 | Determinism kit: reducedMotion, animation kill, fixed timezone and locale, storage state | typescript-node | sonnet-5 | VERIFIED |
+| 009-AC3 | 009 | CDP screencast piped to ffmpeg H.264 plus per-step timing manifest | typescript-node | opus-5 | VERIFIED |
+| 009-AC4 | 009 | Preset matrix plus native-reflow probe deciding native versus reframed | typescript-node | sonnet-5 | VERIFIED |
+| 009-AC5 | 009 | Smart reframe focus-point track consumed by the compositor | typescript-node | sonnet-5 | VERIFIED |
+| 009-AC6 | 009 | `waggle regen`; moved-button fixture regens green via fallback selectors | quality | opus-5 | VERIFIED |
+| 009-AC7 | 009 | Run report per regen written into the project | typescript-node | sonnet-5 | VERIFIED |
+| 009-AC8 | 009 | WAGGLE_RENDER_CONCURRENCY respected across preset jobs | typescript-node | sonnet-5 | VERIFIED |
+| 010-AC1 | 010 | credentials.json schema plus `waggle creds check` without printing values | security | opus-5 | VERIFIED |
+| 010-AC2 | 010 | Fill-time env resolution; canary absent from all artifacts | security | opus-5 | VERIFIED |
+| 010-AC3 | 010 | RFC 6238 TOTP from the seed env ref at fill time | typescript-node | sonnet-5 | VERIFIED |
+| 010-AC4 | 010 | Capture credential marking, placeholder events, screenshot redaction | typescript-node | sonnet-5 | VERIFIED |
+| 010-AC5 | 010 | Shared prompt scrubber, unit-tested against the canary battery | security | opus-5 | VERIFIED |
 | 011-AC1 | 011 | Vision verdict adapter, strict schema, retry once then mark unavailable | mind | sonnet-5 | OPEN |
 | 011-AC2 | 011 | odiff baseline store: accept, update, compare, annotated diffs | typescript-node | sonnet-5 | OPEN |
 | 011-AC3 | 011 | `regen --check` exit codes distinguish four outcomes; report merges verdicts | typescript-node | sonnet-5 | OPEN |

@@ -1,5 +1,6 @@
 import type { CaptureEvent, SessionMeta } from '@waggle/extension';
 import { assertWalkthroughFlow, WAGGLE_IR_SCHEMA_VERSION, type WalkthroughFlow } from '@waggle/ir';
+import type { FrameRedaction } from '../frames/redaction.js';
 import { buildSteps } from './build-steps.js';
 import { groupEvents } from './group-events.js';
 import type { StepTiming } from './types.js';
@@ -7,6 +8,7 @@ import type { StepTiming } from './types.js';
 export interface SegmentationResult {
   readonly flow: WalkthroughFlow;
   readonly stepTimings: readonly StepTiming[];
+  readonly frameRedactions: readonly FrameRedaction[];
   readonly warnings: readonly string[];
 }
 
@@ -53,6 +55,20 @@ export function segmentSession(
       ];
     });
 
+  const frameRedactions: FrameRedaction[] = events.flatMap((event) => {
+    if (event.type !== 'input' || !event.credential) return [];
+    return [
+      {
+        // ffmpeg seeks within the recording, whose frame zero is the
+        // MediaRecorder anchor rather than the earlier session start.
+        // Clamp pre-anchor events to zero so redaction fails closed from
+        // the first encoded frame instead of producing a negative offset.
+        startRelMs: Math.max(0, event.epochMs - meta.video.anchorEpochMs),
+        geometry: event.redaction,
+      },
+    ];
+  });
+
   const flow: WalkthroughFlow = {
     title: `Recording ${meta.sessionId}`,
     steps,
@@ -69,5 +85,10 @@ export function segmentSession(
 
   const validated = assertWalkthroughFlow(flow, 'segmented Walkthrough IR flow');
 
-  return { flow: validated, stepTimings, warnings: [...groupWarnings, ...stepWarnings] };
+  return {
+    flow: validated,
+    stepTimings,
+    frameRedactions,
+    warnings: [...groupWarnings, ...stepWarnings],
+  };
 }

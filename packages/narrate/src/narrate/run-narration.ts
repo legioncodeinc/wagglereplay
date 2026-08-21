@@ -1,7 +1,14 @@
 import { writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { readCurrentIr, subdirPath } from '@waggle/ir';
+import {
+  readCurrentIr,
+  type SensitiveTextLiterals,
+  type SensitiveTextScrubber,
+  subdirPath,
+  type WalkthroughFlow,
+} from '@waggle/ir';
 import { assertShareableAudioAllowed } from '../guardrails/shareable-audio.js';
+import { createNarrationTextScrubber } from '../privacy/project-text.js';
 import {
   narrationScriptExists,
   readNarrationScript,
@@ -70,13 +77,23 @@ function mergeNarrationScript(existing: NarrationScript, fresh: NarrationScript)
   return { schemaVersion: existing.schemaVersion, segments };
 }
 
-function loadOrDraftScript(projectDir: string, scriptPath: string): NarrationScript {
-  const currentIr = readCurrentIr(projectDir);
-  if (currentIr === null) {
-    throw new NoRecordingError(projectDir);
-  }
+function scrubScript(script: NarrationScript, scrubText: SensitiveTextScrubber): NarrationScript {
+  return {
+    ...script,
+    segments: script.segments.map((segment) => ({
+      ...segment,
+      draftText: scrubText(segment.draftText),
+      approvedText: segment.approvedText === null ? null : scrubText(segment.approvedText),
+    })),
+  };
+}
 
-  const freshDraft = draftNarrationScript(currentIr.flow);
+function loadOrDraftScript(
+  flow: WalkthroughFlow,
+  scriptPath: string,
+  scrubText: SensitiveTextScrubber,
+): NarrationScript {
+  const freshDraft = scrubScript(draftNarrationScript(flow), scrubText);
 
   if (!narrationScriptExists(scriptPath)) {
     writeNarrationScript(scriptPath, freshDraft);
@@ -87,9 +104,13 @@ function loadOrDraftScript(projectDir: string, scriptPath: string): NarrationScr
   }
 
   const existing = readNarrationScript(scriptPath);
-  const merged = mergeNarrationScript(existing, freshDraft);
+  const safeExisting = scrubScript(existing, scrubText);
+  if (JSON.stringify(existing) !== JSON.stringify(safeExisting)) {
+    writeNarrationScript(scriptPath, safeExisting);
+  }
+  const merged = mergeNarrationScript(safeExisting, freshDraft);
   const newlyAdded = merged.segments.filter((segment) => !segment.approved);
-  if (newlyAdded.length > existing.segments.filter((segment) => !segment.approved).length) {
+  if (newlyAdded.length > safeExisting.segments.filter((segment) => !segment.approved).length) {
     // The merge introduced segments the author has not seen yet: persist
     // and stop, same as the first-draft case, rather than silently
     // synthesizing around a gap.
@@ -114,6 +135,8 @@ export interface RunNarrationOptions {
   readonly adapter?: TtsAdapter;
   readonly env?: NodeJS.ProcessEnv;
   readonly voiceId?: string;
+  /** Extra explicitly flagged literals, primarily canary probes and imported legacy text. */
+  readonly sensitiveText?: SensitiveTextLiterals;
 }
 
 export interface RunNarrationResult {
@@ -138,9 +161,18 @@ export async function runNarration(options: RunNarrationOptions): Promise<RunNar
   const env = options.env ?? process.env;
   const narrationDir = subdirPath(options.projectDir, 'narration');
   const scriptPath = path.join(narrationDir, 'script.json');
+  const currentIr = readCurrentIr(options.projectDir);
+  if (currentIr === null) {
+    throw new NoRecordingError(options.projectDir);
+  }
+  const scrubText = createNarrationTextScrubber(
+    options.projectDir,
+    currentIr.flow,
+    options.sensitiveText,
+  );
 
-  const script = loadOrDraftScript(options.projectDir, scriptPath);
-  const approvedTexts = getApprovedSegmentTexts(script);
+  const script = loadOrDraftScript(currentIr.flow, scriptPath, scrubText);
+  const approvedTexts = getApprovedSegmentTexts(script).map(scrubText);
   const fullText = approvedTexts.join(' ');
 
   const adapter = options.adapter ?? createTtsAdapterFromEnv(env);

@@ -3,15 +3,24 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Playwright replay engine that re-executes the Walkthrough IR at any viewport. Full implementation lands in prd-009.",
+  "description": "Playwright replay engine that re-executes the Walkthrough IR at any viewport (prd-009) and resolves credential env refs at fill time (prd-010).",
   "exports": {
     ".": "./src/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "e2e": "tsx test/e2e/run-replay-e2e.ts"
+  },
+  "dependencies": {
+    "@waggle/compose": "workspace:*",
+    "@waggle/ir": "workspace:*",
+    "playwright-core": "^1.62.1",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@types/node": "^26.2.0"
+    "@types/node": "^26.2.0",
+    "@waggle/fixture-demo-app": "workspace:*",
+    "tsx": "^4.23.12"
   }
 }

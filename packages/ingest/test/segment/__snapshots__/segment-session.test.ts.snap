@@ -1,3 +1,3 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`AC1: segmentSession - determinism on the fixture recording > produces byte-identical flow JSON across two runs on the same input (hashed) 1`] = `"cacf873a9663bc2c7152025d90cc29d70bb8ba1c9e772dfd5859b533fffd9c55"`;
+exports[`AC1: segmentSession - determinism on the fixture recording > produces byte-identical flow JSON across two runs on the same input (hashed) 1`] = `"67cc805492a771ff771ceea67745d632ebdea06c1dfaba1151128f87f89c4966"`;

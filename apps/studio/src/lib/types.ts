@@ -1,7 +1,6 @@
 import type { HeatmapDocument, PreDraftDocument } from '@waggle/ingest';
-import type { WalkthroughFlow } from '@waggle/ir';
+import type { CredentialSet, WalkthroughFlow } from '@waggle/ir';
 import type { NarrationScript } from '@waggle/narrate';
-import type { CredentialRef } from './schemas/credential-ref.js';
 import type { StudioSettings } from './schemas/studio-settings.js';
 
 /**
@@ -33,7 +32,7 @@ export interface StudioProjectState {
   readonly narration: NarrationScript | null;
   readonly settings: StudioSettings;
   readonly brandKits: readonly BrandKitSummary[];
-  readonly credentialRefs: readonly CredentialRef[];
+  readonly credentialRefs: readonly CredentialSet[];
   /** Built-in render preset ids plus any this project's `waggle.json` declares (AC6 checklist). */
   readonly presetChoices: readonly string[];
   /** AC3 scrubber samples per step index; empty for a step with no extracted frames yet. */

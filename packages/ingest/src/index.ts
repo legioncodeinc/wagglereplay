@@ -31,6 +31,13 @@ export {
   createRealFfmpegRunner,
   type FfmpegRunner,
 } from './frames/ffmpeg-runner.js';
+export {
+  activeFrameRedactions,
+  buildRedactionFilter,
+  type FrameRedaction,
+  FrameRedactionSchema,
+  validateFrameRedactions,
+} from './frames/redaction.js';
 export { aggregateHeatmap } from './heatmap/aggregate.js';
 // --- Heatmap aggregation (AC3) ---------------------------------------------
 export {
@@ -78,6 +85,10 @@ export {
 export { createOpenAiAdapter, type OpenAiAdapterOptions } from './predraft/openai-adapter.js';
 export { buildFailureEntry, buildPlaceholderEntry } from './predraft/placeholder.js';
 export {
+  createPreDraftTextScrubber,
+  PreDraftPrivacyConfigError,
+} from './predraft/privacy.js';
+export {
   buildPreDraftPrompt,
   PREDRAFT_SYSTEM_PROMPT,
   type PreDraftPromptInput,
@@ -107,4 +118,9 @@ export { type BuildStepsResult, buildSteps } from './segment/build-steps.js';
 export { type GroupingResult, groupEvents } from './segment/group-events.js';
 // --- Segmentation (AC1) ----------------------------------------------------
 export { type SegmentationResult, segmentSession } from './segment/segment-session.js';
-export type { EventGroup, GroupOrOrphan, OrphanRoute, StepTiming } from './segment/types.js';
+export type {
+  EventGroup,
+  GroupOrOrphan,
+  OrphanRoute,
+  StepTiming,
+} from './segment/types.js';

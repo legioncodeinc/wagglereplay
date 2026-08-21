@@ -29,14 +29,17 @@ function scroll(
 }
 
 function input(
-  overrides: Partial<Extract<CaptureEvent, { type: 'input' }>> & { seq: number; epochMs: number },
-): Extract<CaptureEvent, { type: 'input' }> {
+  overrides: Partial<Extract<CaptureEvent, { type: 'input'; credential: false }>> & {
+    seq: number;
+    epochMs: number;
+  },
+): Extract<CaptureEvent, { type: 'input'; credential: false }> {
   return {
     type: 'input',
     tabId: 1,
     inputType: 'insertText',
     selectors: [{ type: 'css', value: '#field-a' }],
-    value: { length: 3, masked: true },
+    value: { placeholder: '[REDACTED]', masked: true },
     credential: false,
     ...overrides,
   };

@@ -1,0 +1,113 @@
+# QA Report: prd-009 Replay engine, post-redaction fix
+
+**Plan document:** `library/requirements/backlog/prd-009-replay-engine/prd-009-replay-engine-index.md`
+**Audit date:** 2026-08-21
+**Base branch:** `main` at `6f177d28bb8120a66e84aea09a9e2ab6d2214b9e`
+**Head:** `legion/smoker-prd009-prd010` at the same commit, plus the inventoried uncommitted worktree changes
+**Auditor:** quality-worker-bee
+
+## Summary
+
+The fresh post-redaction audit passes prd-009 with all eight acceptance criteria, all eleven decomposed tasks, and all three non-goals verified against the final post-security tree. The real Chromium/ffmpeg E2E was rerun during this audit and proves moved-button selector fallback, H.264 video-only capture, native and reframed manifest identity, eased focus data, replay-source compositor consumption, and successful configured-preset regen. No prd-009 Critical, Warning, or Suggestion remains; the sibling prd-010 result is recorded independently.
+
+## Scorecard
+
+| Category | Status | Notes |
+|---|---|---|
+| Completeness | ✅ | All 8 ACs, 11 tasks, and 3 non-goals are traced and satisfied. |
+| Correctness | ✅ | Structured step execution, deterministic contexts, capture timing, preset selection, focus data, regen, reporting, and concurrency match the plan after the redaction changes. |
+| Alignment | ✅ | Replay remains in `@waggle/replay`; compose consumes replay source identity and focus data through the intended one-direction seam. |
+| Gaps | ✅ | Error phases, configured presets, alias identity, process lifecycle, screenshot references, and real-browser evidence are covered. |
+| Detrimental | ✅ | The final tree passed lint on 380 files, all typechecks, build, 764 tests, replay/Studio/extension E2Es, and the real ffmpeg/provider canary; no prd-009 regression or hot-path anti-pattern was found. |
+
+## Critical Issues (must fix)
+
+None.
+
+## Warnings (should fix)
+
+None.
+
+## Suggestions (consider improving)
+
+None.
+
+## Plan Item Traceability
+
+| # | Plan Requirement | Status | Implementation Location | Notes |
+|---|---|---|---|---|
+| AC1 | Map steps to Playwright using fallback selectors, act by type, settle through the required ladder, take per-step screenshots, and return structured `StepFailure` data instead of crashing. | ✅ | `packages/replay/src/steps/selector-cascade.ts:187-226`; `packages/replay/src/steps/act.ts:85-272`; `packages/replay/src/steps/settle.ts:239-265`; `packages/replay/src/steps/replay-step.ts:109-306`; `packages/replay/src/steps/step-failure.ts:28-46` | Locate, act, settle, and screenshot exceptions become phase-specific results. `close` is terminal and `setViewport` cannot overwrite the selected preset. |
+| AC2 | Apply reduced motion, toggleable animation-kill CSS, fixed timezone and locale, and storage-state loading per context. | ✅ | `packages/replay/src/determinism/context.ts:62-96`; `packages/replay/src/determinism/assets.ts:17-44` | The context defaults to UTC and en-US, enables reduced motion, conditionally loads storage state, and injects deterministic assets before page code. |
+| AC3 | Ack CDP screencast frames and pipe them to ffmpeg as preset-sized H.264 video-only output with a per-step timing manifest. | ✅ | `packages/replay/src/capture/screencast.ts:83-159`; `packages/replay/src/capture/screencast.ts:208-250`; `packages/replay/src/capture/timing-manifest.ts:56-133`; `packages/replay/test/e2e/run-replay-e2e.ts:155-167` | The frame pump acks every CDP frame, uses libx264 and `-an`, and the real E2E probes codec, stream types, dimensions, and timing. |
+| AC4 | Provide 16x9, 9x16, 1x1, desktop, and mobile replay presets with DPR/mobile flags, probe native reflow per preset, and record native or reframed. | ✅ | `packages/replay/src/presets/registry.ts:34-86`; `packages/replay/src/presets/reflow-probe.ts:62-138`; `packages/replay/src/session/replay-session.ts:137-175`; `packages/replay/src/capture/timing-manifest.ts:56-79`; `library/requirements/backlog/prd-009-replay-engine/qa/native-replay-manifest.json:1-63`; `library/requirements/backlog/prd-009-replay-engine/qa/reframed-replay-manifest.json:1-94` | All five presets are explicit. Probe decisions drive capture geometry and are persisted. The checked-in native and reframed source-master PNGs decode as valid 1920x1080 PNGs; their manifests and compositor outputs carry distinct identities. |
+| AC5 | Emit an eased focus-point track from click coordinates and element centers for reframed presets, and have the compositor consume it. | ✅ | `packages/replay/src/steps/act.ts:95-123`; `packages/replay/src/session/replay-session.ts:230-292`; `packages/replay/src/reframe/focus-track.ts:45-112`; `packages/compose/src/render/render-project.ts:252-277`; `packages/compose/src/graph/build-graph.ts:146-153`; `packages/compose/src/zoom/segments.ts:157-214`; `library/requirements/backlog/prd-009-replay-engine/qa/reframed-replay-manifest.json:65-93` | Act-time points are normalized and eased; replay manifest focus data replaces recorded-IR focus data at the compose seam. |
+| AC6 | Implement `waggle regen` across configured presets; a moved-button fixture must succeed through a fallback selector and record drift. | ✅ | `packages/cli/src/commands/regen.ts:17-91`; `packages/replay/src/regen/orchestrate.ts:79-140`; `packages/replay/src/regen/orchestrate.ts:143-320`; `packages/replay/test/e2e/run-replay-e2e.ts:171-209`; `library/requirements/backlog/prd-009-replay-engine/qa/drift-e2e-run-report.json:1-140` | The audit reran the real fixture, Chromium, ffmpeg, and compositor path. Both jobs record alternative index 1 and succeed. |
+| AC7 | Write a per-regen project report containing steps, settle sources, durations, failures, and drift notes. | ✅ | `packages/replay/src/report/run-report.ts:30-106`; `packages/replay/src/regen/orchestrate.ts:243-320`; `library/requirements/backlog/prd-009-replay-engine/qa/drift-e2e-run-report.json:1-140` | The report is written under `renders/regen/latest-run.json`; the checked-in QA copy contains complete step, drift, capture, and render data for both jobs. |
+| AC8 | Respect `WAGGLE_RENDER_CONCURRENCY` across preset jobs. | ✅ | `packages/replay/src/regen/concurrency.ts:19-82`; `packages/replay/src/regen/orchestrate.ts:171-176`; `packages/replay/src/regen/orchestrate.ts:276-316`; `packages/replay/test/concurrency.test.ts:10-71`; `library/requirements/backlog/prd-009-replay-engine/qa/drift-e2e-run-report.json:5-8` | Strict 1..8 parsing and a bounded worker pool are unit-tested. The real report records limit 2 from the environment. |
+| T1 | Locator cascade and click/input/scroll/navigate act mapping. | ✅ | `packages/replay/src/steps/selector-cascade.ts:187-226`; `packages/replay/src/steps/act.ts:144-229` | The mapper is total across the IR step union, with structured unsupported results. |
+| T2 | Settle orchestration and `StepFailure` type. | ✅ | `packages/replay/src/steps/settle.ts:239-265`; `packages/replay/src/steps/step-failure.ts:12-46`; `packages/replay/test/replay-step.test.ts:74-270` | Locate, act, settle, screenshot, close, and persistent redaction ordering paths are covered. |
+| T3 | Determinism context factory. | ✅ | `packages/replay/src/determinism/context.ts:62-96`; `packages/replay/test/determinism-assets.test.ts:8-29` | Deterministic injection is byte-stable for identical inputs. |
+| T4 | Screencast frame pump and ack loop. | ✅ | `packages/replay/src/capture/screencast.ts:115-159`; `packages/replay/test/screencast.test.ts:16-42` | Frame acknowledgement, seed frame, process spawn errors, and geometry validation are covered. |
+| T5 | ffmpeg encode pipe and timing manifest. | ✅ | `packages/replay/src/capture/screencast.ts:208-250`; `packages/replay/src/capture/timing-manifest.ts:83-133`; `packages/replay/test/e2e/run-replay-e2e.ts:210-274` | Real outputs are probed for H.264, no audio, dimensions, duration alignment, and portable screenshot references. |
+| T6 | Preset registry and reflow probe. | ✅ | `packages/replay/src/presets/registry.ts:34-110`; `packages/replay/src/presets/reflow-probe.ts:62-138`; `packages/replay/test/index.test.ts:4-41` | Matrix and unknown-id behavior are pinned. |
+| T7 | Focus-point track generator. | ✅ | `packages/replay/src/reframe/focus-track.ts:45-112`; `packages/replay/test/focus-track.test.ts:26-70` | Normalization, holds, easing, and center fallback are tested. |
+| T8 | Regen command orchestration. | ✅ | `packages/cli/src/commands/regen.ts:17-91`; `packages/replay/src/regen/orchestrate.ts:143-320`; `packages/cli/test/regen-command.test.ts:42-180` | Repeatable presets, input errors, unknown presets, concurrency errors, and failed-run exit behavior are covered. |
+| T9 | Moved-button fixture and drift E2E. | ✅ | `packages/replay/test/e2e/run-replay-e2e.ts:91-153`; `packages/replay/test/e2e/run-replay-e2e.ts:171-334`; `library/requirements/backlog/prd-009-replay-engine/qa/drift-e2e-run-report.json:1-140` | The primary test-id selector is stale and the accessible fallback succeeds in real Chromium. |
+| T10 | Run-report writer. | ✅ | `packages/replay/src/report/run-report.ts:84-106`; `packages/replay/src/regen/orchestrate.ts:292-320` | Drift notes preserve the failed first choice and used fallback. |
+| T11 | Concurrency limiter. | ✅ | `packages/replay/src/regen/concurrency.ts:30-82`; `packages/replay/test/concurrency.test.ts:10-71` | The limiter preserves order, caps active jobs, and lets sibling jobs finish after one rejects. |
+| NG1 | Non-goal: no vision verdicts from prd-011. | ✅ |, | Honored. Replay emits capture facts and does not implement a vision verdict engine. |
+| NG2 | Non-goal: no cloud runners from prd-012. | ✅ |, | Honored. Browser and ffmpeg execution remain local or caller-injected. |
+| NG3 | Non-goal: no audio pacing from prd-013. | ✅ |, | Honored. Capture is explicitly video-only; no forced-alignment or audio-pacing implementation was added. |
+
+## Files Changed
+
+- `EXECUTION_LEDGER.md` (M), adds the joint prd-009/prd-010 run plan and acceptance-criterion rows.
+- `library/requirements/backlog/prd-009-replay-engine/qa/2026-08-21-security-audit-post-redaction-fix.md` (A), clears the final post-redaction tree for this fresh quality pass.
+- `library/requirements/backlog/prd-009-replay-engine/qa/2026-08-21-security-audit.md` (A), records the initial mandatory security pass.
+- `library/requirements/backlog/prd-009-replay-engine/qa/drift-e2e-run-report.json` (A), checked-in real moved-button regen report, refreshed by the final E2E.
+- `library/requirements/backlog/prd-009-replay-engine/qa/native-replay-manifest.json` (A), native 16x9 capture manifest, refreshed by the final E2E.
+- `library/requirements/backlog/prd-009-replay-engine/qa/native-step-002.png` (A), native source-master capture sample.
+- `library/requirements/backlog/prd-009-replay-engine/qa/reframed-replay-manifest.json` (A), forced-reframed 9x16 capture manifest with focus track, refreshed by the final E2E.
+- `library/requirements/backlog/prd-009-replay-engine/qa/reframed-step-002.png` (A), reframed source-master capture sample.
+- `library/requirements/backlog/prd-009-replay-engine/reports/2026-08-21-qa-report.md` (A), retained historical pre-redaction quality snapshot.
+- `packages/cli/README.md` (M), documents `regen`, `creds check`, environment variables, and exit codes.
+- `packages/cli/package.json` (M), adds the replay workspace dependency.
+- `packages/cli/src/commands/regen.ts` (A), implements `waggle regen` and exit mapping.
+- `packages/cli/src/create-cli.ts` (M), registers the real regen and credentials commands.
+- `packages/cli/src/exit-codes.ts` (M), adds replay-preset and credential exit codes.
+- `packages/cli/test/regen-command.test.ts` (A), covers regen forwarding, reporting, and exit behavior.
+- `packages/compose/src/compositor.ts` (M), extends the compositor seam with replay focus input and source identity.
+- `packages/compose/src/graph/build-graph.ts` (M), forwards replay focus data into the zoom/reframe graph.
+- `packages/compose/src/index.ts` (M), exports replay-source and focus-track contracts.
+- `packages/compose/src/render/render-project.ts` (M), resolves confined replay video/manifests, selects aliases, and writes source metadata.
+- `packages/compose/src/zoom/segments.ts` (M), consumes replay focus data in preference to recorded-IR focus events.
+- `packages/compose/test/render-project.test.ts` (M), covers replay selection, aliases, focus loading, and path confinement.
+- `packages/replay/package.json` (M), replaces stub metadata with runtime dependencies and the real E2E script.
+- `packages/replay/src/capture/screencast.ts` (A), implements the CDP-to-ffmpeg H.264 frame pump.
+- `packages/replay/src/capture/timing-manifest.ts` (A), defines and builds replay timing manifests.
+- `packages/replay/src/determinism/assets.ts` (A), defines deterministic CSS/init assets.
+- `packages/replay/src/determinism/context.ts` (A), creates deterministic Playwright contexts.
+- `packages/replay/src/index.ts` (M), exports the replay engine public surface.
+- `packages/replay/src/presets/reflow-probe.ts` (A), decides native versus reframed capture.
+- `packages/replay/src/presets/registry.ts` (A), defines the five replay presets.
+- `packages/replay/src/reframe/focus-track.ts` (A), builds normalized eased focus tracks.
+- `packages/replay/src/regen/concurrency.ts` (A), parses and enforces render concurrency.
+- `packages/replay/src/regen/orchestrate.ts` (A), orchestrates replay capture, compose, and reporting.
+- `packages/replay/src/report/run-report.ts` (A), defines drift notes and writes regen reports.
+- `packages/replay/src/session/replay-session.ts` (A), runs one deterministic preset capture session.
+- `packages/replay/src/steps/act.ts` (A), maps IR steps to Playwright actions.
+- `packages/replay/src/steps/replay-step.ts` (A), coordinates locate, act, settle, persistent redaction, and screenshot phases.
+- `packages/replay/src/steps/selector-cascade.ts` (A), translates and executes fallback selector cascades.
+- `packages/replay/src/steps/settle.ts` (A), implements the three-rung settle ladder and quiescence probe.
+- `packages/replay/src/steps/step-failure.ts` (A), defines structured step-failure data.
+- `packages/replay/test/concurrency.test.ts` (A), covers parsing and active-job limits.
+- `packages/replay/test/determinism-assets.test.ts` (A), covers deterministic asset injection.
+- `packages/replay/test/e2e/run-replay-e2e.ts` (A), runs real Chromium, ffmpeg, moved-button, and compositor assertions.
+- `packages/replay/test/focus-track.test.ts` (A), covers normalized easing behavior.
+- `packages/replay/test/index.test.ts` (M), replaces the stub assertion with registry/export coverage.
+- `packages/replay/test/regen-config.test.ts` (A), covers configured preset discovery and alias preservation.
+- `packages/replay/test/replay-step.test.ts` (A), covers actions, structured failures, close, and persistent credential-overlay ordering.
+- `packages/replay/test/screencast.test.ts` (A), covers capture geometry and asynchronous spawn failure.
+- `packages/replay/test/selector-cascade.test.ts` (A), covers selector translation and drift recording.
+- `packages/replay/tsconfig.json` (M), enables DOM types used by browser callbacks.
+- `pnpm-lock.yaml` (M), records replay workspace links and existing resolved runtime tooling.

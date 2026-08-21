@@ -1,3 +1,4 @@
+import type { CredentialMarking } from './credential-markings.js';
 import type { CaptureEventDraft } from './events.js';
 
 /**
@@ -16,6 +17,7 @@ export interface CaptureStartMessage {
   kind: 'capture:start';
   sessionId: string;
   startEpochMs: number;
+  credentialMarkings: readonly CredentialMarking[];
 }
 
 export interface CaptureStopMessage {

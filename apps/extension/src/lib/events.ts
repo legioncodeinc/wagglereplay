@@ -7,6 +7,7 @@ import {
   StepElementSchema,
 } from '@waggle/ir';
 import { z } from 'zod';
+import { FIXED_INPUT_PLACEHOLDER } from './masking.js';
 
 /**
  * The raw capture event schema: the `events.jsonl` + `meta.json` contract
@@ -49,9 +50,32 @@ export const ScrollOffsetSchema = z.strictObject({ x: z.number(), y: z.number() 
 export type ScrollOffset = z.infer<typeof ScrollOffsetSchema>;
 
 export const MaskedInputSchema = z.strictObject({
-  length: z.number().int().nonnegative(),
+  placeholder: z.literal(FIXED_INPUT_PLACEHOLDER),
   masked: z.literal(true),
 });
+
+export const InputRedactionGeometrySchema = z
+  .strictObject({
+    rect: RectSchema,
+    viewport: RecordedViewportSchema,
+  })
+  .superRefine((geometry, context) => {
+    const { rect, viewport } = geometry;
+    if (rect.w <= 0 || rect.h <= 0) {
+      context.addIssue({
+        code: 'custom',
+        path: ['rect'],
+        message: 'credential redaction rectangle must have positive dimensions',
+      });
+    }
+    if (rect.x < 0 || rect.y < 0 || rect.x + rect.w > viewport.w || rect.y + rect.h > viewport.h) {
+      context.addIssue({
+        code: 'custom',
+        path: ['rect'],
+        message: 'credential redaction rectangle must be bounded by its recorded viewport',
+      });
+    }
+  });
 
 const baseEventShape = {
   /** Monotonic sequence number within the session, 0-based. */
@@ -90,15 +114,26 @@ export const ScrollEventSchema = z.strictObject({
   selectors: z.array(GeneratedSelectorSchema).optional(),
 });
 
-export const InputEventSchema = z.strictObject({
+const inputEventShape = {
   ...baseEventShape,
   type: z.literal('input'),
   inputType: z.string().min(1),
   selectors: z.array(GeneratedSelectorSchema).min(1),
   value: MaskedInputSchema,
-  /** True when the recorder believes this field carries a secret (ADR-008). */
-  credential: z.boolean(),
-});
+} as const;
+
+export const InputEventSchema = z.discriminatedUnion('credential', [
+  z.strictObject({
+    ...inputEventShape,
+    credential: z.literal(false),
+  }),
+  z.strictObject({
+    ...inputEventShape,
+    /** Credential inputs must carry bounded geometry or capture validation fails closed. */
+    credential: z.literal(true),
+    redaction: InputRedactionGeometrySchema,
+  }),
+]);
 
 export const ROUTE_SOURCES = ['webNavigation', 'history', 'navigation-api'] as const;
 export type RouteSource = (typeof ROUTE_SOURCES)[number];
@@ -123,7 +158,7 @@ export const SettleEventSchema = z.strictObject({
   settle: SettleSchema,
 });
 
-export const CaptureEventSchema = z.discriminatedUnion('type', [
+export const CaptureEventSchema = z.union([
   ClickEventSchema,
   PointerMoveEventSchema,
   ScrollEventSchema,

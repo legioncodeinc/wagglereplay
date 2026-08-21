@@ -1,8 +1,8 @@
 # @waggle/cli
 
 The `waggle` command-line entry point: scaffolds and operates on filesystem
-Waggle project directories (ADR-015). Built in prd-001; most subcommands are
-stubs until the PRD that owns them lands.
+Waggle project directories (ADR-015). Built in prd-001 and extended by each
+package PRD as its command became operational.
 
 There is no published/global `waggle` binary yet (npm publishing is a
 non-goal of prd-001). Run it through the workspace instead:
@@ -16,21 +16,19 @@ pnpm --filter @waggle/cli start <command> [...args]
 | Command | Status | Owning PRD |
 |---|---|---|
 | `waggle init <name>` | Implemented | prd-001 |
-| `waggle record` | Stub | prd-004 |
+| `waggle record` | Implemented | prd-004 |
 | `waggle narrate` | Implemented | prd-006 |
 | `waggle render` | Implemented | prd-007 |
-| `waggle regen` | Stub | prd-009 |
+| `waggle regen` | Implemented | prd-009 |
 | `waggle export` | Implemented | prd-008 |
 | `waggle studio` | Implemented | prd-005 |
-| `waggle creds` | Stub | prd-010 |
+| `waggle creds check` | Implemented | prd-010 |
 | `waggle clean` | Implemented | prd-008 |
 
-Every stub resolves the project directory (`--project <dir>`, default cwd),
-loads and validates `waggle.json`, and then exits with `ExitCode.NOT_IMPLEMENTED`
-and a message of the form `waggle <command>: not implemented (prd-00X)`. This
-means a stub still surfaces a missing project or a broken manifest exactly
-like the real command eventually will; only the command's own behavior is
-unbuilt.
+Every project command resolves the project directory (`--project <dir>`,
+default cwd) and validates `waggle.json` before performing command-specific
+work. Missing and malformed projects therefore use the same documented exit
+codes across the command surface.
 
 ## Exit codes
 
@@ -50,16 +48,18 @@ rendered copy; keep both in sync.
 | 9 | `SHAREABLE_AUDIO_REFUSED` | `waggle narrate` refused to render shareable audio: the ElevenLabs plan is free tier, or the selected model is flagged beta (ADR-006). Set `WAGGLE_ALLOW_UNLICENSED_AUDIO=1` to override. |
 | 10 | `INGEST_SESSION_REQUIRED` | `waggle record` needs `--session <dir>`. Interactive capture (launching Studio, driving the extension) is prd-005 work and does not exist yet in this PRD wave. Point `--session` at a finished capture session, meaning the exact output of the extension finalizer: `events.jsonl`, `meta.json`, and the video file. |
 | 11 | `INGEST_INVALID_SESSION` | `waggle record --session <dir>` pointed at a directory missing `events.jsonl` or `meta.json`, failing those schemas, not seq-ordered, or naming a video file that does not exist. The message names the exact file and problem. |
-| 12 | `RENDER_INPUT_MISSING` | `waggle render` could not assemble its inputs: no recorded IR, a missing source recording, or narration audio and `words.json` disagreeing about whether the project has been narrated. The message names the file. |
-| 13 | `FFMPEG_FAILED` | `waggle render` could not launch the compositor backend (ffmpeg is not installed and `WAGGLE_FFMPEG_PATH` is unset), or it exited non-zero. The tail of its stderr is included. |
+| 12 | `RENDER_INPUT_MISSING` | `waggle render` or `waggle regen` could not assemble its inputs: no recorded IR, a missing source recording, or narration audio and `words.json` disagreeing about whether the project has been narrated. The message names the file. |
+| 13 | `FFMPEG_FAILED` | A render could not launch the compositor backend (ffmpeg is not installed and `WAGGLE_FFMPEG_PATH` is unset), or it exited non-zero. The tail of its stderr is included. |
 | 14 | `BRAND_KIT_INVALID` | `waggle render --brand-kit <id>` named a kit that does not exist under `brand/`, or the kit file is not valid JSON or fails the brand kit schema. |
-| 15 | `PRESET_UNKNOWN` | `waggle render --preset <id>` named a preset that is neither built in nor declared in `waggle.json`, or the manifest entry for it is malformed. The message lists the known ids. |
+| 15 | `PRESET_UNKNOWN` | `waggle render --preset <id>` or `waggle regen --preset <id>` named an unknown or malformed preset. The message lists the known ids. |
 | 16 | `STUDIO_BUILD_MISSING` | `waggle studio` could not find `@waggle/studio`'s built adapter-node server (`build/index.js`). Run `pnpm --filter @waggle/studio build` (or the workspace `pnpm build`) first. |
 | 17 | `STUDIO_PORT_UNAVAILABLE` | `waggle studio` could not bind its host:port (default `127.0.0.1:4310`): something else is already listening there. Pass `--port <port>` to use a different one. |
 | 20 | `EXPORT_NO_RENDERS` | `waggle export` found no rendered outputs for the project's current IR version. Run `waggle render` first. |
 | 21 | `BUNDLE_LINK_INTEGRITY_FAILED` | `waggle export` built a share bundle whose HTML page references a file that does not exist inside the bundle directory (prd-008 AC2's link-integrity check). The message names every missing reference. |
 | 22 | `R2_CONFIG_INVALID` | `waggle export --upload` was passed but one or more `WAGGLE_R2_*` environment variables are not set. The message names every missing variable and what it is for. |
 | 23 | `R2_UPLOAD_FAILED` | `waggle export --upload` was fully configured but the R2 API rejected an upload (a non-2xx response). The message includes the HTTP status and a snippet of R2's own error body. |
+| 24 | `CREDS_INVALID` | `waggle creds check` found a `credentials.json` that is invalid JSON or does not satisfy the canonical reference-only schema. |
+| 25 | `CREDS_UNRESOLVED` | `waggle creds check` found one or more declared environment-variable names that are unset or empty on this machine. Names are reported; values are never printed. |
 
 ## `waggle narrate` (prd-006)
 
@@ -75,6 +75,42 @@ selects a TTS provider from the environment (`WAGGLE_TTS_PROVIDER`, default
 `narration/captions.vtt`. See `packages/narrate/README.md` for the full
 environment variable list, the `words.json` shared contract, and the AC7
 shareable-audio guardrail.
+
+## `waggle regen` (prd-009)
+
+Replays the current Walkthrough IR against the live target, captures fresh
+video for every configured replay preset, recomposites each result, and writes
+the latest run report under `renders/regen/latest-run.json`.
+
+```bash
+pnpm --filter @waggle/cli start regen --project ./my-walkthrough
+pnpm --filter @waggle/cli start regen --project ./my-walkthrough \
+  --preset 16x9 --preset mobile
+```
+
+`--preset` is repeatable. Without it, replay uses the project configuration
+and then the built-in default. A run that reaches the reporting stage but has
+failed steps or renders still writes the report and exits nonzero.
+
+Local replay requires Chromium and ffmpeg. `WAGGLE_RENDER_CONCURRENCY` controls
+the maximum number of replay-plus-render jobs in flight; its default is 2.
+
+## `waggle creds check` (prd-010, ADR-008)
+
+Validates the project's reference-only `credentials.json` and reports whether
+each named environment variable resolves on the current machine. It prints
+environment-variable names and status words only, never resolved values.
+
+```bash
+pnpm --filter @waggle/cli start creds check --project ./my-walkthrough
+```
+
+A credential set names variables such as `DEMO_USER`, `DEMO_PASSWORD`, and
+`DEMO_TOTP_SEED`. The committed `credentials.json` stores those names. The
+corresponding values belong only in the process environment or a local,
+gitignored environment file that you load into the Waggle process.
+`.env.example` documents the names with blank values; never place a real
+username, password, or TOTP seed in that file.
 
 ## `waggle export` (prd-008, ADR-009)
 

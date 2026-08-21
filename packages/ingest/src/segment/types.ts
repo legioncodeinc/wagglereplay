@@ -1,4 +1,5 @@
 import type { CaptureEvent } from '@waggle/extension';
+import type { FrameRedaction } from '../frames/redaction.js';
 
 /**
  * The three raw event types that ever start or extend a step: everything
@@ -61,3 +62,5 @@ export interface StepTiming {
   /** The route the user was viewing when this step's action fired. */
   readonly route: string;
 }
+
+export type { FrameRedaction };

@@ -1,9 +1,11 @@
 import { Command } from 'commander';
 import { registerCleanCommand } from './commands/clean.js';
+import { registerCredsCommand } from './commands/creds.js';
 import { registerExportCommand } from './commands/export.js';
 import { registerInitCommand } from './commands/init.js';
 import { registerNarrateCommand } from './commands/narrate.js';
 import { registerRecordCommand } from './commands/record.js';
+import { registerRegenCommand } from './commands/regen.js';
 import { registerRenderCommand } from './commands/render.js';
 import { registerStubCommand, type StubCommandSpec } from './commands/stub.js';
 import { registerStudioCommand } from './commands/studio.js';
@@ -12,23 +14,12 @@ const CLI_VERSION = '0.1.0';
 
 /**
  * Full command surface (AC4). `init` (prd-001), `narrate` (prd-006),
- * `render` (prd-007), `export`/`clean` (prd-008), and `studio` (prd-005)
- * are real; every other command is a stub that still resolves the project
- * and validates the manifest, then names the PRD that owns its real
- * implementation.
+ * `render` (prd-007), `export`/`clean` (prd-008), `studio` (prd-005),
+ * `regen` (prd-009), and `creds` (prd-010) are real. ADR-019 froze this
+ * surface: regen and creds check are the two carve-outs the PRDs already
+ * scoped, and no further command is added.
  */
-const STUB_COMMANDS: StubCommandSpec[] = [
-  {
-    name: 'regen',
-    summary: 'Replay the IR against the live app and regenerate the video',
-    owningPrd: 'prd-009',
-  },
-  {
-    name: 'creds',
-    summary: 'Manage credential environment-variable references for this project',
-    owningPrd: 'prd-010',
-  },
-];
+const STUB_COMMANDS: StubCommandSpec[] = [];
 
 /**
  * Builds the `waggle` command tree. `exitOverride()` makes commander throw
@@ -55,6 +46,8 @@ export function createCli(): Command {
   registerExportCommand(program);
   registerCleanCommand(program);
   registerStudioCommand(program);
+  registerRegenCommand(program);
+  registerCredsCommand(program);
   for (const spec of STUB_COMMANDS) {
     registerStubCommand(program, spec);
   }

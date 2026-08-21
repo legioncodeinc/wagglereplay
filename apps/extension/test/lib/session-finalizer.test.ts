@@ -35,6 +35,23 @@ describe('CaptureSession', () => {
     expect(session.eventCount).toBe(0);
   });
 
+  it('rejects credential input events without bounded redaction geometry', () => {
+    const session = buildSession();
+    expect(() =>
+      session.record({
+        type: 'input',
+        epochMs: 1_700_000_000_010,
+        inputType: 'insertText',
+        selectors: [{ type: 'css', value: '#password' }],
+        value: { placeholder: '[REDACTED]', masked: true },
+        credential: true,
+        // @ts-expect-error -- missing redaction is the malformed boundary under test
+        redaction: undefined,
+      }),
+    ).toThrow();
+    expect(session.eventCount).toBe(0);
+  });
+
   it('snapshot() returns a defensive copy', () => {
     const session = buildSession();
     session.record({ type: 'pointermove', epochMs: 1, x: 0, y: 0 });

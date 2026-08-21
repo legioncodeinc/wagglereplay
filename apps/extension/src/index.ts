@@ -18,6 +18,14 @@ export {
 } from './content/content-script.js';
 export { createRippleOverlay, type RippleController } from './content/ripple-overlay.js';
 export { attachTelemetry, type TelemetryOptions, type TelemetrySink } from './content/telemetry.js';
+export {
+  CREDENTIAL_FIELD_KINDS,
+  type CredentialFieldKind,
+  type CredentialMarking,
+  CredentialMarkingSchema,
+  explicitCredentialKind,
+  fetchCredentialMarkings,
+} from './lib/credential-markings.js';
 export { type ElementSample, sampleElement } from './lib/element-sampler.js';
 export {
   createPerformanceEpochSource,
@@ -31,6 +39,9 @@ export {
   CaptureEventSchema,
   type GeneratedSelector,
   GeneratedSelectorSchema,
+  type InputEvent,
+  InputEventSchema,
+  InputRedactionGeometrySchema,
   ROUTE_SOURCES,
   SELECTOR_KINDS,
   type SessionMeta,
@@ -42,7 +53,12 @@ export {
   type SessionOutput,
   type VideoSummary,
 } from './lib/finalizer.js';
-export { isCredentialField, type MaskedInput, maskInputValue } from './lib/masking.js';
+export {
+  FIXED_INPUT_PLACEHOLDER,
+  isCredentialField,
+  type MaskedInput,
+  maskInputValue,
+} from './lib/masking.js';
 export type { RuntimeMessage } from './lib/messaging.js';
 export {
   type NetworkQuiescenceOptions,
@@ -50,6 +66,10 @@ export {
   type QuiescenceEvent,
   type WebRequestLikeDetails,
 } from './lib/network-quiescence.js';
+export {
+  boundedRedactionGeometry,
+  type InputRedactionGeometry,
+} from './lib/redaction-geometry.js';
 export { generateSelectors } from './lib/selectors.js';
 export { CaptureSession, type SessionInfo } from './lib/session.js';
 export {

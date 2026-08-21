@@ -6,6 +6,7 @@ import {
   manifestPath,
   PROJECT_SUBDIRS,
   TRACKED_EMPTY_SUBDIRS,
+  type WalkthroughFlow,
   writeNextIrVersion,
 } from '@waggle/ir';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -15,6 +16,7 @@ import {
 } from '../../src/narrate/run-narration.js';
 import { readNarrationScript, writeNarrationScript } from '../../src/script/script-io.js';
 import { ElevenLabsAdapter } from '../../src/tts/elevenlabs/adapter.js';
+import type { TtsAdapter } from '../../src/tts/types.js';
 import { assertMonotonicWords, NarrationWordsDocumentSchema } from '../../src/words/schema.js';
 import { buildFixtureFlow } from '../fixtures/flow.js';
 
@@ -65,7 +67,7 @@ describe('runNarration (AC6 end-to-end)', () => {
     }
   });
 
-  function buildFixtureProject(): string {
+  function buildFixtureProject(flow: WalkthroughFlow = buildFixtureFlow()): string {
     const projectDir = mkdtempSync(path.join(tmpdir(), 'waggle-narrate-e2e-'));
     cleanupDirs.push(projectDir);
     for (const subdir of PROJECT_SUBDIRS) {
@@ -76,7 +78,7 @@ describe('runNarration (AC6 end-to-end)', () => {
     }
     const manifest = createDefaultManifest('fixture');
     writeFileSync(manifestPath(projectDir), `${JSON.stringify(manifest, null, 2)}\n`);
-    writeNextIrVersion(projectDir, buildFixtureFlow());
+    writeNextIrVersion(projectDir, flow);
     return projectDir;
   }
 
@@ -179,5 +181,92 @@ describe('runNarration (AC6 end-to-end)', () => {
     await expect(runNarration({ projectDir, adapter })).rejects.toThrow(
       /no recorded Walkthrough IR/,
     );
+  });
+
+  it('scrubs credential refs, flagged placeholders, values, and canaries before TTS and every text artifact', async () => {
+    const placeholder = '[credential-placeholder]';
+    const canaryValue = 'canary.value+[x]';
+    const canaryText = 'CANARY-NARRATION-991';
+    const flow = buildFixtureFlow();
+    const inputStep = flow.steps.find((step) => step.type === 'change');
+    if (inputStep === undefined || inputStep.type !== 'change')
+      throw new Error('fixture input missing');
+    inputStep.value = placeholder;
+    inputStep.waggle.masked = true;
+
+    const projectDir = buildFixtureProject(flow);
+    writeFileSync(
+      path.join(projectDir, 'credentials.json'),
+      JSON.stringify({
+        schemaVersion: 1,
+        credentials: [
+          {
+            id: 'demo',
+            label: 'Demo',
+            secret_env: 'DEMO_SECRET',
+            applies_to: { secret: ['#email'] },
+          },
+        ],
+      }),
+    );
+
+    const synthesized: string[] = [];
+    const adapter: TtsAdapter = {
+      capabilities: {
+        provider: 'test',
+        model: 'test',
+        timestamps: 'none',
+        maxCharsPerRequest: 10_000,
+        costPerThousandChars: 0,
+        beta: false,
+      },
+      async synthesize(options) {
+        synthesized.push(options.text);
+        return {
+          audio: Uint8Array.from([1, 2, 3]),
+          mimeType: 'audio/mpeg',
+          originalText: options.text,
+          alignment: null,
+          normalizedAlignment: null,
+        };
+      },
+      estimateCostUsd: () => 0,
+    };
+
+    await expect(
+      runNarration({
+        projectDir,
+        adapter,
+        sensitiveText: { values: [canaryValue], canaries: [canaryText] },
+      }),
+    ).rejects.toThrow(NarrationDraftPendingApprovalError);
+
+    const scriptPath = path.join(projectDir, 'narration', 'script.json');
+    const drafted = readNarrationScript(scriptPath);
+    writeNarrationScript(scriptPath, {
+      ...drafted,
+      segments: drafted.segments.map((segment) => ({
+        ...segment,
+        draftText: `Draft ${canaryValue} DEMO_SECRET ${placeholder}`,
+        approvedText: `Speak ${canaryValue} ${canaryText} DEMO_SECRET ${placeholder}`,
+        approved: true,
+      })),
+    });
+
+    const result = await runNarration({
+      projectDir,
+      adapter,
+      sensitiveText: { values: [canaryValue], canaries: [canaryText] },
+    });
+    const artifacts = [
+      JSON.stringify(synthesized),
+      readFileSync(result.scriptPath, 'utf8'),
+      readFileSync(result.transcriptPath, 'utf8'),
+    ].join('\n');
+
+    for (const forbidden of [placeholder, canaryValue, canaryText, 'DEMO_SECRET']) {
+      expect(artifacts).not.toContain(forbidden);
+    }
+    expect(artifacts).toContain('[REDACTED]');
   });
 });

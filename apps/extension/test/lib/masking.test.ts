@@ -1,15 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import { isCredentialField, maskInputValue } from '../../src/lib/masking.js';
+import {
+  FIXED_INPUT_PLACEHOLDER,
+  isCredentialField,
+  maskInputValue,
+} from '../../src/lib/masking.js';
 
 describe('maskInputValue', () => {
-  it('never exposes the raw value, only its length', () => {
+  it('never exposes the raw value or its length', () => {
     const masked = maskInputValue('correct horse battery staple');
-    expect(masked).toEqual({ length: 28, masked: true });
+    expect(masked).toEqual({ placeholder: FIXED_INPUT_PLACEHOLDER, masked: true });
     expect(Object.values(masked)).not.toContain('correct horse battery staple');
   });
 
   it('masks the empty string too', () => {
-    expect(maskInputValue('')).toEqual({ length: 0, masked: true });
+    expect(maskInputValue('')).toEqual({ placeholder: FIXED_INPUT_PLACEHOLDER, masked: true });
   });
 });
 

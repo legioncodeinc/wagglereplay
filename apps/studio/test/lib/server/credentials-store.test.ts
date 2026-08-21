@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { credentialsPath } from '@waggle/ir';
@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import {
   CredentialsStoreError,
   listCredentialRefs,
+  updateCredentialMarking,
 } from '../../../src/lib/server/credentials-store.js';
 
 /** AC6, ADR-008: this store must only ever surface reference NAMES, never a resolved secret value. */
@@ -32,7 +33,14 @@ describe('credentials-store (AC6, ADR-008 refs only)', () => {
       credentialsPath(dir),
       JSON.stringify({
         schemaVersion: 1,
-        credentials: [{ id: 'example', username_env: 'DEMO_USER', secret_env: 'DEMO_PASSWORD' }],
+        credentials: [
+          {
+            id: 'example',
+            label: 'Demo login',
+            username_env: 'DEMO_USER',
+            secret_env: 'DEMO_PASSWORD',
+          },
+        ],
       }),
       'utf8',
     );
@@ -40,12 +48,16 @@ describe('credentials-store (AC6, ADR-008 refs only)', () => {
     expect(refs).toHaveLength(1);
     expect(refs[0]).toMatchObject({
       id: 'example',
+      label: 'Demo login',
       username_env: 'DEMO_USER',
       secret_env: 'DEMO_PASSWORD',
+      applies_to: { username: [], secret: [], totp: [] },
     });
     // Never a value: the schema has no field that could carry one, and this
     // asserts the parsed object has no unexpected extra keys smuggling one in.
-    expect(Object.keys(refs[0] ?? {}).sort()).toEqual(['id', 'secret_env', 'username_env']);
+    expect(Object.keys(refs[0] ?? {}).sort()).toEqual(
+      ['applies_to', 'id', 'label', 'secret_env', 'username_env'].sort(),
+    );
   });
 
   it("accepts a totp_seed_env reference (ADR-008's full shape)", () => {
@@ -73,6 +85,34 @@ describe('credentials-store (AC6, ADR-008 refs only)', () => {
     const dir = seedDir();
     writeFileSync(credentialsPath(dir), '{not json', 'utf8');
     expect(() => listCredentialRefs(dir)).toThrow(CredentialsStoreError);
+  });
+
+  it('persists a selector under exactly one field kind', () => {
+    const dir = seedDir();
+    writeFileSync(
+      credentialsPath(dir),
+      JSON.stringify({
+        schemaVersion: 1,
+        credentials: [
+          {
+            id: 'example',
+            label: 'Demo login',
+            username_env: 'DEMO_USER',
+            secret_env: 'DEMO_PASSWORD',
+            applies_to: { username: [], secret: ['#login'], totp: [] },
+          },
+        ],
+      }),
+      'utf8',
+    );
+
+    const updated = updateCredentialMarking(dir, 'example', '#login', 'username');
+    expect(updated.applies_to).toEqual({ username: ['#login'], secret: [], totp: [] });
+    const persisted = JSON.parse(readFileSync(credentialsPath(dir), 'utf8')) as {
+      credentials: { applies_to: unknown }[];
+    };
+    expect(persisted.credentials[0]?.applies_to).toEqual(updated.applies_to);
+    expect(JSON.stringify(persisted)).not.toContain('resolved-secret-value');
   });
 
   it('rejects a credentials file that fails schema validation', () => {

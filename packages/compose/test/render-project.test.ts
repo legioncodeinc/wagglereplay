@@ -1,4 +1,4 @@
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_BRAND_KIT } from '../src/brand/defaults.js';
@@ -6,7 +6,11 @@ import { BUILT_IN_PRESETS, DEFAULT_PRESET_ID, PresetError, resolvePreset } from 
 import {
   immutableRenderInputs,
   loadNarration,
+  loadReplayFocusTrack,
+  REPLAY_CAPTURES_SUBDIR,
+  REPLAY_INDEX_FILENAME,
   RenderInputError,
+  ReplayIndexError,
   renderFilename,
   renderProject,
   resolveSourceVideo,
@@ -76,6 +80,144 @@ describe('AC7: the prd-009 source-video seam', () => {
     await expect(resolveSourceVideo(fixture.projectDir, fixture.flow)).rejects.toThrow(
       /does not exist/,
     );
+  });
+
+  it('rejects an original-recording reference that escapes the project directory', async () => {
+    const fixture = await makeProject({ withNarration: false, durationMs: 1500 });
+    const outsideName = `${path.basename(fixture.projectDir)}-outside.mp4`;
+    const outsidePath = path.join(path.dirname(fixture.projectDir), outsideName);
+    copyFileSync(fixture.videoPath, outsidePath);
+    const unsafeFlow = {
+      ...fixture.flow,
+      waggle: {
+        ...fixture.flow.waggle,
+        sourceRecording: { videoRef: `../${outsideName}`, durationMs: 1500 },
+      },
+    };
+
+    await expect(resolveSourceVideo(fixture.projectDir, unsafeFlow)).rejects.toThrow(
+      /invalid project-relative video reference/,
+    );
+    rmSync(outsidePath, { force: true });
+  });
+
+  it('rejects replay video and manifest references that escape the project directory', async () => {
+    const fixture = await makeProject({ withNarration: false, durationMs: 1500 });
+    const replayDir = path.join(
+      fixture.projectDir,
+      REPLAY_CAPTURES_SUBDIR,
+      `v${String(fixture.irVersion)}`,
+    );
+    mkdirSync(replayDir, { recursive: true });
+    writeFileSync(
+      path.join(replayDir, REPLAY_INDEX_FILENAME),
+      JSON.stringify({
+        '16x9': {
+          replayPresetId: '16x9',
+          composePresetId: '16x9',
+          videoRef: '../outside.mp4',
+          manifestRef: '../outside.json',
+        },
+      }),
+      'utf8',
+    );
+
+    await expect(
+      resolveSourceVideo(fixture.projectDir, fixture.flow, process.env, {
+        irVersion: fixture.irVersion,
+        presetId: '16x9',
+        replayPresetId: '16x9',
+      }),
+    ).rejects.toThrow(/invalid project-relative video reference/);
+
+    writeFileSync(
+      path.join(replayDir, REPLAY_INDEX_FILENAME),
+      JSON.stringify({
+        '16x9': {
+          replayPresetId: '16x9',
+          composePresetId: '16x9',
+          videoRef: path.relative(fixture.projectDir, fixture.videoPath).replace(/\\/g, '/'),
+          manifestRef: '../outside.json',
+        },
+      }),
+      'utf8',
+    );
+    expect(() =>
+      loadReplayFocusTrack(fixture.projectDir, fixture.irVersion, '16x9', '16x9'),
+    ).toThrow(/invalid project-relative manifest reference/);
+  });
+
+  it('selects replay captures by replay identity when aliases share a compose preset', async () => {
+    const fixture = await makeProject({ withNarration: false, durationMs: 1500 });
+    const replayDir = path.join(
+      fixture.projectDir,
+      REPLAY_CAPTURES_SUBDIR,
+      `v${String(fixture.irVersion)}`,
+    );
+    mkdirSync(replayDir, { recursive: true });
+    const entries = Object.fromEntries(
+      ['16x9', 'desktop'].map((replayPresetId) => {
+        const captureDir = path.join(replayDir, replayPresetId);
+        mkdirSync(captureDir, { recursive: true });
+        const videoRef = path
+          .relative(fixture.projectDir, path.join(captureDir, `${replayPresetId}.mp4`))
+          .replace(/\\/g, '/');
+        const manifestRef = path
+          .relative(fixture.projectDir, path.join(captureDir, 'replay.manifest.json'))
+          .replace(/\\/g, '/');
+        copyFileSync(fixture.videoPath, path.resolve(fixture.projectDir, videoRef));
+        writeFileSync(
+          path.resolve(fixture.projectDir, manifestRef),
+          JSON.stringify({ focusTrack: [] }),
+          'utf8',
+        );
+        return [replayPresetId, { replayPresetId, composePresetId: '16x9', videoRef, manifestRef }];
+      }),
+    );
+    writeFileSync(path.join(replayDir, REPLAY_INDEX_FILENAME), JSON.stringify(entries), 'utf8');
+
+    const source = await resolveSourceVideo(fixture.projectDir, fixture.flow, process.env, {
+      irVersion: fixture.irVersion,
+      presetId: '16x9',
+      replayPresetId: 'desktop',
+    });
+    expect(source.kind).toBe('replay');
+    expect(source.path.replace(/\\/g, '/')).toContain('/desktop/desktop.mp4');
+
+    await renderProject({
+      projectDir: fixture.projectDir,
+      presetId: '16x9',
+      replayPresetId: '16x9',
+      dryRun: true,
+    });
+    await renderProject({
+      projectDir: fixture.projectDir,
+      presetId: '16x9',
+      replayPresetId: 'desktop',
+      dryRun: true,
+    });
+    expect(
+      existsSync(path.join(fixture.projectDir, 'renders', '.work', 'default.16x9.replay-16x9')),
+    ).toBe(true);
+    expect(
+      existsSync(path.join(fixture.projectDir, 'renders', '.work', 'default.16x9.replay-desktop')),
+    ).toBe(true);
+
+    await expect(
+      resolveSourceVideo(fixture.projectDir, fixture.flow, process.env, {
+        irVersion: fixture.irVersion,
+        presetId: '16x9',
+      }),
+    ).rejects.toThrow(ReplayIndexError);
+
+    rmSync(path.join(replayDir, 'desktop', 'desktop.mp4'));
+    await expect(
+      resolveSourceVideo(fixture.projectDir, fixture.flow, process.env, {
+        irVersion: fixture.irVersion,
+        presetId: '16x9',
+        replayPresetId: 'desktop',
+      }),
+    ).rejects.toThrow(/missing video/);
   });
 });
 
