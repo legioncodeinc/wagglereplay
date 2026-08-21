@@ -39,6 +39,22 @@ export function makeTempDir(prefix: string): string {
   return mkdtempSync(path.join(tmpdir(), `waggle-${prefix}-`));
 }
 
+/**
+ * An absolute path rooted at the filesystem root of whatever platform the
+ * suite is running on.
+ *
+ * A test that asserts on path RESOLUTION must never hardcode a `C:/...`
+ * literal. `path.isAbsolute('C:/project')` is false on POSIX, so
+ * `path.resolve()` treats the string as relative and silently prefixes the
+ * working directory: the test then passes on Windows and fails on Linux
+ * with a baffling `/home/runner/.../C:/project/...`. This helper yields
+ * `/project` on POSIX and `C:\project` on Windows, both genuinely
+ * absolute, so an assertion built from it means the same thing on both.
+ */
+export function absoluteTestPath(...segments: readonly string[]): string {
+  return path.resolve(path.sep, ...segments);
+}
+
 export interface SyntheticVideoOptions {
   readonly width?: number;
   readonly height?: number;

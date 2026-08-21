@@ -15,7 +15,7 @@ import {
 import { buildFilterGraph } from '../src/graph/build-graph.js';
 import { resolvePreset } from '../src/presets.js';
 import { buildTimeline } from '../src/timeline.js';
-import { makeFlow, makeWords } from './fixtures.js';
+import { absoluteTestPath, makeFlow, makeWords } from './fixtures.js';
 
 /**
  * prd-007 AC4: the filter-graph builder, and the determinism claim it
@@ -30,6 +30,13 @@ import { makeFlow, makeWords } from './fixtures.js';
 
 const GOLDEN_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), 'golden');
 const PRESET = resolvePreset('16x9', { '16x9': { width: 1280, height: 720, fps: 30 } }).preset;
+
+// Built from the platform's own filesystem root rather than a `C:/` literal,
+// so `path.resolve` inside the graph builder behaves identically on Windows
+// and POSIX. See `absoluteTestPath` in ./fixtures.ts.
+const PROJECT_DIR = absoluteTestPath('project');
+const WORK_DIR = path.join(PROJECT_DIR, 'renders', '.work', 'golden');
+const OUTPUT_PATH = path.join(PROJECT_DIR, 'renders', 'out.mp4');
 
 function assertGolden(name: string, actual: string): void {
   const goldenPath = path.join(GOLDEN_DIR, name);
@@ -89,7 +96,7 @@ function inputsFor(overrides: Partial<CompositorInputs> = {}): CompositorInputs 
   return {
     source: {
       kind: 'original-recording',
-      path: 'C:/project/steps/recording.mp4',
+      path: path.join(PROJECT_DIR, 'steps', 'recording.mp4'),
       width: 1280,
       height: 720,
       durationMs: 6000,
@@ -97,13 +104,13 @@ function inputsFor(overrides: Partial<CompositorInputs> = {}): CompositorInputs 
     },
     flow: makeFlow({ durationMs: 6000, clickTimesMs: [1500, 4200] }),
     narration: {
-      audioPath: 'C:/project/narration/audio.mp3',
+      audioPath: path.join(PROJECT_DIR, 'narration', 'audio.mp3'),
       words: makeWords('Open the dashboard and apply a filter to narrow the results.', 6000),
     },
     brandKit: fullKit(),
-    assetBaseDir: 'C:/project',
+    assetBaseDir: PROJECT_DIR,
     preset: PRESET,
-    output: { path: 'C:/project/renders/out.mp4', workDir: 'C:/project/renders/.work/golden' },
+    output: { path: OUTPUT_PATH, workDir: WORK_DIR },
     pictureInPicture: null,
     ...overrides,
   };
@@ -159,8 +166,27 @@ describe('AC4: the filter graph is deterministic', () => {
     // cwd. That is what makes a golden file portable, and it sidesteps the
     // subtitles filter's Windows drive-letter escaping entirely.
     const graph = buildFilterGraph({ inputs: inputsFor(), captionCueCount: 2 });
+    // Checked against the ACTUAL paths this graph was built from rather
+    // than against a regex for an absolute path. A generic POSIX-root
+    // pattern cannot be used here: ffmpeg expressions are full of `/` as
+    // division (`asetpts=N/SR/TB`, `out_w/2`), so such a regex either
+    // false-positives on arithmetic or is written so loosely it catches
+    // nothing. Comparing against the known inputs is exact, and means the
+    // same thing on Windows and on POSIX.
+    const absoluteInputs = graph.inputs
+      .map((input) => input.path)
+      .filter((candidate) => path.isAbsolute(candidate));
+    expect(absoluteInputs.length).toBeGreaterThan(0);
+    for (const absolute of absoluteInputs) {
+      expect(graph.text).not.toContain(absolute);
+    }
+    for (const directory of [PROJECT_DIR, WORK_DIR, OUTPUT_PATH]) {
+      expect(graph.text).not.toContain(directory);
+    }
+
+    // Belt and braces for a stray hardcoded Windows literal, which the
+    // path comparison above would not catch if someone typed one in.
     expect(graph.text).not.toMatch(/[A-Za-z]:[/\\]/);
-    expect(graph.text).not.toContain('C:/project');
     expect(graph.text).toContain('subtitles=filename=captions.ass:fontsdir=fonts');
   });
 
@@ -232,8 +258,18 @@ describe('AC4: layer assembly', () => {
     const graph = buildFilterGraph({ inputs: inputsFor(), captionCueCount: 2 });
     const logo = graph.inputs.find((input) => input.role === 'logo image');
     expect(logo).toBeDefined();
+    // The kit stores `brand/logo.png` project-relative so it stays
+    // committable; the builder must resolve it against `assetBaseDir` into
+    // a real absolute path for `-i`. The expectation is composed with the
+    // same path primitives rather than written as a literal, so it means
+    // the same thing on Windows and on POSIX.
     expect(path.isAbsolute(logo?.path ?? '')).toBe(true);
-    expect(logo?.path.replace(/\\/g, '/')).toBe('C:/project/brand/logo.png');
+    expect(logo?.path).toBe(path.join(PROJECT_DIR, 'brand', 'logo.png'));
+
+    // And the other half of the claim: it reaches ffmpeg as an argument,
+    // never as text inside the graph.
+    expect(graph.text).not.toContain(logo?.path ?? '');
+    expect(graph.text).not.toContain('logo.png');
   });
 
   it('gives the ripple input a real frame rate, since its size is animated', () => {
@@ -267,7 +303,7 @@ describe('AC4 / ADR-007: the reserved picture-in-picture slot', () => {
     const graph = buildFilterGraph({
       inputs: inputsFor({
         pictureInPicture: {
-          path: 'C:/project/avatar.webm',
+          path: path.join(PROJECT_DIR, 'avatar.webm'),
           hasAlpha: true,
           alphaMode: 'premultiplied',
           startMs: 500,
@@ -289,7 +325,7 @@ describe('AC4 / ADR-007: the reserved picture-in-picture slot', () => {
     const graph = buildFilterGraph({
       inputs: inputsFor({
         pictureInPicture: {
-          path: 'C:/project/avatar.mp4',
+          path: path.join(PROJECT_DIR, 'avatar.mp4'),
           hasAlpha: false,
           alphaMode: 'straight',
           startMs: 0,

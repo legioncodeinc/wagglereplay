@@ -194,6 +194,18 @@ ffmpeg with `libx264`, `libass`, and `libfreetype`, on `PATH` or named by
 `WAGGLE_FFMPEG_PATH` / `WAGGLE_FFPROBE_PATH`. Developed and tested against
 ffmpeg 9.0.
 
+`test/ffmpeg-preflight.test.ts` checks the binary, its companion ffprobe,
+and each encoder and filter the generated graph uses, so a missing or
+stripped-down build is reported as a named requirement rather than as an
+opaque filter-graph parse error twenty layers down.
+
+**This suite does not skip when ffmpeg is absent, and that is deliberate.**
+A skipped render-idempotency test and a passing one look identical on a
+green dashboard, and the render they check is the entire reason this
+package exists. Other packages in this workspace can reasonably guard their
+ffmpeg-dependent tests, because ffmpeg is one input path among many there.
+Here it is the whole job, so the honest signal is a hard failure.
+
 Note that ffmpeg 9 removed `-filter_complex_script`; this package uses the
 current `-/filter_complex <file>` form, which is also what keeps a
 multi-kilobyte cursor expression off a command line that Windows caps at

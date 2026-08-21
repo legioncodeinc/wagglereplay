@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_BRAND_KIT } from '../src/brand/defaults.js';
 import {
@@ -9,7 +10,7 @@ import {
 } from '../src/compositor.js';
 import { FFMPEG_CAPABILITIES, FfmpegCompositor } from '../src/ffmpeg/backend.js';
 import { resolvePreset } from '../src/presets.js';
-import { makeFlow } from './fixtures.js';
+import { absoluteTestPath, makeFlow } from './fixtures.js';
 
 /**
  * prd-007 AC1: the compositor interface and its declared capabilities.
@@ -27,11 +28,17 @@ import { makeFlow } from './fixtures.js';
 // lookup a caller does instead of asserting one exists.
 const PRESET = resolvePreset('16x9').preset;
 
+// Composed from the platform's own filesystem root, never a `C:/` literal:
+// these paths are never touched on disk here, but a hardcoded drive letter
+// is not absolute on POSIX and would become a real failure the moment an
+// assertion started resolving one. See `absoluteTestPath` in ./fixtures.ts.
+const NOWHERE = absoluteTestPath('nowhere');
+
 function baseInputs(overrides: Partial<CompositorInputs> = {}): CompositorInputs {
   return {
     source: {
       kind: 'original-recording',
-      path: 'C:/nowhere/recording.mp4',
+      path: path.join(NOWHERE, 'recording.mp4'),
       width: 1280,
       height: 720,
       durationMs: 4000,
@@ -40,9 +47,9 @@ function baseInputs(overrides: Partial<CompositorInputs> = {}): CompositorInputs
     flow: makeFlow(),
     narration: null,
     brandKit: DEFAULT_BRAND_KIT,
-    assetBaseDir: 'C:/nowhere',
+    assetBaseDir: NOWHERE,
     preset: PRESET,
-    output: { path: 'C:/nowhere/out.mp4', workDir: 'C:/nowhere/work' },
+    output: { path: path.join(NOWHERE, 'out.mp4'), workDir: path.join(NOWHERE, 'work') },
     pictureInPicture: null,
     ...overrides,
   };
@@ -97,7 +104,7 @@ describe('AC1: the compositor contract', () => {
       assertCompositorInputs(
         baseInputs({
           narration: {
-            audioPath: 'C:/nowhere/audio.mp3',
+            audioPath: path.join(NOWHERE, 'audio.mp3'),
             words: {
               schemaVersion: 1,
               provider: 'fixture',
@@ -115,7 +122,7 @@ describe('AC1: the compositor contract', () => {
       assertCompositorInputs(
         baseInputs({
           pictureInPicture: {
-            path: 'C:/nowhere/avatar.webm',
+            path: path.join(NOWHERE, 'avatar.webm'),
             hasAlpha: true,
             alphaMode: 'straight',
             startMs: 0,
@@ -138,7 +145,7 @@ describe('AC1: the compositor contract', () => {
       assertCompositorInputs(
         baseInputs({
           pictureInPicture: {
-            path: 'C:/nowhere/avatar.webm',
+            path: path.join(NOWHERE, 'avatar.webm'),
             hasAlpha: true,
             alphaMode: 'premultiplied',
             startMs: 0,
