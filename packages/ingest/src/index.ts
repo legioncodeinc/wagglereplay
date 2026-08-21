@@ -43,6 +43,11 @@ export {
   RouteHeatmapSchema,
 } from './heatmap/schema.js';
 export { HEATMAP_FILENAME, heatmapPath, writeHeatmap } from './heatmap/write-heatmap.js';
+export {
+  type CopyRecordingResult,
+  copySourceRecording,
+  RECORDINGS_SUBDIR,
+} from './pipeline/copy-recording.js';
 export { type RunIngestOptions, type RunIngestResult, runIngest } from './pipeline/run-ingest.js';
 // --- Session I/O and the full pipeline (AC5) --------------------------------
 export {

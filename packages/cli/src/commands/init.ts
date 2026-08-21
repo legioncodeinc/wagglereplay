@@ -17,12 +17,28 @@ import {
  * regenerable derivative and stays out of git; resolved secrets never do.
  * credentials.json itself IS tracked, because it only ever holds env-var
  * *references*, never values (see credentialsTemplate below).
+ *
+ * recordings/ (the source video "waggle record" copies in, see
+ * @waggle/ingest's copySourceRecording) is heavy media, and ADR-015's own
+ * consequences section is explicit that "heavy media stays gitignored by
+ * default with documented opt-ins (or git LFS)": the source recording is
+ * the one input a re-render can never regenerate (unlike renders/, which
+ * is a cheap derivative of the IR), so an author who wants the exact
+ * source pixels preserved in git can still remove this line or switch to
+ * git LFS - the default just does not force every clone of the repo to
+ * carry every project's raw screen-capture video.
  */
 const PROJECT_GITIGNORE = `# Waggle project .gitignore (ADR-015, ADR-008)
 
 # Rendered videos and share bundles are regenerable derivatives of the
 # Walkthrough IR. Do not commit them.
 renders/
+
+# The source recording "waggle record" keeps (ADR-015: heavy media stays
+# gitignored by default). Unlike renders/, this cannot be regenerated from
+# the IR alone - remove this line (or switch to git LFS) if you want the
+# original screen capture committed.
+recordings/
 
 # Never commit resolved secrets. credentials.json (tracked) holds only
 # environment-variable references; the values themselves live in .env,

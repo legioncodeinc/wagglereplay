@@ -104,6 +104,21 @@ describe('AC5: runIngest end-to-end (real ffmpeg, real fixture recording)', () =
 
     const stepDirs = readdirSync(path.join(projectDir, 'steps', 'v1'));
     expect(stepDirs.length).toBe(result.stepCount);
+
+    // The defect this fixes: @waggle/compose's resolveSourceVideo resolves
+    // sourceRecording.videoRef as path.resolve(projectDir, videoRef) - see
+    // packages/compose/src/render/render-project.ts. Prove that exact
+    // resolution succeeds without importing compose (packages/ingest must
+    // not depend on it): read the written IR back and resolve its own
+    // videoRef the same way compose does.
+    expect(existsSync(result.recordingFilePath)).toBe(true);
+    expect(result.recordingFilePath).toBe(path.join(projectDir, 'recordings', 'v1', 'video.mp4'));
+    const writtenFlow = JSON.parse(readFileSync(result.irFilePath, 'utf8')) as {
+      waggle: { sourceRecording?: { videoRef: string } };
+    };
+    const videoRef = writtenFlow.waggle.sourceRecording?.videoRef;
+    expect(videoRef).toBe('recordings/v1/video.mp4');
+    expect(path.resolve(projectDir, videoRef ?? '')).toBe(result.recordingFilePath);
   }, 60_000);
 
   it('exits with IngestSessionError for a session directory missing meta.json', async () => {
@@ -115,6 +130,33 @@ describe('AC5: runIngest end-to-end (real ffmpeg, real fixture recording)', () =
       runIngest({ projectDir, sessionDir: emptySessionDir, predraftEnv: {} }),
     ).rejects.toThrow(/meta\.json/);
   });
+
+  it('a second run over the same project stores the recording under v2 without touching v1s copy', async () => {
+    const projectDir = seedProject();
+    const { sessionDir } = await seedSessionDir();
+    cleanup.push(projectDir, sessionDir);
+
+    const options = {
+      ffmpegRunner: createRealFfmpegRunner(),
+      extractionOptions: { windowMs: 500, sampleIntervalMs: 500 },
+      predraftEnv: {},
+    };
+
+    const first = await runIngest({ projectDir, sessionDir, ...options });
+    const v1Hash = sha256File(first.recordingFilePath);
+
+    const second = await runIngest({ projectDir, sessionDir, ...options });
+    expect(second.irVersion).toBe(2);
+    expect(second.recordingFilePath).not.toBe(first.recordingFilePath);
+    expect(second.recordingFilePath).toBe(path.join(projectDir, 'recordings', 'v2', 'video.mp4'));
+
+    // v1s copy still exists, unmodified, byte-identical to what it was
+    // right after the first run - the same recording, ingested twice,
+    // never overwrites an older version's copy.
+    expect(existsSync(first.recordingFilePath)).toBe(true);
+    expect(sha256File(first.recordingFilePath)).toBe(v1Hash);
+    expect(sha256File(second.recordingFilePath)).toBe(v1Hash);
+  }, 60_000);
 });
 
 describe('AC5: runIngest is idempotent given identical inputs', () => {
@@ -152,6 +194,17 @@ describe('AC5: runIngest is idempotent given identical inputs', () => {
     const predraftHashA = sha256File(resultA.predraftFilePath);
     const predraftHashB = sha256File(resultB.predraftFilePath);
     expect(predraftHashB).toBe(predraftHashA);
+
+    // Idempotency extends to the copied recording itself: not just "a
+    // file exists", but the exact same bytes, and no duplicate copy left
+    // behind anywhere else in either project.
+    expect(existsSync(resultA.recordingFilePath)).toBe(true);
+    expect(existsSync(resultB.recordingFilePath)).toBe(true);
+    const recordingHashA = sha256File(resultA.recordingFilePath);
+    const recordingHashB = sha256File(resultB.recordingFilePath);
+    expect(recordingHashB).toBe(recordingHashA);
+    expect(readdirSync(path.join(projectA, 'recordings', 'v1'))).toEqual(['video.mp4']);
+    expect(readdirSync(path.join(projectB, 'recordings', 'v1'))).toEqual(['video.mp4']);
 
     // The IR content is identical even though it lives at two different
     // paths (two independent fresh projects) - proving idempotency is

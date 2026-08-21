@@ -49,6 +49,9 @@ describe('waggle init + command surface (e2e)', () => {
 
     const gitignore = readFileSync(path.join(projectDir, '.gitignore'), 'utf8');
     expect(gitignore).toContain('renders/');
+    // The source recording is gitignored by default (ADR-015: heavy media
+    // stays gitignored by default); see packages/cli/src/commands/init.ts.
+    expect(gitignore).toContain('recordings/');
     expect(gitignore).toContain('.env');
 
     // ADR-008: credentials.json holds env-var references only, never values.

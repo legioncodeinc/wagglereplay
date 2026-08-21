@@ -9,6 +9,7 @@ import { runPreDraft } from '../predraft/run-predraft.js';
 import type { FetchLike } from '../predraft/shared-http.js';
 import { writePreDraft } from '../predraft/write-predraft.js';
 import { segmentSession } from '../segment/segment-session.js';
+import { copySourceRecording } from './copy-recording.js';
 import { loadSession } from './session-io.js';
 
 export interface RunIngestOptions {
@@ -29,6 +30,8 @@ export interface RunIngestResult {
   readonly irFilePath: string;
   readonly heatmapFilePath: string;
   readonly predraftFilePath: string;
+  /** Absolute path the source recording was copied to (see ./copy-recording.ts). */
+  readonly recordingFilePath: string;
   readonly framesExtracted: number;
   readonly stepCount: number;
   readonly warnings: readonly string[];
@@ -37,10 +40,18 @@ export interface RunIngestResult {
 /**
  * AC5: the full ingest pipeline. A finished capture session in
  * `sessionDir` becomes: one new immutable IR version (AC1, with `assets`
- * populated by AC2 before it is ever written - the IR file is written
- * exactly once per run, since IR versions are immutable, so keyframe
- * extraction has to happen BEFORE the write, not after), `heatmap.json`
- * (AC3), and `predraft.json` (AC4).
+ * populated by AC2 and `sourceRecording.videoRef` repointed by this
+ * function before it is ever written - the IR file is written exactly
+ * once per run, since IR versions are immutable, so keyframe extraction
+ * and the recording copy both have to happen BEFORE the write, not
+ * after), `heatmap.json` (AC3), and `predraft.json` (AC4).
+ *
+ * The source recording itself is copied into the project directory
+ * (`recordings/v{irVersion}/`, see ./copy-recording.ts) rather than left
+ * in `sessionDir`: `@waggle/compose`'s `resolveSourceVideo` resolves
+ * `sourceRecording.videoRef` as `path.resolve(projectDir, videoRef)`, so
+ * a session-relative video is invisible to render - this is the fix for
+ * the "IR points at a source recording that does not exist" defect.
  *
  * Idempotent given identical inputs (AC5): every stage
  * (segmentSession, extractKeyframes, aggregateHeatmap, and runPreDraft on
@@ -69,8 +80,21 @@ export async function runIngest(options: RunIngestOptions): Promise<RunIngestRes
     options.extractionOptions,
   );
 
+  const { videoRef, destPath: recordingFilePath } = copySourceRecording(
+    videoPath,
+    options.projectDir,
+    targetIrVersion,
+    meta.video.filename,
+  );
+
   const flowWithAssets: WalkthroughFlow = {
     ...flow,
+    waggle: {
+      ...flow.waggle,
+      sourceRecording: flow.waggle.sourceRecording
+        ? { ...flow.waggle.sourceRecording, videoRef }
+        : flow.waggle.sourceRecording,
+    },
     steps: flow.steps.map((step, index) => {
       const assets = assetsByStepIndex.get(index);
       if (!assets) return step;
@@ -106,6 +130,7 @@ export async function runIngest(options: RunIngestOptions): Promise<RunIngestRes
     irFilePath: writeResult.filePath,
     heatmapFilePath,
     predraftFilePath,
+    recordingFilePath,
     framesExtracted: frames.length,
     stepCount: flowWithAssets.steps.length,
     warnings: [...segmentWarnings, ...predraftWarnings],
