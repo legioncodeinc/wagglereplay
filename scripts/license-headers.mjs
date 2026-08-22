@@ -98,9 +98,9 @@ for (const pkg of pkgFiles) {
   if (json.license === 'AGPL-3.0-or-later') continue;
   if (MODE === 'add') {
     json.license = 'AGPL-3.0-or-later';
-    const raw = readFileSync(pkg, 'utf8');
-    const formatted = `${JSON.stringify(json, null, 2).replace(/\n/g, '\n')}\n`;
-    writeFileSync(pkg, json.name === undefined ? raw : formatted);
+    if (json.name !== undefined) {
+      writeFileSync(pkg, `${JSON.stringify(json, null, 2)}\n`);
+    }
     console.log(`license field added: ${path.relative(ROOT, pkg)}`);
   } else {
     pkgMissing += 1;
