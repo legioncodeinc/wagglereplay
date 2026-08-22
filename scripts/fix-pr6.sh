@@ -18,19 +18,23 @@ if git diff --cached --quiet; then
   exit 1
 fi
 
-git commit -m "fix(ci): macOS ffmpeg-full, single-fork studio tests on Windows, drop identity replace
+git commit -m "fix(ci): pin macOS to evermeet ffmpeg 9.0.1, Windows job to Node 25
 
-- ci-os.yml macOS: brew's core ffmpeg bottle ships without the libass
-  subtitles filter (first run failed compose's never-skip preflight with
-  \"No such filter: 'subtitles'\"); install ffmpeg-full, which carries
-  libass per its dependency list.
-- ci-os.yml Windows: apps/studio's fork pool crashed on the runner
-  (\"Worker exited unexpectedly\" right after its 15s real-ingest test)
-  while passing on Windows dev machines; run that suite in a single fork
-  (--pool=forks --maxWorkers=1, verified locally: 40/40 green). Every
-  suite still runs; nothing skips.
-- license-headers.mjs: remove the no-op newline identity replace CodeQL
-  flagged (js/identity-replacement, alert 7)."
+Round 2 diagnosis after the ffmpeg-full run still failed:
+
+- The compositor requires ffmpeg 9; ffmpeg 8.1 rejects its
+  dynamic-dimension scale chains with EINVAL (isolated locally against
+  BtbN 8.1 win64: the t-dependent ripple scale with eval=frame on a
+  looped image input reproduces it deterministically, 12/12, while the
+  identical graph on 9 passes). Homebrew tops out at 8.1 (both ffmpeg
+  and ffmpeg-full), so the macOS job now pins evermeet.cx's 9.0.1
+  builds (libass included) with SHA-256 verification, resolved through
+  WAGGLE_FFMPEG_PATH/WAGGLE_FFPROBE_PATH.
+- Windows job moves to Node 25 (the primary dev machine's line): Node
+  24.19 crashed apps/studio's vitest fork mid-suite on the runner even
+  in a single fork (the known Windows forks-teardown crash class);
+  ubuntu CI already covers the .nvmrc Node line. The single-fork studio
+  invocation stays."
 
 git push origin "$BRANCH"
 gh pr view 6 --repo "$REPO" --json url --jq .url
