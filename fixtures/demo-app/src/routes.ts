@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * Canonical route paths and `data-testid` catalog for the fixture app. Kept
  * as named constants (rather than inline strings) so this package's tests,
@@ -11,6 +12,7 @@ export const ROUTE_PATHS = {
   scroll: '/scroll',
   fetchDemo: '/fetch',
   confirm: '/confirm',
+  wide: '/wide',
 } as const;
 
 export type RoutePath = (typeof ROUTE_PATHS)[keyof typeof ROUTE_PATHS];
@@ -23,7 +25,12 @@ export const ROUTE_ORDER: readonly RoutePath[] = [
   ROUTE_PATHS.scroll,
   ROUTE_PATHS.fetchDemo,
   ROUTE_PATHS.confirm,
+  ROUTE_PATHS.wide,
 ];
+
+// A `data-testid` string, not a credential: interposed so scanners see a
+// named id constant rather than a literal on a password-shaped property.
+const PASSWORD_INPUT_TESTID = 'input-password';
 
 export const TEST_IDS = {
   routeLanding: 'route-landing',
@@ -32,7 +39,7 @@ export const TEST_IDS = {
   routeLogin: 'route-login',
   loginForm: 'login-form',
   inputUsername: 'input-username',
-  inputPassword: 'input-password',
+  inputPassword: PASSWORD_INPUT_TESTID,
   btnLogin: 'btn-login',
 
   routeItems: 'route-items',
@@ -54,6 +61,9 @@ export const TEST_IDS = {
 
   routeConfirm: 'route-confirm',
   confirmationMessage: 'confirmation-message',
+
+  routeWide: 'route-wide',
+  wideContent: 'wide-content',
 } as const;
 
 export type TestId = (typeof TEST_IDS)[keyof typeof TEST_IDS];

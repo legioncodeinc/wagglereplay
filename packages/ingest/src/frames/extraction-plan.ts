@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { StepTiming } from '../segment/types.js';
 
 /** AC2 defaults: a +-5s window around the action, sampled at 1 fps. */

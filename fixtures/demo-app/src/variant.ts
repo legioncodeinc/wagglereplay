@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * The three fixed shapes this fixture app can serve. Every variant renders
  * the same six routes with the same test ids, except for the one documented

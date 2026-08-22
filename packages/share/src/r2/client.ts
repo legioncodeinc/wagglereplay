@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { R2Config } from './env.js';
 import {
   buildStringToSign,
@@ -34,11 +35,27 @@ export class R2UploadError extends Error {
   readonly status: number;
   readonly key: string;
   constructor(key: string, status: number, bodySnippet: string) {
-    super(`R2 PUT of "${key}" failed with HTTP ${status}: ${bodySnippet}`);
+    super(`R2 PUT of "${key}" failed with HTTP ${status}: ${redactR2ErrorBody(bodySnippet)}`);
     this.name = 'R2UploadError';
     this.status = status;
     this.key = key;
   }
+}
+
+/**
+ * ADR-008's no-credentials-in-logs rule, applied to R2 error bodies (2026-08-21
+ * ruling, recorded in the ledger's blocked register): an S3
+ * SignatureDoesNotMatch body echoes AWSAccessKeyId, StringToSign, and
+ * CanonicalRequest, and a key id is credential material even though the
+ * secret itself never appears. Those fields are redacted before the snippet
+ * reaches any error message that might be printed or logged.
+ */
+export function redactR2ErrorBody(snippet: string): string {
+  return snippet
+    .replace(/(<(AWSAccessKeyId)>)([^<]*)(<\/\2>)/g, '$1[REDACTED]$4')
+    .replace(/("AWSAccessKeyId"\s*:\s*")([^"]*)(")/g, '$1[REDACTED]$3')
+    .replace(/(<(StringToSign|CanonicalRequest)>)([\s\S]*?)(<\/\2>)/g, '$1[REDACTED]$4')
+    .replace(/("(StringToSign|CanonicalRequest)"\s*:\s*")([^"]*)(")/g, '$1[REDACTED]$4');
 }
 
 export interface R2ClientOptions {

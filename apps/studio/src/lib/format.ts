@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { StepClassification } from '@waggle/ir';
 
 /** Short label + color token per step classification (AC2's badge). */

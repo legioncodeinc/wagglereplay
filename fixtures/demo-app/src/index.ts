@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * Shared fixture app used by prd-003 (capture extension e2e), prd-009
  * (replay engine drift e2e), and prd-011 (vision QA seeded-defect run). See

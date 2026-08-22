@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { CaptureEvent } from '@waggle/extension';
 import type { ActionEvent, EventGroup, GroupOrOrphan, OutcomeEvent } from './types.js';
 

@@ -21,3 +21,6 @@ Grow the CLI into a full parity surface alongside the GUI. Rejected: it doubles 
 ## Supersession and interaction
 
 Does not supersede any existing ADR; no ADR previously declared the CLI the primary interface, so there is nothing to formally revise. Reinforces ADR-014's cost-avoidance stance (no unnecessary maintained surface) and depends on ADR-004's runner-profile abstraction and prd-012 for the CI path this freeze preserves. Interacts with ADR-016 (the desktop app, not the CLI, now owns the primary launch path) and ADR-017 (the CLI and CI path keeps resolving provider keys from env refs rather than the encrypted desktop config).
+
+Interaction note (2026-08-21): the `--check` entry point this ADR carves out for CI is defined and implemented by prd-011 (verdict set, exit codes, the flag itself, per prd-011 AC3); prd-012 consumes the finished contract inside its workflow and defines none of it. Ownership was ruled per HANDOFF-3's logic and recorded here so the two PRDs cannot both defer the flag to each other. This note records an allocation between two backlog PRDs; it does not change the decision above.
+

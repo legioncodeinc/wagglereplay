@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import {
   DEFAULT_MAX_CHARS_PER_LINE,
   DEFAULT_MAX_LINES_PER_CUE,

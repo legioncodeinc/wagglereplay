@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { RecordedViewport, Rect, StepElement } from '@waggle/ir';
 import { computeAccessibleName, computeAccessibleRole } from './accessibility.js';
 import type { GeneratedSelector, ScrollOffset } from './events.js';

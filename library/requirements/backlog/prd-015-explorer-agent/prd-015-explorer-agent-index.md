@@ -4,7 +4,7 @@ Status: backlog | Phase: 4 | Created: 2026-08-20
 
 ## 0. Dependencies
 
-Blocking PRDs: prd-009 (replay/act machinery), prd-011 (verdicts + baselines), prd-010 (credentials). Governing ADRs: ADR-005, ADR-008. Corpus: replay-and-render.md (agentic driving section).
+Blocking PRDs: prd-009 (replay/act machinery), prd-011 (verdicts + baselines), prd-010 (credentials). Governing ADRs: ADR-005, ADR-008, ADR-017 (provider keys: the explorer LLM key is a provider key, GUI entry via the encrypted store, env refs on the CLI/CI path), ADR-019 (CLI freeze: every interactive capability here ships through Studio, no new CLI surface). Corpus: replay-and-render.md (agentic driving section).
 
 ## Goal
 

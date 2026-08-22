@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { type FetchLike, fetchWithRetry } from '../shared/http.js';
 import { TtsProviderError } from '../types.js';
 import { ELEVENLABS_DEFAULT_BASE_URL, type ElevenLabsModelId } from './constants.js';
@@ -78,7 +79,7 @@ export class ElevenLabsClient {
     });
   }
 
-  /** `POST /v1/text-to-speech/{voiceId}/with-timestamps` — non-dialogue models (Flash, Multilingual v2). */
+  /** `POST /v1/text-to-speech/{voiceId}/with-timestamps` - non-dialogue models (Flash, Multilingual v2). */
   async textToSpeechWithTimestamps(options: {
     voiceId: string;
     text: string;
@@ -96,7 +97,7 @@ export class ElevenLabsClient {
   }
 
   /**
-   * `POST /v1/text-to-dialogue/with-timestamps` — the dialogue endpoint
+   * `POST /v1/text-to-dialogue/with-timestamps` - the dialogue endpoint
    * required for eleven_v3 (ADR-006: "dialogue endpoint when model is
    * v3"). Documented to return the same envelope as the plain
    * with-timestamps endpoint for a single-speaker input; see the response
@@ -118,7 +119,7 @@ export class ElevenLabsClient {
     return ElevenLabsWithTimestampsResponseSchema.parse(body);
   }
 
-  /** `GET /v1/user/subscription` — the plan tier the AC7 guardrail checks. */
+  /** `GET /v1/user/subscription` - the plan tier the AC7 guardrail checks. */
   async fetchSubscriptionTier(): Promise<string> {
     const body: unknown = await this.requestJson('/v1/user/subscription', { method: 'GET' });
     return ElevenLabsSubscriptionResponseSchema.parse(body).tier;

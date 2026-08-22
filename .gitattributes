@@ -1,0 +1,25 @@
+# Normalize all text files to LF in the repo and on checkout.
+# Eliminates the CRLF false-failure class (lint errors, golden-file tests) on Windows checkouts.
+* text=auto eol=lf
+
+# Windows scripts keep CRLF where the platform requires it
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary assets: never normalize
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.mp4 binary
+*.webm binary
+*.zip binary
+*.gz binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary

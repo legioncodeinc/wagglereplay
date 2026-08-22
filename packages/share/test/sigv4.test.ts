@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { createHmac } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import {
@@ -12,6 +13,11 @@ import {
   signRequest,
   toAmzDate,
 } from '../src/r2/sigv4.js';
+import {
+  ANOTHER_EXAMPLE_SIGNING_KEY,
+  AWS_DOCS_EXAMPLE_KEY_ID,
+  AWS_DOCS_EXAMPLE_SIGNING_KEY,
+} from './r2-fixtures.js';
 
 /**
  * The HMAC-SHA-256 and SHA-256 primitives against RFC 4231's published
@@ -181,8 +187,8 @@ describe('signRequest', () => {
     ]),
     signedHeaders: 'content-type;host;x-amz-content-sha256;x-amz-date',
     hashedPayload: sha256Hex('<html></html>'),
-    accessKeyId: 'AKIDEXAMPLE',
-    secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+    accessKeyId: AWS_DOCS_EXAMPLE_KEY_ID,
+    secretAccessKey: AWS_DOCS_EXAMPLE_SIGNING_KEY,
     region: 'auto',
     service: 's3',
     amzDate: '20260314T092653Z',
@@ -201,7 +207,10 @@ describe('signRequest', () => {
   });
 
   it('changes when the secret access key changes', () => {
-    const other = signRequest({ ...baseInput, secretAccessKey: 'a-completely-different-secret' });
+    const other = signRequest({
+      ...baseInput,
+      secretAccessKey: ANOTHER_EXAMPLE_SIGNING_KEY,
+    });
     expect(other).not.toBe(signRequest(baseInput));
   });
 

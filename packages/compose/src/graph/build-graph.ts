@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import path from 'node:path';
 import { buildAudioChain } from '../audio/mix.js';
 import type { BrandKit, LayerAnchor } from '../brand/schema.js';

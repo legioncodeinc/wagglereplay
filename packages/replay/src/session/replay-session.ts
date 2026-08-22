@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import {
@@ -255,7 +256,6 @@ export async function runReplaySession(
             screenshotsDir,
             sessionStartEpoch,
             quietMs: options.quietMs,
-            networkExclusions: options.networkExclusions,
             recordedClickPoint,
             actWithValue: options.actWithValue,
             scrubMessage: options.scrubMessage,

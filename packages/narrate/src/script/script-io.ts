@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { type NarrationScript, NarrationScriptSchema } from './script-schema.js';
 

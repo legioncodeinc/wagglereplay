@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { WalkthroughStep } from '@waggle/ir';
 import type { Locator, Page } from 'playwright-core';
 import type { StepFailureDetail } from './step-failure.js';
@@ -49,8 +50,11 @@ export interface ActContext {
   readonly actWithValue?: ActWithValue;
   /** Optional handlers for `customStep`s, keyed by the step's name. */
   readonly customStepHandlers?: Readonly<Record<string, CustomStepHandler>>;
-  /** Called with the scrubbed failure detail when a step fails; used by the orchestrator. */
-  readonly onUnsupported?: (detail: StepFailureDetail) => void;
+  // Removed 2026-08-21 (Run 4 guardrail pass): an `onUnsupported` callback
+  // used to sit here, documented as "used by the orchestrator", but no
+  // caller ever registered one and act.ts never invoked it; replay-step.ts
+  // consumes the returned `failed` detail directly. A dead hook that reads
+  // as wired-up configuration is worse than no hook.
 }
 
 interface ActOutcome {

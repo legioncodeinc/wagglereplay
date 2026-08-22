@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { writeFileSync } from 'node:fs';
 import { buildCaptionCues, type CaptionCue } from './captions.js';
 import {
@@ -29,7 +30,7 @@ function padStart(value: number, width: number): string {
   return String(value).padStart(width, '0');
 }
 
-/** `HH:MM:SS,mmm` — SRT's comma decimal separator (AC4). */
+/** `HH:MM:SS,mmm` - SRT's comma decimal separator (AC4). */
 export function formatSrtTimestamp(ms: number): string {
   const totalMs = Math.max(0, Math.round(ms));
   const hours = Math.floor(totalMs / 3_600_000);
@@ -39,7 +40,7 @@ export function formatSrtTimestamp(ms: number): string {
   return `${padStart(hours, 2)}:${padStart(minutes, 2)}:${padStart(seconds, 2)},${padStart(millis, 3)}`;
 }
 
-/** `HH:MM:SS.mmm` — VTT's period decimal separator (AC4). */
+/** `HH:MM:SS.mmm` - VTT's period decimal separator (AC4). */
 export function formatVttTimestamp(ms: number): string {
   return formatSrtTimestamp(ms).replace(',', '.');
 }

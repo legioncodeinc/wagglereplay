@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { toNormalized, type ViewportSize } from '@waggle/ir';
 import type { StepTiming } from '../segment/types.js';
 import { HEATMAP_SCHEMA_VERSION, type HeatmapDocument, HeatmapDocumentSchema } from './schema.js';

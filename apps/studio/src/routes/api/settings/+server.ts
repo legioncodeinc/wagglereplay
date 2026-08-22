@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { error, json, type RequestHandler } from '@sveltejs/kit';
 import { StudioSettingsSchema } from '$lib/schemas/studio-settings.js';
 import { getProjectDir } from '$lib/server/project-context.js';

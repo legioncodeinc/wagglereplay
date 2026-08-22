@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { existsSync, mkdirSync, statSync, utimesSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { renderProject } from '@waggle/compose';

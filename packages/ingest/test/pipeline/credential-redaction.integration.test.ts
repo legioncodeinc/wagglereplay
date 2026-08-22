@@ -1,4 +1,4 @@
-import { spawnSync } from 'node:child_process';
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -16,16 +16,31 @@ import { createRealFfmpegRunner } from '../../src/frames/ffmpeg-runner.js';
 import { runIngest } from '../../src/pipeline/run-ingest.js';
 import type { FetchLike } from '../../src/predraft/shared-http.js';
 
-function runFfmpeg(args: readonly string[]): Buffer {
-  const result = spawnSync('ffmpeg', [...args], { stdio: ['ignore', 'pipe', 'pipe'] });
-  if (result.status !== 0) {
-    throw new Error(`ffmpeg failed: ${result.stderr.toString('utf8')}`);
-  }
-  return result.stdout;
+/**
+ * Obviously-fake pre-draft provider key for the env the canary's runIngest
+ * receives (the transport below is a mock; the value only needs to be
+ * non-empty). One labeled constant instead of an inline literal, per the
+ * 2026-08-22 credential-scanner remediation (see test/predraft/fixtures.ts).
+ */
+const FAKE_PROVIDER_KEY_FOR_TESTS = 'test-only-provider-key';
+
+/**
+ * Delegates every ffmpeg invocation in this canary to the PRODUCTION
+ * runner (`createRealFfmpegRunner`), so the suite exercises the same
+ * binary resolution the pipeline uses (`WAGGLE_FFMPEG_PATH` if set,
+ * else PATH) instead of a test-local bare `ffmpeg` that could silently
+ * diverge from what production would have run (HANDOFF-4 section 6
+ * item 4). Deliberately no skip guard: an absent ffmpeg must fail this
+ * suite, not silently pass it.
+ */
+async function runFfmpeg(args: readonly string[]): Promise<Buffer> {
+  const runner = createRealFfmpegRunner();
+  const { stdout } = await runner(args);
+  return Buffer.from(stdout, 'binary');
 }
 
-function writeVisibleCredentialVideo(filePath: string): void {
-  runFfmpeg([
+async function writeVisibleCredentialVideo(filePath: string): Promise<void> {
+  await runFfmpeg([
     '-y',
     '-f',
     'lavfi',
@@ -39,7 +54,7 @@ function writeVisibleCredentialVideo(filePath: string): void {
   ]);
 }
 
-function fieldPixels(pngPath: string): Buffer {
+async function fieldPixels(pngPath: string): Promise<Buffer> {
   return runFfmpeg([
     '-i',
     pngPath,
@@ -98,7 +113,7 @@ describe('credential capture to pre-draft redaction canary', () => {
     });
 
     const videoPath = path.join(sessionDir, 'video.mp4');
-    writeVisibleCredentialVideo(videoPath);
+    await writeVisibleCredentialVideo(videoPath);
     const output = finalizeSession({
       session,
       generatedAt: '2026-08-21T00:00:00.000Z',
@@ -139,7 +154,7 @@ describe('credential capture to pre-draft redaction canary', () => {
       predraftEnv: {
         WAGGLE_PREDRAFT_PROVIDER: 'openai',
         WAGGLE_PREDRAFT_MODEL: 'test-model',
-        OPENAI_API_KEY: 'test-only-provider-key',
+        OPENAI_API_KEY: FAKE_PROVIDER_KEY_FOR_TESTS,
       },
       predraftFetch,
     });
@@ -150,7 +165,7 @@ describe('credential capture to pre-draft redaction canary', () => {
       .map((name) => path.join(stepDir, name));
     expect(pngPaths.length).toBeGreaterThan(0);
     for (const pngPath of pngPaths) {
-      const pixels = fieldPixels(pngPath);
+      const pixels = await fieldPixels(pngPath);
       expect(Math.max(...pixels)).toBe(0);
     }
 

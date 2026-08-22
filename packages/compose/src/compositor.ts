@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { WalkthroughFlow } from '@waggle/ir';
 import type { NarrationWordsDocument } from '@waggle/narrate';
 import type { BrandKit } from './brand/schema.js';

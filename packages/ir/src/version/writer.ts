@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import {
   FIRST_IR_VERSION,

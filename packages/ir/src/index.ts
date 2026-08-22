@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * `@waggle/ir`: the Walkthrough IR.
  *
@@ -34,6 +35,12 @@ export {
   DEFAULT_RECORDED_VIEWPORT,
   importChromeRecorderFlow,
 } from './import/chrome-recorder.js';
+export {
+  createProjectTextScrubber,
+  flaggedPlaceholders,
+  ProjectTextScrubberConfigError,
+  projectCredentialEnvNames,
+} from './privacy/project-literals.js';
 export type {
   SensitiveTextLiterals,
   SensitiveTextScrubber,

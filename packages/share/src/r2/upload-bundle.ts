@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { type PutObjectResult, R2Client, type R2ClientOptions } from './client.js';

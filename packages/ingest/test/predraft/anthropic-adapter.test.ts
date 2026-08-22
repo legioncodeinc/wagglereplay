@@ -1,7 +1,9 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { describe, expect, it, vi } from 'vitest';
 import { PreDraftParseError, PreDraftProviderError } from '../../src/predraft/adapter-types.js';
 import { createAnthropicAdapter } from '../../src/predraft/anthropic-adapter.js';
 import type { FetchLike } from '../../src/predraft/shared-http.js';
+import { FAKE_ANTHROPIC_KEY_FOR_TESTS } from './fixtures.js';
 
 function messagesResponse(text: string): Response {
   return new Response(JSON.stringify({ content: [{ type: 'text', text }] }), { status: 200 });
@@ -13,7 +15,7 @@ describe('AC4: Anthropic pre-draft adapter (mocked transport)', () => {
   it('parses a valid first reply and never retries', async () => {
     const fetchImpl: FetchLike = vi.fn(async () => messagesResponse(validReply));
     const adapter = createAnthropicAdapter({
-      apiKey: 'sk-ant-test',
+      apiKey: FAKE_ANTHROPIC_KEY_FOR_TESTS,
       model: 'claude-haiku-4-5',
       fetchImpl,
     });
@@ -31,7 +33,7 @@ describe('AC4: Anthropic pre-draft adapter (mocked transport)', () => {
       return messagesResponse(validReply);
     });
     const adapter = createAnthropicAdapter({
-      apiKey: 'sk-ant-test',
+      apiKey: FAKE_ANTHROPIC_KEY_FOR_TESTS,
       model: 'claude-haiku-4-5',
       fetchImpl,
     });
@@ -59,7 +61,7 @@ describe('AC4: Anthropic pre-draft adapter (mocked transport)', () => {
       return call === 1 ? messagesResponse('nope') : messagesResponse(validReply);
     });
     const adapter = createAnthropicAdapter({
-      apiKey: 'sk-ant-test',
+      apiKey: FAKE_ANTHROPIC_KEY_FOR_TESTS,
       model: 'claude-haiku-4-5',
       fetchImpl,
     });
@@ -72,7 +74,7 @@ describe('AC4: Anthropic pre-draft adapter (mocked transport)', () => {
   it('throws PreDraftParseError when the reply is still unparseable after one retry', async () => {
     const fetchImpl: FetchLike = vi.fn(async () => messagesResponse('still nope'));
     const adapter = createAnthropicAdapter({
-      apiKey: 'sk-ant-test',
+      apiKey: FAKE_ANTHROPIC_KEY_FOR_TESTS,
       model: 'claude-haiku-4-5',
       fetchImpl,
     });
@@ -102,7 +104,7 @@ describe('AC4: Anthropic pre-draft adapter (mocked transport)', () => {
       return messagesResponse(validReply);
     });
     const adapter = createAnthropicAdapter({
-      apiKey: 'sk-ant-secret',
+      apiKey: FAKE_ANTHROPIC_KEY_FOR_TESTS,
       model: 'claude-haiku-4-5',
       fetchImpl,
     });
@@ -110,7 +112,7 @@ describe('AC4: Anthropic pre-draft adapter (mocked transport)', () => {
     await adapter.generate({ systemPrompt: 's', userPrompt: 'u', images: [] });
 
     const headers = capturedHeaders as Record<string, string>;
-    expect(headers['x-api-key']).toBe('sk-ant-secret');
+    expect(headers['x-api-key']).toBe(FAKE_ANTHROPIC_KEY_FOR_TESTS);
     expect(headers.authorization).toBeUndefined();
   });
 });

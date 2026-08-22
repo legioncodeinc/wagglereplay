@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { fetchCredentialMarkings } from '../lib/credential-markings.js';
 import { finalizeSession } from '../lib/finalizer.js';
 import type { RuntimeMessage } from '../lib/messaging.js';

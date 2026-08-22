@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { readFile, realpath } from 'node:fs/promises';
 import path from 'node:path';
 import type { SensitiveTextLiterals, WalkthroughFlow } from '@waggle/ir';

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { describe, expect, it } from 'vitest';
 import { buildFocusTrack, FOCUS_EASE_MS } from '../src/reframe/focus-track.js';
 import type { StepExecutionResult } from '../src/steps/replay-step.js';

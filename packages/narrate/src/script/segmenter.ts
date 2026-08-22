@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { WalkthroughFlow, WalkthroughStep } from '@waggle/ir';
 import { computeDurationHintMs, TARGET_WORDS_PER_MINUTE } from './pace.js';
 import {

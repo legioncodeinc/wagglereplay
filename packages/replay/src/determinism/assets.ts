@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * The determinism kit's injected assets (prd-009 AC2).
  *

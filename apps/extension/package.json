@@ -25,5 +25,6 @@
     "jsdom": "^30.0.1",
     "playwright-core": "^1.62.1",
     "tsx": "^4.23.12"
-  }
+  },
+  "license": "AGPL-3.0-or-later"
 }

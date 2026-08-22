@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "irVersion": 1,
+  "replayPresetId": "16x9",
+  "composePresetId": "16x9",
+  "reflow": "native",
+  "reflowReason": "layout reflowed within 8px tolerance",
+  "capture": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 12,
+    "durationMs": 1913,
+    "framesReceived": 13,
+    "framesWritten": 22
+  },
+  "steps": [
+    {
+      "stepIndex": 0,
+      "stepType": "setViewport",
+      "ok": true,
+      "startOffsetMs": 25,
+      "durationMs": 165,
+      "settleSource": "mutation-quiet",
+      "selectorUsed": null,
+      "attemptedSelectors": [],
+      "screenshotRef": "screenshots/step-000.png",
+      "failure": null
+    },
+    {
+      "stepIndex": 1,
+      "stepType": "navigate",
+      "ok": true,
+      "startOffsetMs": 229,
+      "durationMs": 144,
+      "settleSource": "element-assertion",
+      "selectorUsed": null,
+      "attemptedSelectors": [],
+      "screenshotRef": "screenshots/step-001.png",
+      "failure": null
+    },
+    {
+      "stepIndex": 2,
+      "stepType": "click",
+      "ok": true,
+      "startOffsetMs": 402,
+      "durationMs": 1092,
+      "settleSource": "mutation-quiet",
+      "selectorUsed": {
+        "recorded": "aria/Start Walkthrough[role=\"button\"]",
+        "playwright": "role=button[name=\"Start Walkthrough\"]",
+        "engine": "role",
+        "alternativeIndex": 1,
+        "drift": true
+      },
+      "attemptedSelectors": ["css=[data-testid=\"cta-start\"]"],
+      "screenshotRef": "screenshots/step-002.png",
+      "failure": null
+    },
+    {
+      "stepIndex": 3,
+      "stepType": "change",
+      "ok": true,
+      "startOffsetMs": 1532,
+      "durationMs": 72,
+      "settleSource": "element-assertion",
+      "selectorUsed": {
+        "recorded": "[data-testid=\"input-username\"]",
+        "playwright": "css=[data-testid=\"input-username\"]",
+        "engine": "css",
+        "alternativeIndex": 0,
+        "drift": false
+      },
+      "attemptedSelectors": [],
+      "screenshotRef": "screenshots/step-003.png",
+      "failure": null
+    },
+    {
+      "stepIndex": 4,
+      "stepType": "change",
+      "ok": true,
+      "startOffsetMs": 1641,
+      "durationMs": 80,
+      "settleSource": "element-assertion",
+      "selectorUsed": {
+        "recorded": "[data-testid=\"input-password\"]",
+        "playwright": "css=[data-testid=\"input-password\"]",
+        "engine": "css",
+        "alternativeIndex": 0,
+        "drift": false
+      },
+      "attemptedSelectors": [],
+      "screenshotRef": "screenshots/step-004.png",
+      "failure": null
+    }
+  ],
+  "focusTrack": []
+}

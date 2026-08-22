@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -5,6 +6,15 @@ import { writeNextIrVersion } from '@waggle/ir';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { runCli } from '../src/cli.js';
 import { ExitCode } from '../src/exit-codes.js';
+
+/**
+ * Obviously-fake provider key for the env-var path these CLI tests take
+ * (`process.env.ELEVENLABS_API_KEY`); the transport is faked below, so the
+ * value only needs to be non-empty. One clearly-labeled constant instead
+ * of inline literals, per the 2026-08-22 credential-scanner remediation
+ * (narrate's test/fixtures.ts holds the same pattern for its suite).
+ */
+const FAKE_TTS_KEY_FOR_TESTS = 'test-key-not-real';
 
 /**
  * A fake ElevenLabs transport, in the exact response shape documented at
@@ -103,7 +113,7 @@ describe('`waggle narrate` (e2e)', () => {
     const projectDir = path.join(parent, 'demo');
     writeNextIrVersion(projectDir, fixtureFlow);
 
-    process.env.ELEVENLABS_API_KEY = 'test-key-not-real';
+    process.env.ELEVENLABS_API_KEY = FAKE_TTS_KEY_FOR_TESTS;
     process.env.WAGGLE_ELEVENLABS_VOICE_ID = 'voice-1';
     installFakeElevenLabsFetch();
 
@@ -120,7 +130,7 @@ describe('`waggle narrate` (e2e)', () => {
     const projectDir = path.join(parent, 'demo');
     writeNextIrVersion(projectDir, fixtureFlow);
 
-    process.env.ELEVENLABS_API_KEY = 'test-key-not-real';
+    process.env.ELEVENLABS_API_KEY = FAKE_TTS_KEY_FOR_TESTS;
     process.env.WAGGLE_ELEVENLABS_VOICE_ID = 'voice-1';
     installFakeElevenLabsFetch();
 

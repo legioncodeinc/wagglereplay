@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { Page } from 'playwright-core';
 import { masterPreset, REPLAY_PRESETS, type ReplayPreset } from './registry.js';
 

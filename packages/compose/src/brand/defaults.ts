@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { BRAND_KIT_SCHEMA_VERSION, type BrandKit, BrandKitSchema } from './schema.js';
 
 /**

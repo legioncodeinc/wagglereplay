@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { error, json, type RequestHandler } from '@sveltejs/kit';
 import { CredentialSetSchema } from '@waggle/ir';
 import { z } from 'zod';

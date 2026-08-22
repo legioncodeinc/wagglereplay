@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { computeAccessibleName, computeAccessibleRole } from './accessibility.js';
 import type { GeneratedSelector } from './events.js';
 

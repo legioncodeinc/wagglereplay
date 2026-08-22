@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { type CredentialMarking, explicitCredentialKind } from '../lib/credential-markings.js';
 import { sampleElement } from '../lib/element-sampler.js';
 import type { EpochSource } from '../lib/epoch.js';

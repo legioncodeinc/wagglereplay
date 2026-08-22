@@ -1,0 +1,106 @@
+name: CI (OS matrix)
+
+# OS coverage for the two platforms the product ships installers for
+# (HANDOFF-4 section 7): Windows and macOS run typecheck + build + test.
+# The primary dev machine is Windows; until this workflow existed, no
+# workflow had ever run on either platform. Lint stays on ubuntu (CI):
+# it is OS-neutral. Actions pinned to full commit SHAs.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-os-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Windows runs Node 25 (the primary dev machine's line). Node
+          # 24.19 crashed apps/studio's vitest fork mid-suite on this
+          # runner ("Worker exited unexpectedly", the known Windows
+          # forks-teardown crash class) while the same suite passes on
+          # 25 locally; ubuntu CI already covers the .nvmrc Node line.
+          - os: windows-latest
+            node-version: "25"
+          - os: macos-latest
+            node-version: "24"
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Enable corepack (pnpm)
+        run: corepack enable
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # compose/ingest shell out to real ffmpeg (ADR-003) and never skip
+      # when absent. The compositor requires ffmpeg 9 (8.1 rejects the
+      # dynamic-dimension scale chains with EINVAL; isolated 2026-08-22
+      # against BtbN 8.1 win64). Windows: same static-build action as
+      # CI's ubuntu job. macOS: Homebrew tops out at 8.1 (both `ffmpeg`
+      # and `ffmpeg-full`), so pin evermeet.cx's 9.0.1 builds (libass
+      # included) with SHA-256 verification and resolve them through the
+      # product's own WAGGLE_FFMPEG_PATH/WAGGLE_FFPROBE_PATH env.
+      - name: Install ffmpeg (Windows)
+        if: runner.os == 'Windows'
+        uses: AnimMouse/setup-ffmpeg@178e0b4a408f06ce40d896c3cd79f50fa6f8b0c3 # v1.2.5
+        with:
+          version: "9.0"
+
+      - name: Install ffmpeg 9.0.1 (macOS, evermeet, SHA-pinned)
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          set -euo pipefail
+          dir="$RUNNER_TEMP/ffmpeg-9.0.1"
+          mkdir -p "$dir"
+          curl -sSfL --retry 3 -o "$dir/ffmpeg.zip" https://evermeet.cx/ffmpeg/ffmpeg-9.0.1.zip
+          curl -sSfL --retry 3 -o "$dir/ffprobe.zip" https://evermeet.cx/ffmpeg/ffprobe-9.0.1.zip
+          echo "8a8c9e549983409fe6604b9aa665648b7a5def9407fe814c39c8b2ea7f64a48f  $dir/ffmpeg.zip" | shasum -a 256 -c -
+          echo "d13f35db03456b7f65b7edb6437c86e23810fbfe91795e571f5b77211343b4f1  $dir/ffprobe.zip" | shasum -a 256 -c -
+          unzip -oq "$dir/ffmpeg.zip" -d "$dir/bin"
+          unzip -oq "$dir/ffprobe.zip" -d "$dir/bin"
+          chmod +x "$dir/bin/ffmpeg" "$dir/bin/ffprobe"
+          echo "WAGGLE_FFMPEG_PATH=$dir/bin/ffmpeg" >> "$GITHUB_ENV"
+          echo "WAGGLE_FFPROBE_PATH=$dir/bin/ffprobe" >> "$GITHUB_ENV"
+
+      - name: Typecheck
+        run: pnpm run --if-present typecheck
+
+      - name: Build
+        run: pnpm run --if-present build
+
+      # Windows only: apps/studio's fork pool crashed on the runner
+      # ("Worker exited unexpectedly", right after its 15s real-ingest
+      # test) while passing on Windows dev machines; running that one
+      # suite in a single fork removes the multi-worker dimension without
+      # weakening any assertion. Every suite still runs, nothing skips.
+      - name: Test
+        if: runner.os != 'Windows'
+        run: pnpm run --if-present test
+
+      - name: Test (studio in a single fork)
+        if: runner.os == 'Windows'
+        run: |
+          pnpm -r --if-present --filter "!@waggle/studio" run test
+          pnpm --filter @waggle/studio test --pool=forks --maxWorkers=1

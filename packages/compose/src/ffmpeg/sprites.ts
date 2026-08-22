@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { ClickRipple, CursorStyle } from '../brand/schema.js';
 import { parseHexColor, type Rgb } from '../captions/ass-primitives.js';
 import { type Bitmap, createBitmap, encodePng, setPixel } from './png.js';

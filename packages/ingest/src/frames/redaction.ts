@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { InputRedactionGeometrySchema } from '@waggle/extension';
 import { z } from 'zod';
 import { FrameExtractionError } from '../errors.js';

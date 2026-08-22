@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * Pure text redaction shared by replay, ingest, and narration (prd-010 AC5).
  *

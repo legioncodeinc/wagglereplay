@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { z } from 'zod';
 import type { PreDraftAdapter, PreDraftRequest } from './adapter-types.js';
 import { PreDraftParseError, PreDraftProviderError } from './adapter-types.js';

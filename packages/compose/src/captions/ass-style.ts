@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { BrandKit, CaptionStyle, Card, Watermark } from '../brand/schema.js';
 import type { RenderPreset } from '../presets.js';
 import { sanitizeAssField, toAssAlignment, toAssColor } from './ass-primitives.js';

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { ELEVENLABS_FREE_TIER_NAMES } from '../tts/elevenlabs/constants.js';
 
 /** Set to `1` or `true` to render anyway despite a refusal, printing an explicit warning (AC7). */

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { type ChildProcessWithoutNullStreams, spawn } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
 import path from 'node:path';
@@ -289,6 +290,15 @@ export class ScreencastCapture {
   /**
    * Stops screencast, flushes the pipe, and waits for ffmpeg to exit.
    * Resolves with the frame stats; rejects if ffmpeg failed.
+   *
+   * Before tearing down, pins one final frame: damage-driven CDP delivery
+   * can lag the session under load (two concurrent preset captures starve
+   * the compositor's frame delivery, observed 2026-08-21 when a replay
+   * video's tail still showed the first page while the walkthrough had
+   * moved on), so the encoded video's last frame is captured here, from
+   * the page's actual end state. This is also what makes the credential
+   * overlay provably present in the capture: the end state carries every
+   * persistent redaction box the session installed.
    */
   async stop(): Promise<{ received: number; written: number }> {
     if (this.stopped) {
@@ -301,6 +311,20 @@ export class ScreencastCapture {
       this.emitTick();
     }
     this.stopped = true;
+    try {
+      const finalShot = await this.page.screenshot({
+        type: 'jpeg',
+        quality: SCREENCAST_QUALITY,
+      });
+      if (this.ffmpeg !== null && !this.ffmpeg.stdin.destroyed && finalShot.length > 0) {
+        this.latestFrame = finalShot;
+        this.ffmpeg.stdin.write(finalShot);
+        this.framesWritten += 1;
+      }
+    } catch {
+      // The page may already be gone (context teardown racing stop); the
+      // last delivered damage frame remains the tail in that case.
+    }
     if (this.cdp !== null) {
       await this.cdp.send('Page.stopScreencast').catch(() => undefined);
       await this.cdp.detach().catch(() => undefined);

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { BUILT_IN_PRESETS } from '@waggle/compose';
 import type { StudioProjectState } from '$lib/types.js';
 import { listBrandKits } from './brand-store.js';

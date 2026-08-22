@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { WalkthroughFlow } from '../schema/flow.js';
 import type { StepCore, UserFlowCore } from '../schema/step-core.js';
 import { assertUserFlowCore } from '../validate.js';

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { RecordedViewport, Rect } from '@waggle/ir';
 
 /** The only visual metadata retained for a credential-bearing input event. */

@@ -1,9 +1,28 @@
 # EXECUTION LEDGER: Waggle full-application build
 
-Orchestrator: the-smoker. Branch: `legion/handoff-application-automation-3f40ae`.
-Scope: all 17 PRDs in `library/requirements/backlog/`, 98 acceptance criteria.
+Orchestrator: the-smoker. Run 1 branch `legion/handoff-application-automation-3f40ae` (merged via PR #1); each later run names its own branch in its run header below.
+Scope: all 19 PRDs (001 through 019; prd-019 created in Run 4 to own the raw-capture retention policy), 110 tracked acceptance criteria (98 original plus prd-018's 8 module criteria and prd-019's 4; prd-018's 67 sub-criteria are tracked inside its sub-PRDs, not as ledger rows).
 Status vocabulary: OPEN | IN PROGRESS | DONE | VERIFIED.
 DONE means fully implemented with passing tests. VERIFIED means a pass other than the implementer confirmed it.
+Caveat carried from HANDOFF-4 section 3 item 10: Run 2's VERIFIED grades came from a harness with no sub-agent spawn tool, so the orchestrator graded its own work; independent checks (PR review, CodeQL, audit passes, post-merge CI) did occur, but do not cite this ledger as proof of independent verification.
+
+## Run 4 header (2026-08-21): HANDOFF-4 Wave 0 plus Wave 0.5
+
+Branch `legion/handoff4-wave0-guardrails`, dispatched against `main` HEAD `8ce824a` with Mario's
+"execute HANDOFF-4 at all costs" direction. Scope: every agent-executable item in HANDOFF-4
+sections 5 (Wave 0, planning repairs) and 6 (Wave 0.5, guardrail code), the section 7 workflow
+authoring plus repository settings, and the decision-queue rulings that only gate documentation
+(all applied rulings recorded for Mario in library/requirements/reports/handoff-4-run4-decisions.md
+and reversible by edit). No product-behavior changes; no PRD dispatch beyond planning edits.
+Decisions needing external input (keys, headed display, store submission) remain blocked.
+
+## Run 3 header (2026-08-21): ADR-020 plus prd-018 plus CODEOWNERS
+
+Branch `legion/docs-adr020-prd018-codeowners`, merged as PR #4 (commit 011f5e7). Planning only:
+ADR-020 accepted (Electron shell, unsigned builds), prd-018 authored (index plus sub-PRDs a
+through g), CODEOWNERS repaired. No AC rows changed; no code. PR #5 afterwards merged the
+HANDOFF-4 playbook and its audit report.
+
 
 ## Run 2 header (2026-08-21): prd-009 plus prd-010
 
@@ -76,7 +95,7 @@ Wave plan for this run (dependency-ordered; 010 AC2 to AC5 need 009 wave 1):
 - W4. PRD-004, PRD-005, PRD-006 in parallel. 005 consumes 004's ingest outputs, so 005 starts one beat behind.
 - W5. PRD-007, then PRD-008. 008 wave-1 sidecar work runs parallel to 007 wave 2.
 - W6. PRD-009 plus PRD-010. The moat pair. 010's replay injection point needs 009 wave 1.
-- W7. PRD-011 plus PRD-012. Both consume 009.
+- W7. PRD-011, then PRD-012 (the 2026-08-21 ownership ruling orders them: prd-011 defines and implements `--check`; prd-012 consumes it). Both consume 009.
 - W8. PRD-013 plus PRD-014. Independent of each other.
 - W9. PRD-015, then PRD-016 which needs 015. PRD-017 runs parallel to both.
 - W10. Ship Gate: security-worker-bee, then quality-worker-bee, then orchestrator repo-health.
@@ -152,7 +171,7 @@ Wave plan for this run (dependency-ordered; 010 AC2 to AC5 need 009 wave 1):
 | 010-AC5 | 010 | Shared prompt scrubber, unit-tested against the canary battery | security | opus-5 | VERIFIED |
 | 011-AC1 | 011 | Vision verdict adapter, strict schema, retry once then mark unavailable | mind | sonnet-5 | OPEN |
 | 011-AC2 | 011 | odiff baseline store: accept, update, compare, annotated diffs | typescript-node | sonnet-5 | OPEN |
-| 011-AC3 | 011 | `regen --check` exit codes distinguish four outcomes; report merges verdicts | typescript-node | sonnet-5 | OPEN |
+| 011-AC3 | 011 | `regen --check`: prd-011 owns flag, verdicts, exit codes; report merges verdicts | typescript-node | sonnet-5 | OPEN |
 | 011-AC4 | 011 | Studio review surface with accept and reject baseline actions | ux-ui-svelte | sonnet-5 | OPEN |
 | 011-AC5 | 011 | Self-heal selector proposal as an IR patch draft, never auto-applied | mind | sonnet-5 | OPEN |
 | 011-AC6 | 011 | Cost guard: spend estimate, skip flag, token logging | typescript-node | sonnet-5 | OPEN |
@@ -160,7 +179,7 @@ Wave plan for this run (dependency-ordered; 010 AC2 to AC5 need 009 wave 1):
 | 012-AC2 | 012 | Reusable waggle-regen.yml with caching, secrets, artifacts, summary | ci-release | sonnet-5 | OPEN |
 | 012-AC3 | 012 | Trigger matrix documented and tested; failures attach the run report | ci-release | sonnet-5 | OPEN |
 | 012-AC4 | 012 | Cloudflare Containers profile stub plus runbook, marked not implemented | devops | sonnet-5 | OPEN |
-| 013-AC1 | 013 | `narrate --audio` forced alignment, per-word confidence, low-confidence flags | typescript-node | sonnet-5 | OPEN |
+| 013-AC1 | 013 | Uploaded-audio alignment via Studio upload or WAGGLE_NARRATE_AUDIO_PATH env; confidence sidecar | typescript-node | sonnet-5 | OPEN |
 | 013-AC2 | 013 | WhisperX self-hosted fallback; identical words.json shape | typescript-node | sonnet-5 | OPEN |
 | 013-AC3 | 013 | Sentence-to-step mapper with fuzzy repair plus studio review pass | mind | sonnet-5 | OPEN |
 | 013-AC4 | 013 | Pacing stretch; lip-timing drift under 200 ms per step boundary | typescript-node | sonnet-5 | OPEN |
@@ -176,14 +195,26 @@ Wave plan for this run (dependency-ordered; 010 AC2 to AC5 need 009 wave 1):
 | 015-AC5 | 015 | Journey drafts as flagged draft IRs; one replays green via prd-009 | mind | sonnet-5 | OPEN |
 | 015-AC6 | 015 | Spend guard with a hard stop and partial-results save | typescript-node | sonnet-5 | OPEN |
 | 016-AC1 | 016 | STT plus intent parser produce a reviewable step list; ambiguity flags | mind | sonnet-5 | OPEN |
-| 016-AC2 | 016 | Studio checkpoint before any browser run; the yolo flag is loud | svelte | sonnet-5 | OPEN |
+| 016-AC2 | 016 | Studio checkpoint before any browser run; WAGGLE_YOLO_INTENT_REVIEW env guard is loud | svelte | sonnet-5 | OPEN |
 | 016-AC3 | 016 | Explorer executes the confirmed list into a draft IR; soft fail with screenshots | typescript-node | sonnet-5 | OPEN |
 | 016-AC4 | 016 | Render paced to the source audio; fixture case watchable end to end | quality | opus-5 | OPEN |
 | 016-AC5 | 016 | Full-run provenance linked from one run report | typescript-node | sonnet-5 | OPEN |
 | 017-AC1 | 017 | Avatar provider adapter, alpha WebM download, alpha survives the probe | typescript-node | sonnet-5 | OPEN |
 | 017-AC2 | 017 | Content-addressed cache; regen and kit swaps hit it; stats in the report | typescript-node | sonnet-5 | OPEN |
 | 017-AC3 | 017 | Alpha WebM into the PiP slot on ffmpeg, and Remotion if installed | typescript-node | sonnet-5 | OPEN |
-| 017-AC4 | 017 | Cost guard with a confirm flag for non-interactive runs | typescript-node | sonnet-5 | OPEN |
+| 017-AC4 | 017 | Cost guard with the WAGGLE_ALLOW_AVATAR_SPEND env guard for non-interactive runs | typescript-node | sonnet-5 | OPEN |
+| 018-AC1 | 018 | Electron main process hosts Studio loopback server; hardened renderer (contextIsolation, sandbox, CSP) | typescript-node | sonnet-5 | OPEN |
+| 018-AC2 | 018 | Per-launch loopback auth, host validation, bounded bodies; closes the Studio Low finding | security | opus-5 | OPEN |
+| 018-AC3 | 018 | Provider keys encrypted via safeStorage in app-data per ADR-017; CLI/CI env-ref path unchanged | typescript-node | sonnet-5 | OPEN |
+| 018-AC4 | 018 | Recordings list with raw-capture warning and delete controls removing master plus derived artifacts | svelte | sonnet-5 | OPEN |
+| 018-AC5 | 018 | Extension-to-app handshake: health-ping, focus or waggle:// launch, single instance | typescript-node | sonnet-5 | OPEN |
+| 018-AC6 | 018 | Recording flow per ADR-018: countdown, capture-excluded control, always-works stop, auto-processing | typescript-node | sonnet-5 | OPEN |
+| 018-AC7 | 018 | Unsigned Windows/macOS packaging, engine floor, Chromium and ffmpeg delivery, honest install copy | ci-release | sonnet-5 | OPEN |
+| 018-AC8 | 018 | Zero-terminal clean-machine pass: install to finished render, no terminal, evidence recorded | quality | opus-5 | OPEN |
+| 019-AC1 | 019 | Retention policy document with the normative user-facing sentence | readme-writing | sonnet-5 | OPEN |
+| 019-AC2 | 019 | Policy names covered leak paths; gitignore assertion test for recordings/ | typescript-node | sonnet-5 | OPEN |
+| 019-AC3 | 019 | Release-checklist gate item wired before external distribution | readme-writing | sonnet-5 | OPEN |
+| 019-AC4 | 019 | prd-018d in-app notice references the policy document | readme-writing | sonnet-5 | OPEN |
 
 ## Watchdog log
 
@@ -228,8 +259,8 @@ Wave plan for this run (dependency-ordered; 010 AC2 to AC5 need 009 wave 1):
 | 006-AC3 (partial) | No ELEVENLABS_API_KEY. Adapter, schema parsing, retry, and chunk stitching are fully built and unit-tested against mock transports. The v3 dialogue-plus-with-timestamps envelope and the exact subscription tier strings were never seen from a live response. | Provide ELEVENLABS_API_KEY to confirm the live response envelope. |
 | 006-AC6 (partial) | Same. The end-to-end run produces words.json, SRT, VTT, and transcript from a mocked synthesize call; no real audio bytes exist. | Provide ELEVENLABS_API_KEY to produce and spot-check real audio. |
 | 003-AC8 (partial) | Real chrome.tabCapture needs a headed display with the extension sideloaded, not reachable in this automated session. Proven here: the built extension loads in real Chromium and its MV3 service worker registers; the real content-script bundle drives the fixture app with worst-case click alignment of 9.5 ms against a 50 ms budget, reproduced by the orchestrator. Unproven: an actual tabCapture recording and byte-level correlation to decoded video frames. | Run apps/extension/docs/ac8-e2e-runbook.md on a machine with a display: build, load unpacked, click the action, walk the 6 steps, confirm non-zero MediaRecorder chunk sizes. |
-| CodeQL upload | Code Security is disabled on the private repo legioncodeinc/wagglereplay, so code scanning results cannot upload. Analysis itself succeeds. | Mario to enable Code Security in repo Settings, Code security and analysis. Note code scanning is paid on private repos and free on public ones; ADR-013 commits this project to public AGPL-3.0 eventually. Enabling Secret Protection and Push Protection at the same time closes the rest of HANDOFF item 2. |
-| R2 error logging | R2UploadError embeds 500 chars of the R2 response body, printed to the terminal. An S3 SignatureDoesNotMatch body carries AWSAccessKeyId, StringToSign, and CanonicalRequest, so a key id can reach CI logs. The secret access key never leaves the process. | Mario to decide: key ids ship in cleartext in every Authorization header anyway (argues Low), but CLAUDE.md and ADR-008 say no credentials in logs (argues Medium). Confirm whether ADR-008 scopes only to demo-replay credentials or to all credentials. |
+| CodeQL upload | RESOLVED 2026-08-21: Code Security was enabled; CodeQL analysis and upload run on PRs (five HIGH alerts were triaged in Run 2, four fixed, one false positive dismissed). Row retained for history. | Closed; see the CI/security watchdog rows below. |
+| R2 error logging | R2UploadError embeds 500 chars of the R2 response body, printed to the terminal. An S3 SignatureDoesNotMatch body carries AWSAccessKeyId, StringToSign, and CanonicalRequest, so a key id can reach CI logs. The secret access key never leaves the process. | Applied ruling 2026-08-21 (Run 4, reversible): ADR-008's no-credentials-in-logs rule is read to cover key ids in error-body echoes (the stricter Medium reading); redact AWSAccessKeyId and StringToSign fields from R2UploadError output. Implementation lands with the Run 4 guardrail pass. |
 | Studio exposure | Studio endpoints are unauthenticated, secured only by the loopback bind, which is correct by default. Residual: DNS rebinding defeats the origin check, and BODY_SIZE_LIMIT is Infinity on unauthenticated write endpoints that buffer all chunks. | Mario to decide a max upload size that does not break legitimate extension chunk uploads, and whether a Host allowlist belongs in a handle hook. Product decision, not purely security. |
 | 008-AC3 (partial) | No R2 or S3 credentials. The uploader hand-rolls SigV4 signing, fully implemented and unit-tested against a mocked transport plus RFC 4231 primitives vectors. Unproven: that a real R2 bucket accepts a request signed this way and returns 200. | Provide R2 account id, access key id, secret access key, and bucket name to confirm a live upload. |
 | 004-AC4 (anticipated) | PRD-004 AC4 requires a provider-agnostic LLM call for pre-draft descriptions. No LLM key present. | Provide an LLM provider key (any of OpenAI, Anthropic, Gemini) plus the preferred provider. |

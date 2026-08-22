@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * `@waggle/narrate`: script drafting and TTS synthesis with word
  * timestamps (prd-006).

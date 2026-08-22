@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * AC8: end-to-end proof that telemetry aligns with the video within 50ms
  * at each click of the fixture app's canonical 6-step walkthrough.

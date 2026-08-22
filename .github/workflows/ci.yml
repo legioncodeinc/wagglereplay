@@ -56,6 +56,11 @@ jobs:
       - name: Lint
         run: if [ -f package.json ]; then pnpm run --if-present lint; else echo "no package.json yet"; fi
 
+      # SPDX headers + package.json license fields (HANDOFF-4 section 6
+      # item 8): mechanical now, painful after external contributions.
+      - name: License check
+        run: if [ -f package.json ]; then pnpm run --if-present license:check; else echo "no package.json yet"; fi
+
   typecheck:
     name: Typecheck
     runs-on: ubuntu-latest

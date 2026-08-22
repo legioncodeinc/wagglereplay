@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { CredentialMarking } from './credential-markings.js';
 import type { CaptureEventDraft } from './events.js';
 

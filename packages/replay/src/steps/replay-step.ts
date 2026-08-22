@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import path from 'node:path';
 import type { SensitiveTextScrubber, WalkthroughStep } from '@waggle/ir';
 import type { Locator, Page } from 'playwright-core';
@@ -37,9 +38,8 @@ export interface StepExecutionOptions {
    * pre-storage redaction box on the screenshot.
    */
   readonly isCredentialStep?: boolean;
-  /** Settle options: quiet window and network exclusions. */
+  /** Settle quiet window; network exclusions are set once at context creation, not per step. */
   readonly quietMs?: number;
-  readonly networkExclusions?: readonly string[];
   /** Preferred act-time credential boundary. */
   readonly actWithValue?: ActWithValue;
   /** Final scrub applied to every structured failure before persistence. */
@@ -264,7 +264,6 @@ export async function executeStep(options: StepExecutionOptions): Promise<StepEx
       options: {
         timeoutMs: options.timeoutMs,
         quietMs: options.quietMs,
-        networkExclusions: options.networkExclusions?.map((urlContains) => ({ urlContains })),
       },
     });
   } catch (error: unknown) {

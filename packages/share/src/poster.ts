@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { resolveFfmpegPath } from '@waggle/compose';
 import { type FfmpegRunner, ffmpegStderrTail, runFfmpeg } from './ffmpeg-run.js';
 

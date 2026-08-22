@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * Ingest-specific error types. Every one of these is caught somewhere on
  * the way to `packages/cli`'s `waggle record` command

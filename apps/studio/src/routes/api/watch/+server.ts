@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { RequestHandler } from '@sveltejs/kit';
 import { getProjectDir } from '$lib/server/project-context.js';
 import { getProjectWatcher } from '$lib/server/watcher.js';

@@ -12,6 +12,7 @@
   "scripts": {
     "lint": "biome ci .",
     "lint:fix": "biome check --write .",
+    "license:check": "node scripts/license-headers.mjs check",
     "typecheck": "pnpm -r --if-present run typecheck",
     "test": "pnpm -r --if-present run test",
     "build": "pnpm -r --if-present run build"

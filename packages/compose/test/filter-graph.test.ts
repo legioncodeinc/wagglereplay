@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -39,7 +40,9 @@ const WORK_DIR = path.join(PROJECT_DIR, 'renders', '.work', 'golden');
 const OUTPUT_PATH = path.join(PROJECT_DIR, 'renders', 'out.mp4');
 
 function assertGolden(name: string, actual: string): void {
-  const goldenPath = path.join(GOLDEN_DIR, name);
+  // Golden files are a flat directory of bare filenames; basename enforces
+  // that contract (a name carrying a separator can never escape golden/).
+  const goldenPath = path.join(GOLDEN_DIR, path.basename(name));
   if (process.env.WAGGLE_UPDATE_GOLDEN === '1') {
     writeFileSync(goldenPath, actual, 'utf8');
     return;

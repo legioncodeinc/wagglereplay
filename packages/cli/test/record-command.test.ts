@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -92,7 +93,7 @@ describe('`waggle record` (e2e)', () => {
     return sessionDir;
   }
 
-  it('exits INGEST_SESSION_REQUIRED naming prd-005 when --session is omitted', async () => {
+  it('exits INGEST_SESSION_REQUIRED pointing at the Studio extension flow when --session is omitted', async () => {
     const parent = tempParentDir();
     await runCli(['node', 'waggle', 'init', 'demo', '--dir', parent]);
     const projectDir = path.join(parent, 'demo');

@@ -1,7 +1,9 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { describe, expect, it, vi } from 'vitest';
 import { PreDraftParseError, PreDraftProviderError } from '../../src/predraft/adapter-types.js';
 import { createOpenAiAdapter } from '../../src/predraft/openai-adapter.js';
 import type { FetchLike } from '../../src/predraft/shared-http.js';
+import { FAKE_OPENAI_KEY_FOR_TESTS } from './fixtures.js';
 
 function chatResponse(content: string): Response {
   return new Response(JSON.stringify({ choices: [{ message: { content } }] }), { status: 200 });
@@ -12,7 +14,11 @@ const validReply = JSON.stringify({ description: 'Clicked the login button.', co
 describe('AC4: OpenAI pre-draft adapter (mocked transport)', () => {
   it('parses a valid first reply and never retries', async () => {
     const fetchImpl: FetchLike = vi.fn(async () => chatResponse(validReply));
-    const adapter = createOpenAiAdapter({ apiKey: 'sk-test', model: 'gpt-4o-mini', fetchImpl });
+    const adapter = createOpenAiAdapter({
+      apiKey: FAKE_OPENAI_KEY_FOR_TESTS,
+      model: 'gpt-4o-mini',
+      fetchImpl,
+    });
 
     const result = await adapter.generate({
       systemPrompt: 'system',
@@ -30,7 +36,11 @@ describe('AC4: OpenAI pre-draft adapter (mocked transport)', () => {
       capturedBody = JSON.parse(String(init?.body));
       return chatResponse(validReply);
     });
-    const adapter = createOpenAiAdapter({ apiKey: 'sk-test', model: 'gpt-4o-mini', fetchImpl });
+    const adapter = createOpenAiAdapter({
+      apiKey: FAKE_OPENAI_KEY_FOR_TESTS,
+      model: 'gpt-4o-mini',
+      fetchImpl,
+    });
 
     await adapter.generate({
       systemPrompt: 'system',
@@ -51,7 +61,11 @@ describe('AC4: OpenAI pre-draft adapter (mocked transport)', () => {
       call += 1;
       return call === 1 ? chatResponse('not json at all') : chatResponse(validReply);
     });
-    const adapter = createOpenAiAdapter({ apiKey: 'sk-test', model: 'gpt-4o-mini', fetchImpl });
+    const adapter = createOpenAiAdapter({
+      apiKey: FAKE_OPENAI_KEY_FOR_TESTS,
+      model: 'gpt-4o-mini',
+      fetchImpl,
+    });
 
     const result = await adapter.generate({ systemPrompt: 's', userPrompt: 'u', images: [] });
 
@@ -61,7 +75,11 @@ describe('AC4: OpenAI pre-draft adapter (mocked transport)', () => {
 
   it('throws PreDraftParseError when the reply is still unparseable after one retry', async () => {
     const fetchImpl: FetchLike = vi.fn(async () => chatResponse('still not json'));
-    const adapter = createOpenAiAdapter({ apiKey: 'sk-test', model: 'gpt-4o-mini', fetchImpl });
+    const adapter = createOpenAiAdapter({
+      apiKey: FAKE_OPENAI_KEY_FOR_TESTS,
+      model: 'gpt-4o-mini',
+      fetchImpl,
+    });
 
     await expect(
       adapter.generate({ systemPrompt: 's', userPrompt: 'u', images: [] }),
@@ -72,7 +90,11 @@ describe('AC4: OpenAI pre-draft adapter (mocked transport)', () => {
   it('strips a markdown code fence around the JSON if the model adds one', async () => {
     const fenced = `\`\`\`json\n${validReply}\n\`\`\``;
     const fetchImpl: FetchLike = vi.fn(async () => chatResponse(fenced));
-    const adapter = createOpenAiAdapter({ apiKey: 'sk-test', model: 'gpt-4o-mini', fetchImpl });
+    const adapter = createOpenAiAdapter({
+      apiKey: FAKE_OPENAI_KEY_FOR_TESTS,
+      model: 'gpt-4o-mini',
+      fetchImpl,
+    });
 
     const result = await adapter.generate({ systemPrompt: 's', userPrompt: 'u', images: [] });
     expect(result.confidence).toBe('high');
@@ -94,7 +116,11 @@ describe('AC4: OpenAI pre-draft adapter (mocked transport)', () => {
       if (call < 3) return new Response('server error', { status: 500 });
       return chatResponse(validReply);
     });
-    const adapter = createOpenAiAdapter({ apiKey: 'sk-test', model: 'gpt-4o-mini', fetchImpl });
+    const adapter = createOpenAiAdapter({
+      apiKey: FAKE_OPENAI_KEY_FOR_TESTS,
+      model: 'gpt-4o-mini',
+      fetchImpl,
+    });
 
     const result = await adapter.generate({ systemPrompt: 's', userPrompt: 'u', images: [] });
     expect(result.description).toBe('Clicked the login button.');
@@ -108,13 +134,15 @@ describe('AC4: OpenAI pre-draft adapter (mocked transport)', () => {
       return chatResponse(validReply);
     });
     const adapter = createOpenAiAdapter({
-      apiKey: 'sk-secret-123',
+      apiKey: FAKE_OPENAI_KEY_FOR_TESTS,
       model: 'gpt-4o-mini',
       fetchImpl,
     });
 
     await adapter.generate({ systemPrompt: 's', userPrompt: 'u', images: [] });
 
-    expect((capturedHeaders as Record<string, string>).authorization).toBe('Bearer sk-secret-123');
+    expect((capturedHeaders as Record<string, string>).authorization).toBe(
+      `Bearer ${FAKE_OPENAI_KEY_FOR_TESTS}`,
+    );
   });
 });

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { CaptureEvent, SessionMeta } from '@waggle/extension';
 import { assertWalkthroughFlow, WAGGLE_IR_SCHEMA_VERSION, type WalkthroughFlow } from '@waggle/ir';
 import type { FrameRedaction } from '../frames/redaction.js';

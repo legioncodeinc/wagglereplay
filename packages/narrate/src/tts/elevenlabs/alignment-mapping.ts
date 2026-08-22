@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { aggregateCharsToWords, type CharAlignment } from '../../words/aggregate.js';
 import type { WordTiming } from '../../words/schema.js';
 

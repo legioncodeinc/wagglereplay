@@ -1,6 +1,8 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { describe, expect, it, vi } from 'vitest';
 import { ElevenLabsAdapter } from '../../../src/tts/elevenlabs/adapter.js';
 import { TtsRequestTooLargeError } from '../../../src/tts/types.js';
+import { FAKE_TTS_KEY_FOR_TESTS } from '../../fixtures.js';
 
 function withTimestampsBody(text: string) {
   const characters = text.split('');
@@ -21,7 +23,7 @@ function withTimestampsBody(text: string) {
 
 describe('ElevenLabsAdapter', () => {
   it('declares Flash as the default model with the corpus-verified char cap and cost', () => {
-    const adapter = new ElevenLabsAdapter({ apiKey: 'test-key-not-real', voiceId: 'voice-1' });
+    const adapter = new ElevenLabsAdapter({ apiKey: FAKE_TTS_KEY_FOR_TESTS, voiceId: 'voice-1' });
     expect(adapter.capabilities).toEqual({
       provider: 'elevenlabs',
       model: 'eleven_flash_v2_5',
@@ -34,7 +36,7 @@ describe('ElevenLabsAdapter', () => {
 
   it('declares v3 as beta with a 5k char cap', () => {
     const adapter = new ElevenLabsAdapter({
-      apiKey: 'test-key-not-real',
+      apiKey: FAKE_TTS_KEY_FOR_TESTS,
       voiceId: 'voice-1',
       modelId: 'eleven_v3',
     });
@@ -47,7 +49,7 @@ describe('ElevenLabsAdapter', () => {
       async () => new Response(JSON.stringify(withTimestampsBody('Hi')), { status: 200 }),
     );
     const adapter = new ElevenLabsAdapter({
-      apiKey: 'test-key-not-real',
+      apiKey: FAKE_TTS_KEY_FOR_TESTS,
       voiceId: 'voice-1',
       fetchImpl,
     });
@@ -63,7 +65,7 @@ describe('ElevenLabsAdapter', () => {
       return new Response(JSON.stringify(withTimestampsBody('Hi')), { status: 200 });
     });
     const adapter = new ElevenLabsAdapter({
-      apiKey: 'test-key-not-real',
+      apiKey: FAKE_TTS_KEY_FOR_TESTS,
       voiceId: 'voice-1',
       modelId: 'eleven_v3',
       fetchImpl,
@@ -75,7 +77,7 @@ describe('ElevenLabsAdapter', () => {
   it('refuses to synthesize text longer than the model char cap without ever calling the transport', async () => {
     const fetchImpl = vi.fn();
     const adapter = new ElevenLabsAdapter({
-      apiKey: 'test-key-not-real',
+      apiKey: FAKE_TTS_KEY_FOR_TESTS,
       voiceId: 'voice-1',
       modelId: 'eleven_v3',
       fetchImpl,
@@ -86,7 +88,7 @@ describe('ElevenLabsAdapter', () => {
   });
 
   it('estimateCostUsd matches the corpus-verified per-1k-char price', () => {
-    const adapter = new ElevenLabsAdapter({ apiKey: 'test-key-not-real', voiceId: 'voice-1' });
+    const adapter = new ElevenLabsAdapter({ apiKey: FAKE_TTS_KEY_FOR_TESTS, voiceId: 'voice-1' });
     expect(adapter.estimateCostUsd(2000)).toBeCloseTo(0.1, 5);
   });
 
@@ -95,7 +97,7 @@ describe('ElevenLabsAdapter', () => {
       async () => new Response(JSON.stringify({ tier: 'creator' }), { status: 200 }),
     );
     const adapter = new ElevenLabsAdapter({
-      apiKey: 'test-key-not-real',
+      apiKey: FAKE_TTS_KEY_FOR_TESTS,
       voiceId: 'voice-1',
       fetchImpl,
     });

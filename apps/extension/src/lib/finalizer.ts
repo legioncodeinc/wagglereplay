@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { CaptureEventSchema, type SessionMeta, SessionMetaSchema } from './events.js';
 import type { CaptureSession } from './session.js';
 

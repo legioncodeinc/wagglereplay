@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { assertWalkthroughFlow, type WalkthroughFlow } from '@waggle/ir';
 
 /** A small, hand-built, schema-valid two-step Walkthrough IR flow for unit tests that don't need a real recording. */

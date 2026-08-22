@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * Deepgram Aura-2 (ADR-006 budget adapter, corpus receipts:
  * https://deepgram.com/pricing , https://developers.deepgram.com/docs/text-to-speech).

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import path from 'node:path';
 import type { PreDraftDocument } from '@waggle/ingest';
 import { subdirPath, type WalkthroughFlow } from '@waggle/ir';

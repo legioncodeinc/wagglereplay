@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { readFileSync } from 'node:fs';
 import { CliExitError } from '../errors.js';
 import { ExitCode } from '../exit-codes.js';

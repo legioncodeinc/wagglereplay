@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { RouteHeatmap } from '@waggle/ingest';
 import type { CredentialAppliesTo, WalkthroughStep } from '@waggle/ir';
 import type { NarrationSegmentDraft } from '@waggle/narrate';

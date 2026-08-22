@@ -22,5 +22,6 @@
     "@types/node": "^26.2.0",
     "@waggle/fixture-demo-app": "workspace:*",
     "tsx": "^4.23.12"
-  }
+  },
+  "license": "AGPL-3.0-or-later"
 }

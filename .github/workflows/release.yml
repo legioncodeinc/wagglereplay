@@ -1,0 +1,111 @@
+name: Release
+
+# Tag-triggered release builds (HANDOFF-4 section 7, prd-018g's tagged-push
+# decision): on v* tags, build every distributable artifact that exists on
+# the tree, publish a SHA-256 checksum per artifact (the only integrity
+# signal an unsigned build can offer, per ADR-020), and open a DRAFT
+# release with generated notes. Publication is manual: Mario reviews and
+# publishes. The desktop installers join automatically once apps/desktop
+# exists (prd-018g); until then the extension zip is the shippable
+# artifact. Uses only first-party CLI tools (gh), no third-party release
+# actions to pin or trust.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build artifacts + draft release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+          - os: windows-latest
+            platform: windows
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Enable corepack (pnpm)
+        run: corepack enable
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify clean quality gates on the release tree
+        run: |
+          pnpm run --if-present lint
+          pnpm run --if-present license:check
+          pnpm run --if-present typecheck
+          pnpm run --if-present build
+          pnpm run --if-present test
+
+      - name: Build extension artifact
+        shell: bash
+        run: |
+          pnpm --filter @waggle/extension build
+          mkdir -p release-artifacts
+          if [ -d apps/extension/dist ]; then
+            (cd apps/extension && zip -qr ../../release-artifacts/waggle-extension.zip dist)
+          fi
+
+      # prd-018g lands apps/desktop: when it exists, build its installers
+      # from this same workflow with no further wiring.
+      - name: Build desktop installers (when apps/desktop exists)
+        shell: bash
+        run: |
+          if [ -d apps/desktop ] && [ -f apps/desktop/package.json ]; then
+            pnpm --filter @waggle/desktop dist
+            find apps/desktop/release -maxdepth 1 -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.zip" \) -exec cp {} release-artifacts/ \; 2>/dev/null || true
+          else
+            echo "apps/desktop not present yet (prd-018g pending); skipping installer build"
+          fi
+
+      - name: Publish SHA-256 checksums
+        shell: bash
+        run: |
+          cd release-artifacts
+          if command -v sha256sum >/dev/null 2>&1; then
+            sha256sum * > checksums.txt
+          else
+            powershell -Command "Get-ChildItem -File | ForEach-Object { (Get-FileHash \$_.Name -Algorithm SHA256).Hash.ToLower() + '  ' + \$_.Name } | Out-File -Encoding ascii checksums.txt"
+          fi
+          cat checksums.txt
+
+      - name: Create draft release with notes
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" release-artifacts/* --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$TAG" --draft --generate-notes --title "Waggle $TAG" release-artifacts/* --repo "$GITHUB_REPOSITORY"
+          fi
+
+      - name: Upload artifacts for inspection
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-artifacts-${{ matrix.platform }}
+          path: release-artifacts/
+          if-no-files-found: error
+          retention-days: 30

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { getProjectDir } from '$lib/server/project-context.js';
 import { loadStudioProjectState } from '$lib/server/project-state.js';
 import type { PageServerLoad } from './$types.js';

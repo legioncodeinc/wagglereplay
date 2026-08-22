@@ -1,17 +1,12 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
-import type { R2Config } from '../src/r2/env.js';
 import { uploadBundle } from '../src/r2/upload-bundle.js';
 import { makeTempDir } from './fixtures.js';
+import { exampleR2Config } from './r2-fixtures.js';
 
-const CONFIG: R2Config = {
-  accountId: 'acct123',
-  accessKeyId: 'AKIDEXAMPLE',
-  secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
-  bucket: 'my-bucket',
-  publicBaseUrl: 'https://cdn.example.com',
-};
+const CONFIG = exampleR2Config();
 
 function stageBundle(): string {
   const dir = makeTempDir('upload-bundle');

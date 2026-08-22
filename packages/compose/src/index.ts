@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * `@waggle/compose`: the compositor interface and its default ffmpeg
  * backend (prd-007).
@@ -181,6 +182,7 @@ export {
   FfmpegNotFoundError,
   resolveFfmpegPath,
   resolveFfprobePath,
+  run,
 } from './ffmpeg/run-ffmpeg.js';
 export {
   encodeCursorSprite,

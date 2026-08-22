@@ -1,8 +1,7 @@
-import { existsSync, readFileSync } from 'node:fs';
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import {
-  CredentialsFileSchema,
-  createSensitiveTextScrubber,
-  credentialsPath,
+  createProjectTextScrubber,
+  ProjectTextScrubberConfigError,
   type SensitiveTextLiterals,
   type SensitiveTextScrubber,
   type WalkthroughFlow,
@@ -15,44 +14,26 @@ export class PreDraftPrivacyConfigError extends Error {
   }
 }
 
-function credentialEnvNames(projectDir: string): string[] {
-  const filePath = credentialsPath(projectDir);
-  if (!existsSync(filePath)) return [];
-
-  try {
-    const result = CredentialsFileSchema.safeParse(JSON.parse(readFileSync(filePath, 'utf8')));
-    if (!result.success) throw new PreDraftPrivacyConfigError();
-    return result.data.credentials.flatMap((credentialSet) =>
-      [credentialSet.username_env, credentialSet.secret_env, credentialSet.totp_seed_env].filter(
-        (envName): envName is string => envName !== undefined,
-      ),
-    );
-  } catch (error) {
-    if (error instanceof PreDraftPrivacyConfigError) throw error;
-    throw new PreDraftPrivacyConfigError();
-  }
-}
-
-function flaggedPlaceholders(flow: WalkthroughFlow): string[] {
-  return flow.steps.flatMap((step) =>
-    step.type === 'change' && step.waggle.masked ? [step.value] : [],
-  );
-}
-
 /**
  * Builds the text-only scrubber invoked for every pre-draft provider request,
  * provider reply, warning, and persisted description. Image bytes are not
  * modified by this text utility.
+ *
+ * Literal resolution (credential env names plus masked placeholders) lives
+ * in @waggle/ir's shared project-literals module since the 2026-08-21 Run 4
+ * guardrail pass; this wrapper keeps ingest's public error type.
  */
 export function createPreDraftTextScrubber(
   projectDir: string,
   flow: WalkthroughFlow,
   additional: SensitiveTextLiterals = {},
 ): SensitiveTextScrubber {
-  return createSensitiveTextScrubber({
-    envNames: [...credentialEnvNames(projectDir), ...(additional.envNames ?? [])],
-    values: additional.values,
-    placeholders: [...flaggedPlaceholders(flow), ...(additional.placeholders ?? [])],
-    canaries: additional.canaries,
-  });
+  try {
+    return createProjectTextScrubber(projectDir, flow, additional);
+  } catch (error) {
+    if (error instanceof ProjectTextScrubberConfigError) {
+      throw new PreDraftPrivacyConfigError();
+    }
+    throw error;
+  }
 }

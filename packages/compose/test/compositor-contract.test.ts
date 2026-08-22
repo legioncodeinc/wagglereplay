@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_BRAND_KIT } from '../src/brand/defaults.js';

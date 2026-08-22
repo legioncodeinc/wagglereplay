@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { StepAssets } from '@waggle/ir';
 
 /** Zero-padded step directory name, matching `@waggle/ingest`'s `stepDirName` (`step-000`, `step-001`, ...). */

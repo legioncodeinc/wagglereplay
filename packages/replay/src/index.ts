@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * `@waggle/replay`: the Playwright replay engine (prd-009) plus the
  * credential resolution layer prd-010 anchors here.
@@ -121,15 +122,12 @@ export {
 export {
   REPLAY_SETTLE_SOURCES,
   type ReplaySettleSource,
-  type SettleExclusion,
   type SettleOptions,
   type SettleOutcome,
   settleStep,
 } from './steps/settle.js';
 export {
-  isStepFailure,
   STEP_FAILURE_PHASES,
-  StepFailure,
   type StepFailureDetail,
   type StepFailurePhase,
 } from './steps/step-failure.js';

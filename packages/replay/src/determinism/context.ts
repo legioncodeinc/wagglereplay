@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { Browser, BrowserContext } from 'playwright-core';
 import { QUIESCENCE_PROBE_SOURCE } from '../steps/settle.js';
 import { buildDeterminismInitPayload, installDeterminismAssets } from './assets.js';

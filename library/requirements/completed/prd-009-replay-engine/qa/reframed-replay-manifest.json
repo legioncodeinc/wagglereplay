@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "irVersion": 1,
+  "replayPresetId": "9x16",
+  "composePresetId": "9x16",
+  "reflow": "reframed",
+  "reflowReason": "horizontal overflow of 740px at 1080x1920 (no reflow)",
+  "capture": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 12,
+    "durationMs": 594,
+    "framesReceived": 5,
+    "framesWritten": 7
+  },
+  "steps": [
+    {
+      "stepIndex": 0,
+      "stepType": "setViewport",
+      "ok": true,
+      "startOffsetMs": 32,
+      "durationMs": 134,
+      "settleSource": "mutation-quiet",
+      "selectorUsed": null,
+      "attemptedSelectors": [],
+      "screenshotRef": "screenshots/step-000.png",
+      "failure": null
+    },
+    {
+      "stepIndex": 1,
+      "stepType": "navigate",
+      "ok": true,
+      "startOffsetMs": 205,
+      "durationMs": 70,
+      "settleSource": "element-assertion",
+      "selectorUsed": null,
+      "attemptedSelectors": [],
+      "screenshotRef": "screenshots/step-001.png",
+      "failure": null
+    },
+    {
+      "stepIndex": 2,
+      "stepType": "click",
+      "ok": true,
+      "startOffsetMs": 406,
+      "durationMs": 87,
+      "settleSource": "element-assertion",
+      "selectorUsed": {
+        "recorded": "[data-testid=\"wide-content\"]",
+        "playwright": "css=[data-testid=\"wide-content\"]",
+        "engine": "css",
+        "alternativeIndex": 0,
+        "drift": false
+      },
+      "attemptedSelectors": [],
+      "screenshotRef": "screenshots/step-002.png",
+      "failure": null
+    }
+  ],
+  "focusTrack": [
+    {
+      "atMs": 0,
+      "nx": 0.34375,
+      "ny": 0.06851851851851852
+    },
+    {
+      "atMs": 149.5,
+      "nx": 0.34375,
+      "ny": 0.06851851851851852
+    },
+    {
+      "atMs": 249.5,
+      "nx": 0.34375,
+      "ny": 0.06851851851851852
+    },
+    {
+      "atMs": 349.5,
+      "nx": 0.34375,
+      "ny": 0.06851851851851852
+    },
+    {
+      "atMs": 449.5,
+      "nx": 0.34375,
+      "ny": 0.06851851851851852
+    },
+    {
+      "atMs": 594,
+      "nx": 0.34375,
+      "ny": 0.06851851851851852
+    }
+  ]
+}

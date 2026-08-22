@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * AC4 Playwright smoke: loads a fixture Waggle project into the REAL
  * built `@waggle/studio` server, drives the real browser UI to edit a

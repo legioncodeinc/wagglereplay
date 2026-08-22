@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { existsSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import net from 'node:net';

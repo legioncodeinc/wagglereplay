@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { type FetchLike, fetchWithRetry } from '../shared/http.js';
 import { TtsProviderError } from '../types.js';
 import { DEEPGRAM_DEFAULT_BASE_URL } from './constants.js';
