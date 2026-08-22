@@ -1,6 +1,6 @@
 # PRD-018b: Per-launch loopback authentication and request guards
 
-> **Waggle** — sub-feature PRD of [PRD-018](./prd-018-desktop-application-index.md)
+> **Waggle** - sub-feature PRD of [PRD-018](./prd-018-desktop-application-index.md)
 >
 > **Status:** Draft
 > **Priority:** P0 (closes the standing security finding)
@@ -16,15 +16,17 @@ Close the one remaining Low security finding: the Studio loopback server has no 
 
 - Token generation in the desktop main process at every launch (`crypto.randomBytes`, rotated per launch, never persisted).
 - Auth middleware in the Studio server: every route except the minimal health endpoint requires the token; constant-time comparison.
+- The health endpoint is CREATED here, not narrowed: no health route exists on `main` today (verified 2026-08-21; `apps/studio/src/routes/api/` carries credential-markings, frames, settings, steps, and watch only). It exposes status and app version only - no route inventory, no token echo.
+- The focus route is claimed here for sub-PRD e: an authenticated POST whose handler needs main-process window focus, which a plain SvelteKit route cannot reach. Injection seam: the desktop main registers a focus callback on the server's exported handler at boot (a setter on the adapter-node server module); when the setter was never called (the `waggle studio` CLI path), the route answers `501` with a "desktop app required" body. sub-PRD e consumes, never re-implements.
 - Token delivery to the renderer via the sub-PRD a preload bridge.
 - Token delivery to the extension via an origin-pinned handshake endpoint (see Technical Considerations).
-- Host header validation (only `127.0.0.1`/`localhost` with the launched port — DNS-rebinding deterrence) and a request body size cap.
-- The health endpoint exposes status and app version only — no route inventory, no token echo.
+- Host header validation (only `127.0.0.1`/`localhost` with the launched port - DNS-rebinding deterrence) and a request body size cap.
+- The loopback port is pinned at 4310: the extension hardcodes `http://127.0.0.1:4310` (`apps/extension/src/lib/upload-client.ts` line 18, `DEFAULT_STUDIO_ORIGIN`), and the CLI's default already matches. The desktop main uses 4310 and treats an occupied port as a launch error naming the conflicting process class, not a silent fallback to a random port the extension cannot find. (If port discovery is ever wanted, it requires an extension-side discovery mechanism; out of scope and rejected for v1.)
 
 ### Out of scope
 
 - TLS (loopback does not need it; token + host validation are the controls).
-- Multi-user or remote access — explicitly never (ADR-014/ADR-016).
+- Multi-user or remote access - explicitly never (ADR-014/ADR-016).
 - Rate limiting (no threat model on a single-user loopback with a token).
 
 ### Dependencies
@@ -35,7 +37,7 @@ Close the one remaining Low security finding: the Studio loopback server has no 
 
 ## User Stories
 
-### US-18b.1 — Unauthenticated requests are rejected
+### US-18b.1 - Unauthenticated requests are rejected
 
 **As a** user running Waggle on a shared machine, **I want** any process that lacks the launch token to be unable to drive the Studio API, **so that** other local users or pages cannot read my projects or trigger renders.
 
@@ -45,7 +47,7 @@ Close the one remaining Low security finding: the Studio loopback server has no 
 - AC-18b.1.3 Given the health endpoint, when pinged without a token, then it answers `200` with `{ status, version }` and nothing else.
 - AC-18b.1.4 Given two consecutive app launches, then the tokens differ (rotation asserted in test).
 
-### US-18b.2 — The renderer session works transparently
+### US-18b.2 - The renderer session works transparently
 
 **As a** desktop user, **I want** the Studio UI to just work, **so that** authentication is invisible inside the app.
 
@@ -53,7 +55,7 @@ Close the one remaining Low security finding: the Studio loopback server has no 
 - AC-18b.2.1 Given the renderer, when any Studio API call is made, then the client library attaches the token from `window.waggleDesktop` as an authorization header without UI involvement.
 - AC-18b.2.2 Given the preload bridge is unavailable (plain browser without Electron), then the client surfaces a clear "desktop app required" error rather than silent 401 loops.
 
-### US-18b.3 — The extension obtains the token without user steps
+### US-18b.3 - The extension obtains the token without user steps
 
 **As a** recorder, **I want** the extension to authenticate to Studio automatically, **so that** zero-terminal holds on the capture path too.
 
@@ -62,14 +64,14 @@ Close the one remaining Low security finding: the Studio loopback server has no 
 - AC-18b.3.2 Given any other origin (http pages, other extensions), when the handshake is attempted, then the server responds `403` and does not reveal whether the app is running beyond the health endpoint's public status.
 - AC-18b.3.3 Given the extension holds a token from a previous launch, when the app relaunches, then the stale token fails with `401` and the extension transparently re-handshakes once.
 
-### US-18b.4 — Host and body guards
+### US-18b.4 - Host and body guards
 
 **As a** maintainer, **I want** rebinding-style requests and oversized bodies rejected, **so that** the loopback boundary cannot be abused as a pivot.
 
 **Acceptance criteria:**
 - AC-18b.4.1 Given a request whose `Host` header is not `127.0.0.1:<port>` or `localhost:<port>`, when it arrives, then the server responds `403` before route handling.
 - AC-18b.4.2 Given a request body exceeding the configured cap, when it is sent, then the server responds `413` and the connection is dropped.
-- AC-18b.4.3 Given the cap, then it is a named config constant documented against the largest legitimate payload (recording upload), with a comment tying it to prd-013's audio alignment work.
+- AC-18b.4.3 Given the cap, then it is a named config constant sized per MediaRecorder CHUNK, not per recording: the extension's recorder emits a chunk every `timesliceMs` (default 1000 ms, `apps/extension/src/offscreen/recorder.ts` line 58), so the cap must bound a single chunk upload of a configurable worst-case bitrate with headroom, documented with the arithmetic in a comment tying it to prd-013's (larger) audio-alignment uploads.
 
 ## Technical Considerations
 
@@ -81,22 +83,25 @@ Close the one remaining Low security finding: the Studio loopback server has no 
 ## Files Touched
 
 ### New files
-- `apps/desktop/src/main/launch-token.ts` — generation and IPC exposure
-- `apps/studio/src/lib/server/auth-middleware.ts` — token check, constant-time compare
-- `apps/studio/src/lib/server/host-guard.ts` — Host validation + body cap wiring
-- `apps/studio/src/lib/server/handshake.ts` — origin-pinned token issuance
+- `apps/desktop/src/main/launch-token.ts` - generation and IPC exposure
+- `apps/studio/src/lib/server/auth-middleware.ts` - token check, constant-time compare
+- `apps/studio/src/lib/server/host-guard.ts` - Host validation + body cap wiring
+- `apps/studio/src/lib/server/handshake.ts` - origin-pinned token issuance
 - Tests mirroring each file under `apps/studio/test/` and `apps/desktop/test/`
 
 ### Modified files
-- `apps/studio/src/lib/server/` — register middleware ahead of existing routes; health endpoint narrowed to `{ status, version }`
-- `apps/studio/src/lib/` client layer — token header attachment from the bridge (AC-18b.2)
-- `apps/extension/src/background/` — handshake call and stale-token re-handshake (AC-18b.3.3)
-- PRD-010 canary battery fixture list — add the launch token string
+- `apps/studio/src/lib/server/` - register middleware ahead of existing routes; health endpoint created (none exists today); focus route added with the main-process injection seam
+- `packages/cli/src/commands/studio.ts:73` and `apps/studio/test/e2e/run-studio-smoke.ts:169` - the two `BODY_SIZE_LIMIT: 'Infinity'` sites: the production one replaces Infinity with the named chunk-sized cap; the smoke-test harness boot is updated to whatever the authenticated server requires (token generation) so the e2e keeps proving the real handshake
+- `apps/extension/src/lib/upload-client.ts` - the fetches that must carry the token (and re-handshake on 401 per AC-18b.3.3)
+- `apps/studio/src/lib/` client layer - token header attachment from the bridge (AC-18b.2)
+- `apps/extension/src/background/` - handshake call and stale-token re-handshake (AC-18b.3.3)
+- PRD-010 canary battery fixture list - add the launch token string
 
 ## Test Plan
 
-- Unit: middleware matrix — missing token, wrong token, valid token, health exemption (AC-18b.1.1–3); rotation test (AC-18b.1.4); host matrix (AC-18b.4.1); body cap (AC-18b.4.2).
-- Unit: handshake origin matrix — extension origin, https page, other extension (AC-18b.3.1/2).
+- Unit: middleware matrix - missing token, wrong token, valid token, health exemption (AC-18b.1.1-3); rotation test (AC-18b.1.4); host matrix (AC-18b.4.1); body cap (AC-18b.4.2).
+- Unit: handshake origin matrix - extension origin, https page, other extension (AC-18b.3.1/2).
+- Forged-Origin local-process test: a local non-extension process crafts a request with `Origin: chrome-extension://<the-allowed-id>` but no browser backing it. The origin check alone cannot distinguish it; the test documents this honestly - the residual local-process risk is that ANY local process can read the token by making the same handshake the extension makes (origin headers are spoofable off-browser). The stated control is the trust boundary itself: any process that can talk to loopback can already interact with local servers; the token stops non-local and in-browser attackers, and DNS rebinding, which is what it is for. This residual risk is recorded in the security review, not waved through.
 - E2E against the packaged app (sub-PRD a shell): `curl` with wrong Host header rejected; renderer flow succeeds with no user-visible auth (AC-18b.2.1); canary test asserts the token appears in zero artifacts.
 - Security review: this sub-PRD is the security-worker-bee Ship Gate focus; the handshake design ships only with its sign-off.
 
@@ -105,10 +110,10 @@ Close the one remaining Low security finding: the Studio loopback server has no 
 - **Risk:** the origin-pinned handshake is the linchpin; a flaw in origin handling undermines the token. **Mitigation:** single hardcoded allowlist entry, deny-by-default, adversarial review at the gate.
 - **Risk:** body cap vs prd-013 audio uploads. **Mitigation:** cap named and sized now, revisited when prd-013 lands.
 - **Open question:** should the CLI `waggle studio` path require the token by default (recommended: yes, generated and printed once) or only when `WAGGLE_STUDIO_TOKEN` is set? Decide in implementation; document in the command's help text without changing its surface (ADR-019).
-- **Open question:** handshake rate — whether the extension re-handshakes per message or caches per launch. Recommended: cache with the single re-handshake of AC-18b.3.3.
+- **Open question:** handshake rate - whether the extension re-handshakes per message or caches per launch. Recommended: cache with the single re-handshake of AC-18b.3.3.
 
 ## Related
 
 - [PRD-018 index](./prd-018-desktop-application-index.md)
-- [ADR-020 — security consequences of distribution](../../../knowledge/private/architecture/ADR-020-electron-desktop-shell-unsigned-builds.md)
-- [ADR-008 — env refs contract this extends](../../../knowledge/private/architecture/ADR-008-credentials-env-refs-never-in-project-files.md)
+- [ADR-020 - security consequences of distribution](../../../knowledge/private/architecture/ADR-020-electron-desktop-shell-unsigned-builds.md)
+- [ADR-008 - env refs contract this extends](../../../knowledge/private/architecture/ADR-008-credentials-env-refs-never-in-project-files.md)

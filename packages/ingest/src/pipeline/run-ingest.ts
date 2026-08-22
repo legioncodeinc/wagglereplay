@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { latestIrVersion, type WalkthroughFlow, writeNextIrVersion } from '@waggle/ir';
 import { IngestSessionError } from '../errors.js';
 import { extractKeyframes } from '../frames/extract-keyframes.js';

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * ElevenLabs model catalog relevant to narration (ADR-006, corpus receipts:
  * https://elevenlabs.io/docs/api-reference/text-to-speech/convert-with-timestamps ,

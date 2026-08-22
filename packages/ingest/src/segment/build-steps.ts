@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { FIXED_INPUT_PLACEHOLDER } from '@waggle/extension';
 import type { WalkthroughStep } from '@waggle/ir';
 import type { EventGroup, GroupOrOrphan, StepTiming } from './types.js';

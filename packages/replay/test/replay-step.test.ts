@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { type WalkthroughStep, WalkthroughStepSchema } from '@waggle/ir';
 import type { Locator, Page } from 'playwright-core';
 import { describe, expect, it, vi } from 'vitest';

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { parse } from '@puppeteer/replay';
 import { describe, expect, it } from 'vitest';
 import {

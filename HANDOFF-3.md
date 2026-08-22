@@ -49,7 +49,7 @@ The shipped behavior includes:
 - A moved-button drift test that runs real Chromium and ffmpeg. The stale primary selector fails, the accessible fallback succeeds, and the report records the fallback index.
 - Checked-in native and reframed manifests, screenshots, and a drift run report under the PRD QA directory.
 
-The final CodeQL remediation replaced interpolated initialization-script source with a Playwright function plus separately serialized data. Network exclusions are read lazily so initialization order cannot capture stale configuration. No `eval`, `new Function`, or equivalent executable-source construction remains in the replay path.
+The final CodeQL remediation replaced interpolated initialization-script source with a Playwright function plus separately serialized data. Network exclusions are read lazily so initialization order cannot capture stale configuration. No `eval`, `new Function`, or equivalent executable-source construction remains in the replay path. [Correction 2026-08-21, HANDOFF-4 section 3 item 2: "no executable-source construction" is false as written - `packages/replay/src/steps/act.ts:248-251` passes an IR-supplied `waitForExpression` string to `page.waitForFunction`. This is legitimate ADR-001 schema inheritance, but the IR is a shareable file, so the correct posture is a stated trust assumption, not a denied surface; expect CodeQL to flag it eventually. HANDOFF-4 section 10 item 9 carries the corrected contract wording.]
 
 ### PRD-010 credentials and masking
 

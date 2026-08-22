@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { WalkthroughFlow } from '@waggle/ir';
 import { toNormalized, viewportSize } from '@waggle/ir';
 import type { CursorStyle } from '../brand/schema.js';

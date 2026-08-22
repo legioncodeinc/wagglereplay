@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { rmSync } from 'node:fs';
 import { writeHeatmap, writePreDraft } from '@waggle/ingest';
 import { writeNextIrVersion } from '@waggle/ir';

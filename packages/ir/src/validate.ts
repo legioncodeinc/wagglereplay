@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { z } from 'zod';
 import { type WalkthroughFlow, WalkthroughFlowSchema } from './schema/flow.js';
 import { type UserFlowCore, UserFlowCoreSchema } from './schema/step-core.js';

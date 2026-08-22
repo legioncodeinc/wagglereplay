@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * Per-tab network-quiescence tracking (AC6, ADR-010).
  *

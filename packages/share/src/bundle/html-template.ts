@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * The share page itself (prd-008 AC2): one self-contained HTML file with
  * inline CSS and a small inline script, no external stylesheet, font,

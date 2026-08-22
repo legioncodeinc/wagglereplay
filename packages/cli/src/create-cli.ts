@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { Command } from 'commander';
 import { registerCleanCommand } from './commands/clean.js';
 import { registerCredsCommand } from './commands/creds.js';

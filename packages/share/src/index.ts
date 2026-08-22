@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * `@waggle/share`: render output management, the static share-page
  * bundle, and the optional R2 uploader (prd-008).

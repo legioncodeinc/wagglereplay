@@ -1,6 +1,7 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { describe, expect, it, vi } from 'vitest';
 import { R2Client, R2UploadError } from '../src/r2/client.js';
-import type { R2Config } from '../src/r2/env.js';
+import { exampleR2Config } from './r2-fixtures.js';
 
 /**
  * prd-008 AC3: "Build the uploader against an INJECTABLE client ... Fully
@@ -10,14 +11,7 @@ import type { R2Config } from '../src/r2/env.js';
  * SigV4 signing; only the transport (`fetchImpl`) is a mock. See
  * README.md for exactly which assertion still needs a live R2 bucket.
  */
-
-const CONFIG: R2Config = {
-  accountId: 'acct123',
-  accessKeyId: 'AKIDEXAMPLE',
-  secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
-  bucket: 'my-bucket',
-  publicBaseUrl: 'https://cdn.example.com',
-};
+const CONFIG = exampleR2Config();
 
 const FIXED_NOW = () => new Date('2026-03-14T09:26:53.123Z');
 
@@ -133,6 +127,39 @@ describe('AC3: R2Client.putObject', () => {
     expect(uploadError.key).toBe('v1/index.html');
     expect(uploadError.message).toContain('403');
     expect(uploadError.message).toContain('AccessDenied');
+  });
+
+  it('redacts AWSAccessKeyId and StringToSign from a SignatureDoesNotMatch body before the message exists', async () => {
+    const fetchImpl = vi.fn(
+      async () =>
+        new Response(
+          '<Error><Code>SignatureDoesNotMatch</Code>' +
+            '<AWSAccessKeyId>EXAMPLEKEYIDNOTREAL00</AWSAccessKeyId>' +
+            '<StringToSign>AWS4-HMAC-SHA256\nPUT\n/v1/index.html</StringToSign>' +
+            '<CanonicalRequest>PUT\n/v1/index.html\nhost:acct.r2</CanonicalRequest>' +
+            '</Error>',
+          { status: 403, statusText: 'Forbidden' },
+        ),
+    );
+    const client = new R2Client(CONFIG, { fetchImpl, now: FIXED_NOW });
+
+    let caught: unknown;
+    try {
+      await client.putObject({
+        key: 'v1/index.html',
+        body: Buffer.from('x'),
+        contentType: 'text/html',
+      });
+    } catch (error) {
+      caught = error;
+    }
+
+    expect(caught).toBeInstanceOf(R2UploadError);
+    const message = (caught as R2UploadError).message;
+    expect(message).toContain('SignatureDoesNotMatch');
+    expect(message).not.toContain('EXAMPLEKEYIDNOTREAL00');
+    expect(message).not.toContain('AWS4-HMAC-SHA256');
+    expect(message).toContain('[REDACTED]');
   });
 
   it('never throws for a network-layer failure without surfacing it as an unlabeled rejection', async () => {

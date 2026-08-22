@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { ModelReply } from './schema.js';
 
 /** One image attached to a pre-draft request (a `before`/`click` frame PNG, base64-encoded). */

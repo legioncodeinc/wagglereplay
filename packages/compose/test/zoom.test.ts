@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_BRAND_KIT } from '../src/brand/defaults.js';
 import type { ZoomStyle } from '../src/brand/schema.js';

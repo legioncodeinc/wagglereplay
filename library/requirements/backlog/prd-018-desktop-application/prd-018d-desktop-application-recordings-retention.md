@@ -1,6 +1,6 @@
 # PRD-018d: Recordings list with raw-capture warning and delete controls
 
-> **Waggle** — sub-feature PRD of [PRD-018](./prd-018-desktop-application-index.md)
+> **Waggle** - sub-feature PRD of [PRD-018](./prd-018-desktop-application-index.md)
 >
 > **Status:** Draft
 > **Priority:** P2
@@ -14,7 +14,8 @@ Give the desktop-hosted recordings page (the surface ADR-016 names) three capabi
 
 ### Scope
 
-- Recordings list in Studio fed by the existing project/session model on disk (ADR-015 filesystem layout), one row per captured session: date, duration, project, and presence of master/derived artifacts.
+- Recordings list in Studio fed by the real on-disk layout (ADR-015): one row per captured session per project. The server is single-project at a time today (sub-PRD h makes switching explicit), so the list shows the ACTIVE project's recordings; a project column appears only if/when h's registry exposes cross-project recency, and the row's "project" field is then read-only context, never a cross-project query surface (reconciled with h's single-active-project rule).
+- Enumeration source is the real `recordings/v{n}/` subtree (the version-scoped master locations ingest writes, established by the Run 2 seam fix) plus `steps/v{n}/` for derived frame trees - NOT a "session manifest" enumeration, which does not exist as a separate artifact. Presence of master and derived artifacts is determined by canonical path existence, confinement-checked.
 - Per-recording sensitivity notice plus a first-visit global notice: raw capture masters are unmasked screen recordings and stay local.
 - Delete flow: explicit confirm → remove the session's capture master and derived artifacts (renders, extracted frames) from disk, canonically confined to the project directory.
 
@@ -32,7 +33,7 @@ Give the desktop-hosted recordings page (the surface ADR-016 names) three capabi
 
 ## User Stories
 
-### US-18d.1 — See what was recorded
+### US-18d.1 - See what was recorded
 
 **As a** user, **I want** my recordings listed with what exists on disk, **so that** I can manage capture material without a file explorer.
 
@@ -40,7 +41,7 @@ Give the desktop-hosted recordings page (the surface ADR-016 names) three capabi
 - AC-18d.1.1 Given projects with captured sessions, when the recordings page opens, then every session with a master present is listed with date, duration, and project name.
 - AC-18d.1.2 Given a session whose master was already deleted, when the list renders, then the row shows its derived artifacts without offering playback of a master that does not exist.
 
-### US-18d.2 — Understand the sensitivity
+### US-18d.2 - Understand the sensitivity
 
 **As a** user, **I want** an unmissable statement that raw captures are unmasked, **so that** I treat masters accordingly when I share or copy files.
 
@@ -48,20 +49,21 @@ Give the desktop-hosted recordings page (the surface ADR-016 names) three capabi
 - AC-18d.2.1 Given the first visit to the recordings page, when it opens, then a global notice states that raw capture masters are unmasked screen recordings kept locally, acknowledged before dismissal.
 - AC-18d.2.2 Given each row, when it renders, then a per-recording sensitivity marker is present whenever the master exists.
 
-### US-18d.3 — Delete a recording's material
+### US-18d.3 - Delete a recording's material
 
 **As a** user, **I want** to delete a recording and everything derived from it, **so that** sensitive material leaves my machine on my schedule.
 
 **Acceptance criteria:**
 - AC-18d.3.1 Given a recording, when delete is confirmed, then the master and all derived artifacts for that session are removed from disk and the list updates.
 - AC-18d.3.2 Given the confirm dialog, when cancel is chosen, then nothing is deleted.
-- AC-18d.3.3 Given any candidate path for deletion, when it resolves outside the project directory (traversal or symlink escape), then deletion fails closed and logs the rejection — no partial deletes.
+- AC-18d.3.3 Given any candidate path for deletion, when it resolves outside the project directory (traversal or symlink escape), then deletion fails closed and logs the rejection - no partial deletes.
 - AC-18d.3.4 Given a delete operation, then only that session's artifacts are touched; other sessions and project files (IR, credentials.json) are untouched.
+- AC-18d.3.5 Given a deleted master whose IR version's `sourceRecording.videoRef` no longer resolves, when any pipeline needing the master runs (re-render, re-frame extraction), then the failure is the structured "source recording missing" error naming the version, and the storyboard still opens and displays extracted-frame steps already on disk; the recordings row for that version shows "master deleted" state (defined behavior, never a crash or a silent skip).
 
 ## Technical Considerations
 
 - **Confinement:** deletion path resolution reuses PRD-010's extractor-attested confinement approach (canonicalize, verify containment, reject symlinks escaping the project). Deletion is the most destructive file operation in the app; fail-closed is the only acceptable mode.
-- **Derived-artifact enumeration:** derive from the session's manifest/run reports rather than globbing, so the delete set is exactly what the pipeline recorded producing.
+- **Derived-artifact enumeration:** derive from the real `recordings/v{n}/` and `steps/v{n}/` subtrees plus the run reports that name what the pipeline produced - not from a "session manifest" (no such artifact exists; corrected 2026-08-21) - so the delete set is the version-scoped subtree the pipeline actually wrote, confinement-checked.
 - **No bulk API:** one session per request; the UI prevents multi-select delete in v1.
 - **Notice persistence:** first-visit acknowledgment stored in app-data (not in any project file).
 
@@ -73,11 +75,11 @@ Give the desktop-hosted recordings page (the surface ADR-016 names) three capabi
 - Unit/e2e tests mirroring both
 
 ### Modified files
-- `apps/studio/src/lib/` — session listing query extended with artifact presence (if not already exposed)
+- `apps/studio/src/lib/` - session listing query extended with artifact presence (if not already exposed)
 
 ## Test Plan
 
-- Unit: deletion set enumeration from a fixture session manifest (AC-18d.3.1/3.4); confinement matrix — traversal attempt, symlink escape, in-bounds ok (AC-18d.3.3), mirroring PRD-010's fail-closed tests.
+- Unit: deletion set enumeration from a fixture session manifest (AC-18d.3.1/3.4); confinement matrix - traversal attempt, symlink escape, in-bounds ok (AC-18d.3.3), mirroring PRD-010's fail-closed tests.
 - E2E (packaged app): record fixture session → list shows warning markers → delete → assert files gone and neighbors untouched; cancel path leaves everything (AC-18d.3.2).
 - UI: first-visit notice acknowledgment flow (AC-18d.2.1).
 
@@ -89,5 +91,5 @@ Give the desktop-hosted recordings page (the surface ADR-016 names) three capabi
 ## Related
 
 - [PRD-018 index](./prd-018-desktop-application-index.md)
-- [HANDOFF-3 — raw-capture retention boundary](../../../HANDOFF-3.md)
-- [ADR-015 — filesystem project dirs](../../../knowledge/private/architecture/ADR-015-filesystem-project-dirs-no-database.md)
+- [HANDOFF-3 - raw-capture retention boundary](../../../HANDOFF-3.md)
+- [ADR-015 - filesystem project dirs](../../../knowledge/private/architecture/ADR-015-filesystem-project-dirs-no-database.md)

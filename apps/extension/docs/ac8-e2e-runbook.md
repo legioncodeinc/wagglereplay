@@ -48,8 +48,9 @@ generation, and the real finalizer - not a fabricated number.
   running Studio server (AC2, AC7) work end to end.
 
 Those require a human, a real display, and (for the upload steps) a
-listening Studio server, which does not exist yet (Studio itself is
-prd-005).
+listening Studio server, which now exists: `waggle studio` (prd-005,
+merged) boots the built loopback server on `127.0.0.1:4310` with the
+session-upload endpoints wired to ingest inputs.
 
 ## Manual verification steps
 
@@ -69,18 +70,21 @@ prd-005).
 7. Walk the canonical 6-step flow from `fixtures/demo-app/README.md` by
    hand.
 8. Click the action icon again to stop. Expected: the badge clears.
-9. Because no Studio server is listening yet (prd-005), the
-   `fetch(...)` calls in `lib/upload-client.ts` will fail with a network
-   error - inspect the service worker console and confirm the failures are
-   exactly `ECONNREFUSED`/`Failed to fetch` against
-   `http://127.0.0.1:4310/waggle/sessions/...` and nothing else silently
-   swallowed. This confirms the finalizer ran and attempted the real
-   upload contract, which is as far as this can be verified without
-   prd-005 actually listening.
-10. To verify tabCapture and MediaRecorder specifically before prd-005
-    exists, temporarily add a `console.log` in
-    `offscreen/recorder.ts`'s `ondataavailable` handler logging
-    `event.data.size`, rebuild, repeat steps 4-8, and confirm the
+9. Studio has shipped (prd-005, merged), so boot it first: from the repo
+   root, after `pnpm build`, run `pnpm --filter @waggle/cli start studio
+   --project <a waggle project initialized nearby>` in another terminal.
+   With Studio listening on `127.0.0.1:4310`, stopping the recording
+   should now produce successful uploads: inspect the service worker
+   console and confirm the `fetch(...)` calls in `lib/upload-client.ts`
+   return non-error responses against `http://127.0.0.1:4310/waggle/...`
+   and that the session files land in the project's ingest-input location.
+   (If Studio is NOT running, the same fetches fail with exactly
+   `ECONNREFUSED`/`Failed to fetch` and nothing else silently swallowed,
+   which still confirms the finalizer ran and attempted the real upload
+   contract.)
+10. To verify tabCapture and MediaRecorder specifically, temporarily add a
+    `console.log` in `offscreen/recorder.ts`'s `ondataavailable` handler
+    logging `event.data.size`, rebuild, repeat steps 4-8, and confirm the
     offscreen document's console (accessible the same way as the service
     worker's in `chrome://extensions`) logs non-zero chunk sizes at the
     configured timeslice interval.

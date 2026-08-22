@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { z } from 'zod';
 import type { SourceVideo, SourceVideoKind } from '../compositor.js';
 import { resolveFfprobePath, run, stderrTail } from './run-ffmpeg.js';

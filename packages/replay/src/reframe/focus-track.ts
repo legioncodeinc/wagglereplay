@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { FocusPoint } from '../capture/timing-manifest.js';
 import type { StepExecutionResult } from '../steps/replay-step.js';
 

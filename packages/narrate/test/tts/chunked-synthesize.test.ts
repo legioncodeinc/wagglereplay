@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { describe, expect, it } from 'vitest';
 import { splitTextIntoChunks, synthesizeChunked } from '../../src/tts/chunked-synthesize.js';
 import type {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * AC4: provider-agnostic environment resolution for the pre-draft LLM
  * call, with graceful degradation as the primary contract - this module

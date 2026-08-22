@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { error, json, type RequestHandler } from '@sveltejs/kit';
 import { z } from 'zod';
 import { applyHumanEdit, DescriptionNotFoundError } from '$lib/server/narration-store.js';

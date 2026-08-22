@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /** AC1: target reading pace, words per minute (corpus: "target pace ~150 wpm"). */
 export const TARGET_WORDS_PER_MINUTE = 150;
 

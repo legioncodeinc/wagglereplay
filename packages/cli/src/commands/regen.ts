@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import path from 'node:path';
 import {
   ConcurrencyError,
@@ -15,8 +16,9 @@ import { loadManifest } from '../manifest/load-manifest.js';
  * `waggle regen` (prd-009 AC6): replay the current IR against the live
  * app, re-capture every configured preset, re-composite, and write the
  * run report. ADR-019's carve-out: regen is one of the two commands the
- * frozen surface lets this PRD finish; prd-012 will add `--check` on top
- * for CI, which is the other half of that same carve-out.
+ * frozen surface lets this PRD finish; prd-011 will add `--check` on top
+ * for CI, and prd-012 consumes that flag in its workflow, which is the
+ * other half of that same carve-out.
  */
 export function registerRegenCommand(program: Command): void {
   program

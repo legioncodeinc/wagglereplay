@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { pathToFileURL } from 'node:url';
 import { createCli } from './create-cli.js';
 import { CliExitError } from './errors.js';

@@ -1,6 +1,6 @@
 # PRD-018e: Extension handshake, launch, focus, and single instance
 
-> **Waggle** — sub-feature PRD of [PRD-018](./prd-018-desktop-application-index.md)
+> **Waggle** - sub-feature PRD of [PRD-018](./prd-018-desktop-application-index.md)
 >
 > **Status:** Draft
 > **Priority:** P1
@@ -15,7 +15,7 @@ Implement ADR-016's launch path end to end: the extension's "Launch Studio" acti
 ### Scope
 
 - Desktop: `waggle://` custom protocol registration (Windows, macOS), single-instance lock, second-instance window focus, and `waggle://launch` handling when the app is closed.
-- Extension (`apps/extension/src/background/`): action-click flow — health ping with short timeout, then focus-request or protocol open; result feedback on the action badge/tooltip.
+- Extension (`apps/extension/src/background/`): action-click flow - health ping with short timeout, then focus-request or protocol open; result feedback on the action badge/tooltip.
 - Health-check semantics: the sub-PRD b public endpoint (`{ status, version }`), with a bounded timeout treated as "not running".
 
 ### Out of scope
@@ -32,7 +32,7 @@ Implement ADR-016's launch path end to end: the extension's "Launch Studio" acti
 
 ## User Stories
 
-### US-18e.1 — Launch Studio with the app closed
+### US-18e.1 - Launch Studio with the app closed
 
 **As a** recorder, **I want** the extension button to start Waggle, **so that** I never open anything myself.
 
@@ -40,7 +40,7 @@ Implement ADR-016's launch path end to end: the extension's "Launch Studio" acti
 - AC-18e.1.1 Given the app is not running, when the extension action is clicked, then the health ping fails within its timeout and the extension triggers `waggle://launch`, and the OS opens the installed app (Windows and macOS).
 - AC-18e.1.2 Given the protocol is unregistered (app uninstalled), when the extension attempts it, then the user sees a clear "install the desktop app" message, not a silent failure.
 
-### US-18e.2 — Focus Studio with the app running
+### US-18e.2 - Focus Studio with the app running
 
 **As a** recorder, **I want** the button to surface the existing window, **so that** I never get a second app.
 
@@ -48,7 +48,7 @@ Implement ADR-016's launch path end to end: the extension's "Launch Studio" acti
 - AC-18e.2.1 Given the app is running, when the action is clicked, then the health ping succeeds and the extension calls the focus route; the main process brings the existing window to the foreground without creating a window or server.
 - AC-18e.2.2 Given a second app instance is somehow launched (user double-clicks while running), then `requestSingleInstanceLock` fails in the second process, it forwards its argv and quits, and the first instance focuses its window.
 
-### US-18e.3 — Reliable "not running" detection
+### US-18e.3 - Reliable "not running" detection
 
 **As a** maintainer, **I want** stale or wedged servers detected honestly, **so that** the button never routes to a dead endpoint.
 
@@ -59,29 +59,29 @@ Implement ADR-016's launch path end to end: the extension's "Launch Studio" acti
 ## Technical Considerations
 
 - **Protocol registration:** `app.setAsDefaultProtocolClient('waggle')` on Windows and macOS in the packaged build; dev runs skip registration. Windows registry-based registration is handled by electron-builder's protocol config (sub-PRD g wires it).
-- **Single instance:** `app.requestSingleInstanceLock()` at the earliest main-process point; second instance forwards `process.argv` (where the `waggle://` URL arrives on Windows) and exits. On macOS, `open-url` delivers the URL to the running instance — both paths converge on one handler.
-- **Focus route:** authenticated (sub-PRD b token) POST that the main process resolves to window focus — no query-string token (it would leak into logs/OS process lists).
+- **Single instance:** `app.requestSingleInstanceLock()` at the earliest main-process point; second instance forwards `process.argv` (where the `waggle://` URL arrives on Windows) and exits. On macOS, `open-url` delivers the URL to the running instance - both paths converge on one handler.
+- **Focus route:** authenticated (sub-PRD b token) POST that the main process resolves to window focus - no query-string token (it would leak into logs/OS process lists).
 - **Extension side:** all of this lives in the existing MV3 service worker (`apps/extension/src/background/`); no new permissions beyond ADR-018's already-planned `windows`.
 
 ## Files Touched
 
 ### New files
-- `apps/desktop/src/main/protocol.ts` — registration, URL parsing, single allowed link shape
-- `apps/desktop/src/main/single-instance.ts` — lock, argv/open-url forwarding, focus
-- `apps/extension/src/background/launch-flow.ts` — ping → focus-or-open state machine
+- `apps/desktop/src/main/protocol.ts` - registration, URL parsing, single allowed link shape
+- `apps/desktop/src/main/single-instance.ts` - lock, argv/open-url forwarding, focus
+- `apps/extension/src/background/launch-flow.ts` - ping → focus-or-open state machine
 - Tests mirroring each
 
 ### Modified files
-- `apps/desktop/src/main/index.ts` — wire protocol + single-instance handlers into boot order
-- `apps/extension/src/background/` action-click handler — delegate to the launch flow
-- Sub-PRD g's electron-builder config — declare the protocol for installer registration
+- `apps/desktop/src/main/index.ts` - wire protocol + single-instance handlers into boot order
+- `apps/extension/src/background/` action-click handler - delegate to the launch flow
+- Sub-PRD g's electron-builder config - declare the protocol for installer registration
 
 ## Test Plan
 
-- Unit: launch-flow state machine — ping success/focus, ping failure/open, focus-failure fallback (AC-18e.3.2), protocol-unregistered error (AC-18e.1.2).
+- Unit: launch-flow state machine - ping success/focus, ping failure/open, focus-failure fallback (AC-18e.3.2), protocol-unregistered error (AC-18e.1.2).
 - Unit: single-instance argv forwarding and convergence of Windows argv vs macOS open-url paths.
 - E2E (real Electron, two launches): second launch exits, first window focuses, exactly one server port bound (AC-18e.2.2).
-- Manual matrix (recorded into `qa/`): Windows and macOS packaged builds — closed-app click launches, running-app click focuses, uninstalled-protocol message.
+- Manual matrix (recorded into `qa/`): Windows and macOS packaged builds - closed-app click launches, running-app click focuses, uninstalled-protocol message.
 
 ## Risks and Open Questions
 
@@ -92,5 +92,5 @@ Implement ADR-016's launch path end to end: the extension's "Launch Studio" acti
 ## Related
 
 - [PRD-018 index](./prd-018-desktop-application-index.md)
-- [ADR-016 — launch path this implements](../../../knowledge/private/architecture/ADR-016-studio-packaged-desktop-app.md)
-- Sub-PRD b — health endpoint and token the ping/focus calls rely on
+- [ADR-016 - launch path this implements](../../../knowledge/private/architecture/ADR-016-studio-packaged-desktop-app.md)
+- Sub-PRD b - health endpoint and token the ping/focus calls rely on

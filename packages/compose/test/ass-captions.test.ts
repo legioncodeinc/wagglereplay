@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -33,7 +34,9 @@ import { makeWords } from './fixtures.js';
 const GOLDEN_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), 'golden');
 
 function assertGolden(name: string, actual: string): void {
-  const goldenPath = path.join(GOLDEN_DIR, name);
+  // Golden files are a flat directory of bare filenames; basename enforces
+  // that contract (a name carrying a separator can never escape golden/).
+  const goldenPath = path.join(GOLDEN_DIR, path.basename(name));
   if (process.env.WAGGLE_UPDATE_GOLDEN === '1') {
     writeFileSync(goldenPath, actual, 'utf8');
     return;

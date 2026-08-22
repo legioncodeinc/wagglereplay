@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * Canonical exit-code table for the `waggle` CLI.
  *
@@ -74,11 +75,12 @@ export const ExitCode = {
   SHAREABLE_AUDIO_REFUSED: 9,
 
   /**
-   * `waggle record` was run with no `--session <dir>`: interactive capture
-   * (launching Studio, driving the extension) is prd-005's job and does
-   * not exist yet in this PRD wave. Pass `--session <dir>` pointing at a
-   * finished capture session (events.jsonl, meta.json, and the video file
-   * - the exact output of the extension's finalizer) to ingest it now.
+   * `waggle record` was run with no `--session <dir>`: the recommended
+   * human path for interactive capture is the extension flow (Studio,
+   * per ADR-019); this command is the scripted ingestion path. Pass
+   * `--session <dir>` pointing at a finished capture session
+   * (events.jsonl, meta.json, and the video file - the exact output of
+   * the extension's finalizer) to ingest it now.
    */
   INGEST_SESSION_REQUIRED: 10,
 

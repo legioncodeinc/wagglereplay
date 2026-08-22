@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * Shared HTTP plumbing for TTS provider clients (ElevenLabs, Deepgram):
  * the injectable-transport type and the retry policy every client applies

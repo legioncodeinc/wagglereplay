@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { HeatmapDocument, PreDraftDocument } from '@waggle/ingest';
 import type { CredentialSet, WalkthroughFlow } from '@waggle/ir';
 import type { NarrationScript } from '@waggle/narrate';

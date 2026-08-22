@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * Shared HTTP plumbing for the pre-draft LLM adapters, deliberately
  * mirroring `@waggle/narrate`'s `packages/narrate/src/tts/shared/http.ts`

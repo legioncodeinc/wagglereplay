@@ -1,6 +1,8 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { describe, expect, it, vi } from 'vitest';
 import { ElevenLabsClient } from '../../../src/tts/elevenlabs/client.js';
 import { TtsProviderError } from '../../../src/tts/types.js';
+import { FAKE_TTS_KEY_FOR_TESTS } from '../../fixtures.js';
 
 /**
  * Builds a fake ElevenLabs with-timestamps response body matching the
@@ -41,7 +43,7 @@ describe('ElevenLabsClient', () => {
       return new Response(JSON.stringify(withTimestampsBody('Hi')), { status: 200 });
     });
 
-    const client = new ElevenLabsClient({ apiKey: 'test-key-not-real', fetchImpl });
+    const client = new ElevenLabsClient({ apiKey: FAKE_TTS_KEY_FOR_TESTS, fetchImpl });
     const result = await client.textToSpeechWithTimestamps({
       voiceId: 'voice-1',
       text: 'Hi',
@@ -50,7 +52,7 @@ describe('ElevenLabsClient', () => {
 
     expect(capturedUrl).toBe('https://api.elevenlabs.io/v1/text-to-speech/voice-1/with-timestamps');
     expect((capturedInit?.headers as Record<string, string>)['xi-api-key']).toBe(
-      'test-key-not-real',
+      FAKE_TTS_KEY_FOR_TESTS,
     );
     expect(JSON.parse(capturedInit?.body as string)).toEqual({
       text: 'Hi',
@@ -70,7 +72,7 @@ describe('ElevenLabsClient', () => {
       return new Response(JSON.stringify(withTimestampsBody('Hi')), { status: 200 });
     });
 
-    const client = new ElevenLabsClient({ apiKey: 'test-key-not-real', fetchImpl });
+    const client = new ElevenLabsClient({ apiKey: FAKE_TTS_KEY_FOR_TESTS, fetchImpl });
     await client.textToDialogueWithTimestamps({
       voiceId: 'voice-1',
       text: 'Hi',
@@ -83,7 +85,7 @@ describe('ElevenLabsClient', () => {
     const fetchImpl = vi.fn(
       async () => new Response(JSON.stringify({ tier: 'free' }), { status: 200 }),
     );
-    const client = new ElevenLabsClient({ apiKey: 'test-key-not-real', fetchImpl });
+    const client = new ElevenLabsClient({ apiKey: FAKE_TTS_KEY_FOR_TESTS, fetchImpl });
     await expect(client.fetchSubscriptionTier()).resolves.toBe('free');
   });
 
@@ -98,7 +100,7 @@ describe('ElevenLabsClient', () => {
     });
 
     const client = new ElevenLabsClient({
-      apiKey: 'test-key-not-real',
+      apiKey: FAKE_TTS_KEY_FOR_TESTS,
       fetchImpl,
       retryDelayMs: 0,
     });
@@ -116,7 +118,7 @@ describe('ElevenLabsClient', () => {
       async () => new Response(JSON.stringify({ detail: 'invalid api key' }), { status: 401 }),
     );
     const client = new ElevenLabsClient({
-      apiKey: 'test-key-not-real',
+      apiKey: FAKE_TTS_KEY_FOR_TESTS,
       fetchImpl,
       retryDelayMs: 0,
     });
@@ -139,7 +141,7 @@ describe('ElevenLabsClient', () => {
   it('gives up after maxRetries on repeated 500s', async () => {
     const fetchImpl = vi.fn(async () => new Response('server error', { status: 500 }));
     const client = new ElevenLabsClient({
-      apiKey: 'test-key-not-real',
+      apiKey: FAKE_TTS_KEY_FOR_TESTS,
       fetchImpl,
       retryDelayMs: 0,
       maxRetries: 2,

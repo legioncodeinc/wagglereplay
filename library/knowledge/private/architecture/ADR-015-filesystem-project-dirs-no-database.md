@@ -17,3 +17,7 @@ Demo-as-code: walkthroughs diff in PRs, regenerate in CI, and travel with the re
 ## Alternatives Considered
 
 SQLite via Drizzle (better queries, worse git story). Postgres (SaaS-shaped, removed by ADR-013).
+
+## Amendment note (2026-08-21): the file list is illustrative, not exhaustive
+
+Ruling on the open file-list question (ledger W4, restated in HANDOFF-4 decision 7): the directory enumeration in the Decision section is illustrative of the format at the time it was written, not a closed registry. Project state grows as PRDs land; none of it requires revisiting this ADR's actual decision (filesystem project dir as the datastore, no database, immutable IR versions). Known additional project state today: `recordings/` (raw capture masters, gitignored by default), `predraft.json` (ingest pre-draft), `heatmap.json`, `studio.json` (Studio session state), `patches/` (prd-011 IR patch drafts), and `baselines/` grows subdirectories per the prd-011 store layout. Any PRD that introduces new project-dir state records it in its own Files Touched section; a new ADR is required only if state would move out of the project directory or into a database, both of which this ADR forbids.

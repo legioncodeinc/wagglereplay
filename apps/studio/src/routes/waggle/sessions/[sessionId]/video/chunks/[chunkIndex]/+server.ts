@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { error, type RequestHandler } from '@sveltejs/kit';
 import {
   InvalidChunkIndexError,

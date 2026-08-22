@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { AudioStyle } from '../brand/schema.js';
 import { num } from '../expr/piecewise.js';
 import type { RenderTimeline } from '../timeline.js';

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { clampExpr, num, piecewise } from '../expr/piecewise.js';
 import type { RenderPreset } from '../presets.js';
 import type { ZoomTrack } from './segments.js';

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import {
   CTA_START_TEXT,
   DEFAULT_FETCH_DELAY_MS,
@@ -58,6 +59,8 @@ export function renderRouteHtml(pathname: string, variant: FixtureVariant): stri
       return fetchHtml();
     case ROUTE_PATHS.confirm:
       return confirmHtml();
+    case ROUTE_PATHS.wide:
+      return wideHtml();
     default:
       return landingHtml(variant);
   }
@@ -162,6 +165,25 @@ function confirmHtml(): string {
     `<main data-testid="${TEST_IDS.routeConfirm}">` +
     '<h1>All done</h1>' +
     `<p data-testid="${TEST_IDS.confirmationMessage}">Walkthrough complete.</p>` +
+    '</main>'
+  );
+}
+
+/**
+ * A deliberately non-reflowing page: content wider than any portrait or
+ * narrow preset viewport, so the replay reflow probe's
+ * horizontal-overflow branch decides `reframed` from a real measurement
+ * (added 2026-08-21, Run 4 guardrail pass: the prd-009 QA reframed
+ * artifact was previously produced only via forceReframed, which returns
+ * before any measurement).
+ */
+function wideHtml(): string {
+  return (
+    `<main data-testid="${TEST_IDS.routeWide}">` +
+    '<h1>Wide content</h1>' +
+    `<div data-testid="${TEST_IDS.wideContent}" style="min-width:1600px;border:1px solid #999;padding:8px">` +
+    'This block is 1600 CSS pixels wide on purpose; it cannot reflow into a narrow viewport.' +
+    '</div>' +
     '</main>'
   );
 }
@@ -375,6 +397,19 @@ function buildClientScript(variant: FixtureVariant): string {
     '    );',
     '  }',
     '',
+    '  function wideHtml() {',
+    '    return (',
+    "      '<main data-testid=\"' + IDS.routeWide + '\">' +",
+    '      "<h1>Wide content</h1>" +',
+    "      '<div data-testid=\"' +",
+    '      IDS.wideContent +',
+    '      \'" style="min-width:1600px;border:1px solid #999;padding:8px">\' +',
+    '      "This block is 1600 CSS pixels wide on purpose; it cannot reflow into a narrow viewport." +',
+    '      "</div>" +',
+    '      "</main>"',
+    '    );',
+    '  }',
+    '',
     '  function render(pathname) {',
     '    var root = document.getElementById("app-root");',
     '    if (!root) return;',
@@ -384,6 +419,7 @@ function buildClientScript(variant: FixtureVariant): string {
     '    else if (pathname === ROUTES.scroll) html = scrollHtml();',
     '    else if (pathname === ROUTES.fetchDemo) html = fetchHtml();',
     '    else if (pathname === ROUTES.confirm) html = confirmHtml();',
+    '    else if (pathname === ROUTES.wide) html = wideHtml();',
     '    else html = landingHtml();',
     '    root.innerHTML = html;',
     '  }',

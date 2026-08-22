@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-22T03:28:03.351Z",
+  "irVersion": 1,
+  "concurrency": {
+    "limit": 2,
+    "source": "WAGGLE_RENDER_CONCURRENCY"
+  },
+  "presets": [
+    {
+      "presetId": "16x9",
+      "composePresetId": "16x9",
+      "reflow": "native",
+      "reflowReason": "layout reflowed within 8px tolerance",
+      "capture": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 12,
+        "durationMs": 1913
+      },
+      "videoRef": "recordings/replay/v1/16x9/16x9.mp4",
+      "manifestRef": "recordings/replay/v1/16x9/replay.manifest.json",
+      "steps": [
+        {
+          "stepIndex": 0,
+          "stepType": "setViewport",
+          "ok": true,
+          "startOffsetMs": 25,
+          "durationMs": 165,
+          "settleSource": "mutation-quiet",
+          "drift": false,
+          "failure": null
+        },
+        {
+          "stepIndex": 1,
+          "stepType": "navigate",
+          "ok": true,
+          "startOffsetMs": 229,
+          "durationMs": 144,
+          "settleSource": "element-assertion",
+          "drift": false,
+          "failure": null
+        },
+        {
+          "stepIndex": 2,
+          "stepType": "click",
+          "ok": true,
+          "startOffsetMs": 402,
+          "durationMs": 1092,
+          "settleSource": "mutation-quiet",
+          "drift": true,
+          "failure": null
+        },
+        {
+          "stepIndex": 3,
+          "stepType": "change",
+          "ok": true,
+          "startOffsetMs": 1532,
+          "durationMs": 72,
+          "settleSource": "element-assertion",
+          "drift": false,
+          "failure": null
+        },
+        {
+          "stepIndex": 4,
+          "stepType": "change",
+          "ok": true,
+          "startOffsetMs": 1641,
+          "durationMs": 80,
+          "settleSource": "element-assertion",
+          "drift": false,
+          "failure": null
+        }
+      ],
+      "driftNotes": [
+        {
+          "stepIndex": 2,
+          "stepType": "click",
+          "usedAlternativeIndex": 1,
+          "usedSelector": "role=button[name=\"Start Walkthrough\"]",
+          "firstChoice": "css=[data-testid=\"cta-start\"]"
+        }
+      ],
+      "render": {
+        "outputPath": "renders/walkthrough.v1.replay-16x9.16x9.mp4",
+        "reframe": "native",
+        "durationMs": 1833,
+        "sourceKind": "replay",
+        "sourceReplayPresetId": "16x9",
+        "sourceVideoRef": "recordings/replay/v1/16x9/16x9.mp4",
+        "sourceManifestRef": "recordings/replay/v1/16x9/replay.manifest.json"
+      }
+    },
+    {
+      "presetId": "desktop",
+      "composePresetId": "16x9",
+      "reflow": "native",
+      "reflowReason": "layout reflowed within 8px tolerance",
+      "capture": {
+        "width": 1440,
+        "height": 900,
+        "fps": 12,
+        "durationMs": 2034
+      },
+      "videoRef": "recordings/replay/v1/desktop/desktop.mp4",
+      "manifestRef": "recordings/replay/v1/desktop/replay.manifest.json",
+      "steps": [
+        {
+          "stepIndex": 0,
+          "stepType": "setViewport",
+          "ok": true,
+          "startOffsetMs": 31,
+          "durationMs": 133,
+          "settleSource": "mutation-quiet",
+          "drift": false,
+          "failure": null
+        },
+        {
+          "stepIndex": 1,
+          "stepType": "navigate",
+          "ok": true,
+          "startOffsetMs": 203,
+          "durationMs": 144,
+          "settleSource": "element-assertion",
+          "drift": false,
+          "failure": null
+        },
+        {
+          "stepIndex": 2,
+          "stepType": "click",
+          "ok": true,
+          "startOffsetMs": 407,
+          "durationMs": 1126,
+          "settleSource": "mutation-quiet",
+          "drift": true,
+          "failure": null
+        },
+        {
+          "stepIndex": 3,
+          "stepType": "change",
+          "ok": true,
+          "startOffsetMs": 1558,
+          "durationMs": 137,
+          "settleSource": "element-assertion",
+          "drift": false,
+          "failure": null
+        },
+        {
+          "stepIndex": 4,
+          "stepType": "change",
+          "ok": true,
+          "startOffsetMs": 1722,
+          "durationMs": 102,
+          "settleSource": "element-assertion",
+          "drift": false,
+          "failure": null
+        }
+      ],
+      "driftNotes": [
+        {
+          "stepIndex": 2,
+          "stepType": "click",
+          "usedAlternativeIndex": 1,
+          "usedSelector": "role=button[name=\"Start Walkthrough\"]",
+          "firstChoice": "css=[data-testid=\"cta-start\"]"
+        }
+      ],
+      "render": {
+        "outputPath": "renders/walkthrough.v1.replay-desktop.16x9.mp4",
+        "reframe": "reframed",
+        "durationMs": 1917,
+        "sourceKind": "replay",
+        "sourceReplayPresetId": "desktop",
+        "sourceVideoRef": "recordings/replay/v1/desktop/desktop.mp4",
+        "sourceManifestRef": "recordings/replay/v1/desktop/replay.manifest.json"
+      }
+    }
+  ],
+  "success": true
+}

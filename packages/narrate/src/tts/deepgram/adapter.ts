@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { FetchLike } from '../shared/http.js';
 import type { SynthesizeOptions, SynthesizeResult, TtsAdapter, TtsCapabilities } from '../types.js';
 import { TtsRequestTooLargeError } from '../types.js';

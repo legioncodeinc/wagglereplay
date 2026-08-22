@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { attachTelemetry } from '../../src/content/telemetry.js';
 import { createPerformanceEpochSource } from '../../src/lib/epoch.js';

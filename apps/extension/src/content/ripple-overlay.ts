@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * Live click ripple overlay (AC7): a toggleable visual "you just clicked
  * here" ring shown at the click point while a recording is running, so the

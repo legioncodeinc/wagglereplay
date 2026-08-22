@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { RuntimeMessage } from '../lib/messaging.js';
 import { createUploadClient } from '../lib/upload-client.js';
 

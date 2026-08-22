@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { Locator, Page } from 'playwright-core';
 
 /**
@@ -27,18 +28,17 @@ export interface SettleOutcome {
   readonly ms: number;
 }
 
-export interface SettleExclusion {
-  /** Case-insensitive substring matched against request URLs. */
-  readonly urlContains?: string;
-}
-
 export interface SettleOptions {
   /** Tertiary budget for the whole ladder, in ms. */
   readonly timeoutMs: number;
   /** How long the page must stay mutation-free and network-free. Default 150ms. */
   readonly quietMs?: number;
-  /** Requests whose URL contains any of these are ignored by the network heuristic. */
-  readonly networkExclusions?: readonly SettleExclusion[];
+  // Removed 2026-08-21 (Run 4 guardrail pass): a `networkExclusions` field
+  // used to sit here but settleStep never read it; the quiescence probe's
+  // exclusion list is page state installed once by the determinism context
+  // (`createDeterministicContext`'s `networkExclusions`, which becomes
+  // `window.__waggleSettleExclusions`). A per-step copy that was silently
+  // dropped read as working configuration; the live path is unchanged.
 }
 
 /**

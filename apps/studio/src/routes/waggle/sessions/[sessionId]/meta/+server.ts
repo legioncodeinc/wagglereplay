@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { error, json, type RequestHandler } from '@sveltejs/kit';
 import { FrameExtractionError, IngestSessionError } from '@waggle/ingest';
 import { getProjectDir } from '$lib/server/project-context.js';

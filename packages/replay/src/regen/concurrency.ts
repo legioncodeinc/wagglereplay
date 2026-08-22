@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * The preset-job concurrency limiter (prd-009 AC8).
  *

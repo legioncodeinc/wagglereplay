@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import type { StepAssets } from '@waggle/ir';

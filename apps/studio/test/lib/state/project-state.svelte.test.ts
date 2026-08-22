@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { describe, expect, it } from 'vitest';
 import { ProjectState } from '../../../src/lib/state/project-state.svelte.js';
 import type { StudioProjectState } from '../../../src/lib/types.js';

@@ -27,5 +27,6 @@
     "@types/chrome": "^0.2.6",
     "@types/node": "^26.2.0",
     "tsx": "^4.23.12"
-  }
+  },
+  "license": "AGPL-3.0-or-later"
 }

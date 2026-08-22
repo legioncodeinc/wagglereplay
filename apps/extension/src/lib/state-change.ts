@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { AriaChangeSchema, type DomDelta, type Rect } from '@waggle/ir';
 import type { z } from 'zod';
 

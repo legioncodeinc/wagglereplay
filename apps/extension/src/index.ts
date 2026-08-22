@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * `@waggle/extension`: the Chrome MV3 capture extension (prd-003).
  *

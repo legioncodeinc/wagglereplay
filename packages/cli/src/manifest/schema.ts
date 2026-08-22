@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * Schema for waggle.json, the project manifest described in ADR-015.
  *

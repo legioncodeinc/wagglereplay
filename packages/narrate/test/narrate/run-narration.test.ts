@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -19,6 +20,7 @@ import { ElevenLabsAdapter } from '../../src/tts/elevenlabs/adapter.js';
 import type { TtsAdapter } from '../../src/tts/types.js';
 import { assertMonotonicWords, NarrationWordsDocumentSchema } from '../../src/words/schema.js';
 import { buildFixtureFlow } from '../fixtures/flow.js';
+import { FAKE_TTS_KEY_FOR_TESTS } from '../fixtures.js';
 
 /**
  * A fake ElevenLabs transport with no network access: it inspects the
@@ -85,7 +87,7 @@ describe('runNarration (AC6 end-to-end)', () => {
   it('drafts narration/script.json and refuses to synthesize until every segment is approved (AC1)', async () => {
     const projectDir = buildFixtureProject();
     const adapter = new ElevenLabsAdapter({
-      apiKey: 'test-key-not-real',
+      apiKey: FAKE_TTS_KEY_FOR_TESTS,
       voiceId: 'voice-1',
       fetchImpl: fakeElevenLabsFetch(),
     });
@@ -104,7 +106,7 @@ describe('runNarration (AC6 end-to-end)', () => {
   it('produces audio, words.json, and captions with monotonic timings covering the full audio duration once approved', async () => {
     const projectDir = buildFixtureProject();
     const adapter = new ElevenLabsAdapter({
-      apiKey: 'test-key-not-real',
+      apiKey: FAKE_TTS_KEY_FOR_TESTS,
       voiceId: 'voice-1',
       fetchImpl: fakeElevenLabsFetch(),
     });
@@ -174,7 +176,7 @@ describe('runNarration (AC6 end-to-end)', () => {
     writeFileSync(manifestPath(projectDir), `${JSON.stringify(manifest, null, 2)}\n`);
 
     const adapter = new ElevenLabsAdapter({
-      apiKey: 'test-key-not-real',
+      apiKey: FAKE_TTS_KEY_FOR_TESTS,
       voiceId: 'voice-1',
       fetchImpl: fakeElevenLabsFetch(),
     });

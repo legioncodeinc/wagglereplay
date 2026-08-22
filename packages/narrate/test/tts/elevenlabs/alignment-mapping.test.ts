@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { describe, expect, it } from 'vitest';
 import { mapOriginalTextToNormalizedTiming } from '../../../src/tts/elevenlabs/alignment-mapping.js';
 import type { CharAlignment } from '../../../src/words/aggregate.js';
